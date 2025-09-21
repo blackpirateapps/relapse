@@ -14,7 +14,8 @@ export async function initDb() {
             longestStreak INTEGER NOT NULL,
             relapseCount INTEGER NOT NULL,
             coinsAtLastRelapse REAL NOT NULL,
-            upgrades TEXT NOT NULL
+            upgrades TEXT NOT NULL,
+            lastClaimedLevel INTEGER NOT NULL DEFAULT 0
         );
     `);
     // Check if the single row exists
@@ -22,7 +23,7 @@ export async function initDb() {
     if (rows.length === 0) {
         // Insert the initial state
         await client.execute({
-            sql: "INSERT INTO user_state (id, lastRelapse, longestStreak, relapseCount, coinsAtLastRelapse, upgrades) VALUES (?, ?, ?, ?, ?, ?);",
+            sql: "INSERT INTO user_state (id, lastRelapse, longestStreak, relapseCount, coinsAtLastRelapse, upgrades, lastClaimedLevel) VALUES (?, ?, ?, ?, ?, ?, ?);",
             args: [
                 1,
                 new Date().toISOString(),
@@ -34,7 +35,8 @@ export async function initDb() {
                     celestialFlames: false,
                     volcanicLair: false,
                     celestialSky: false 
-                })
+                }),
+                0 // Start at level 0, as its reward is 0
             ],
         });
     }

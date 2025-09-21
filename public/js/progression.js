@@ -7,12 +7,11 @@ initializeApp(state => {
     const summaryContainer = document.getElementById('progress-summary');
     const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
     
-    // Populate the horizontal scroller
+    // Populate the horizontal scroller with rewards on each card
     progressionContainer.innerHTML = ranks.map((rank, index) => {
         const isUnlocked = totalHours >= rank.hours;
         const isCurrent = isUnlocked && (!ranks[index + 1] || totalHours < ranks[index + 1].hours);
 
-        // All images are now in color, no grayscale
         return `
             <div class="snap-center flex-shrink-0 w-full max-w-sm mx-auto flex flex-col items-center justify-center p-6">
                 <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-2xl p-8 w-full text-center">
@@ -21,13 +20,17 @@ initializeApp(state => {
                     </div>
                     <h2 class="font-serif-display text-3xl ${isCurrent ? 'text-amber-400' : 'text-white'}">${rank.name}</h2>
                     <p class="text-gray-400 mt-2 text-sm">Unlocked at ${rank.hours / 24} days</p>
-                    <p class="mt-4 text-gray-300 h-24">${rank.storyline}</p>
+                    <p class="mt-4 text-gray-300 h-20">${rank.storyline}</p>
+                    <div class="mt-4 bg-gray-900/50 p-3 rounded-lg">
+                        <h4 class="text-sm text-gray-400">Level-Up Reward</h4>
+                        <p class="text-lg font-bold text-yellow-400">${rank.reward.toLocaleString()} Coins</p>
+                    </div>
                 </div>
             </div>
         `;
     }).join('');
 
-    // Populate and manage the new summary section
+    // Populate and manage the summary section
     updateSummary(totalHours);
 });
 
@@ -42,8 +45,15 @@ function updateSummary(totalHours) {
     const currentHourlyRate = totalHours > 0 ? Math.floor(10 * 1.2 * Math.pow(totalHours, 0.2)) : 12;
 
     let timeToNextContent;
+    let rewardContent;
 
     if (nextRank) {
+        rewardContent = `
+            <div>
+                <h4 class="text-sm text-gray-400">Next Reward</h4>
+                <p class="text-2xl font-bold text-yellow-400">${nextRank.reward.toLocaleString()} Coins</p>
+            </div>`;
+            
         timeToNextContent = `
             <div>
                 <h4 class="text-sm text-gray-400">Time to ${nextRank.name}</h4>
@@ -72,6 +82,11 @@ function updateSummary(totalHours) {
         }, 1000);
 
     } else {
+        rewardContent = `
+             <div>
+                <h4 class="text-sm text-gray-400">Next Reward</h4>
+                <p class="text-2xl font-bold text-yellow-400">-</p>
+            </div>`;
         timeToNextContent = `
             <div>
                 <h4 class="text-sm text-gray-400">Time to Next Level</h4>
@@ -80,11 +95,12 @@ function updateSummary(totalHours) {
     }
 
     summaryContainer.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
             <div>
                 <h4 class="text-sm text-gray-400">Current Rank</h4>
                 <p class="text-2xl font-bold text-amber-400">${currentRank.name}</p>
             </div>
+            ${rewardContent}
             <div>
                 <h4 class="text-sm text-gray-400">Current Coin Rate</h4>
                 <p class="text-2xl font-bold text-yellow-400">${currentHourlyRate} coins/hr</p>
