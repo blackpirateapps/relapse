@@ -17,11 +17,15 @@
         .phoenix-fire { animation: fire 2s infinite alternate; }
         @keyframes fire { 0% { filter: drop-shadow(0 0 10px #ef4444) drop-shadow(0 0 20px #f59e0b); } 100% { filter: drop-shadow(0 0 20px #ef4444) drop-shadow(0 0 40px #f59e0b) brightness(1.2); } }
         .nav-button[data-active="true"] { background-color: #4f46e5; color: white; }
+        /* Style for the preview toggle switch */
+        #preview-toggle:checked ~ .dot {
+            transform: translateX(100%);
+            background-color: #4f46e5;
+        }
     </style>
 </head>
 <body class="h-full flex items-center justify-center text-white p-4 bg-gray-900">
 
-    <!-- Login Screen -->
     <div id="login-screen" class="w-full max-w-sm hidden">
         <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl text-center">
             <h1 class="font-serif-display text-3xl mb-2 text-amber-400">Abstinence Phoenix</h1>
@@ -32,7 +36,6 @@
         </div>
     </div>
     
-    <!-- Loading Spinner -->
     <div id="loading-spinner" class="w-full max-w-sm text-center">
          <svg class="animate-spin h-10 w-10 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -40,17 +43,7 @@
           </svg>
     </div>
 
-    <!-- Main App -->
     <div id="app" class="hidden w-full max-w-4xl mx-auto">
-        <!-- Navigation -->
-        <div class="flex justify-center gap-2 mb-6">
-            <button data-section="journey" class="nav-button bg-gray-700 hover:bg-gray-600 font-bold py-2 px-5 rounded-lg transition-all" data-active="true">Journey</button>
-            <button data-section="progression" class="nav-button bg-gray-700 hover:bg-gray-600 font-bold py-2 px-5 rounded-lg transition-all">Progression</button>
-            <button data-section="shop" class="nav-button bg-gray-700 hover:bg-gray-600 font-bold py-2 px-5 rounded-lg transition-all">Shop</button>
-        </div>
-        
-        
-        <div id="app" class="hidden w-full max-w-4xl mx-auto">
         <div class="flex justify-center gap-2 mb-6">
             <button data-section="journey" class="nav-button bg-gray-700 hover:bg-gray-600 font-bold py-2 px-5 rounded-lg transition-all" data-active="true">Journey</button>
             <button data-section="progression" class="nav-button bg-gray-700 hover:bg-gray-600 font-bold py-2 px-5 rounded-lg transition-all">Progression</button>
@@ -62,17 +55,14 @@
             <button id="exit-preview-button" class="ml-4 font-bold text-sm bg-indigo-800 hover:bg-indigo-900 px-3 py-1 rounded-md">Exit Preview</button>
         </div>
 
-        <!-- Journey Section (Main View) -->
         <div id="journey-section" class="app-section">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                <!-- Left Panel: Phoenix Display -->
                 <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl flex flex-col items-center justify-center h-full">
                     <div id="phoenix-display" class="w-48 h-48 mb-6 flex items-center justify-center"></div>
                     <h2 id="rank-name" class="font-serif-display text-3xl text-center text-amber-400"></h2>
                     <p class="text-gray-400 text-center">Your symbol of progress.</p>
                 </div>
 
-                <!-- Right Panel: Controls & Stats -->
                 <div class="space-y-6">
                     <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl">
                         <h3 class="font-serif-display text-2xl mb-4 text-center">Current Streak</h3>
@@ -101,30 +91,23 @@
             </div>
         </div>
         
-        <!-- Progression Section -->
         <div id="progression-section" class="app-section hidden">
             <div id="progression-content" class="bg-gray-800 p-8 rounded-2xl shadow-2xl">
-                <!-- Progression content will be injected here -->
-            </div>
+                </div>
         </div>
 
-        <!-- Shop Section -->
         <div id="shop-section" class="app-section hidden">
              <div id="shop-content" class="bg-gray-800 p-8 rounded-2xl shadow-2xl">
-                <!-- Shop content will be injected here -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- Modal (For Urge and Relapse Confirmation) -->
     <div id="modal-container" class="fixed inset-0 z-50 overflow-y-auto hidden">
       <div class="flex items-center justify-center min-h-screen p-4 text-center">
           <div id="modal-bg" class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" style="backdrop-filter: blur(5px);"></div>
           <div id="modal-content" class="inline-block bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full p-8" style="animation: slide-up 0.3s ease-out;">
-             <!-- Modal content will be injected here -->
-          </div>
+             </div>
       </div>
     </div>
 </body>
 </html>
-
