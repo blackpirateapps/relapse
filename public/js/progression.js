@@ -1,4 +1,4 @@
-import { initializeApp, ranks, renderPhoenix, calculateCoins } from './shared.js';
+import { initializeApp, ranks, renderPhoenix } from './shared.js';
 
 initializeApp(state => {
     const progressionContainer = document.getElementById('progression-container');
@@ -7,7 +7,6 @@ initializeApp(state => {
     progressionContainer.innerHTML = ranks.map((rank, index) => {
         const isUnlocked = totalHours >= rank.hours;
         const isCurrent = isUnlocked && (!ranks[index + 1] || totalHours < ranks[index + 1].hours);
-
         const hourlyRate = rank.hours > 0 ? Math.floor(10 * 1.2 * Math.pow(rank.hours, 0.2)) : 12;
 
         return `
@@ -28,3 +27,4 @@ initializeApp(state => {
         `;
     }).join('');
 });
+
