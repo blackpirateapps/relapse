@@ -5,8 +5,8 @@ const client = createClient({
     authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
-// Function to initialize the database schema if it doesn't exist
 export async function initDb() {
+    // Main user state table
     await client.execute(`
         CREATE TABLE IF NOT EXISTS user_state (
             id INTEGER PRIMARY KEY,
@@ -18,25 +18,29 @@ export async function initDb() {
             lastClaimedLevel INTEGER NOT NULL DEFAULT 0
         );
     `);
-    // Check if the single row exists
+
+    // New table for the Aviary
+    await client.execute(`
+        CREATE TABLE IF NOT EXISTS phoenix_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            final_rank_name TEXT NOT NULL,
+            final_rank_level INTEGER NOT NULL,
+            streak_duration_ms INTEGER NOT NULL,
+            start_date TEXT NOT NULL,
+            end_date TEXT NOT NULL,
+            upgrades_json TEXT NOT NULL
+        );
+    `);
+
     const { rows } = await client.execute("SELECT id FROM user_state WHERE id = 1;");
     if (rows.length === 0) {
-        // Insert the initial state
         await client.execute({
             sql: "INSERT INTO user_state (id, lastRelapse, longestStreak, relapseCount, coinsAtLastRelapse, upgrades, lastClaimedLevel) VALUES (?, ?, ?, ?, ?, ?, ?);",
             args: [
-                1,
-                new Date().toISOString(),
-                0,
-                0,
-                0,
-                JSON.stringify({ 
-                    aura: false, 
-                    celestialFlames: false,
-                    volcanicLair: false,
-                    celestialSky: false 
-                }),
-                0 // Start at level 0, as its reward is 0
+                1, new Date().toISOString(), 0, 0, 0,
+                JSON.stringify({ aura: false, celestialFlames: false, volcanicLair: false, celestialSky: false }),
+                0
             ],
         });
     }

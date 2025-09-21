@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Great Aviary - Abstinence Phoenix</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <script type="module" src="/js/aviary.js" defer></script>
+</head>
+<body class="h-full flex items-center justify-center text-white p-4">
+
+    <!-- SVG Background Container -->
+    <div id="background-container" class="fixed inset-0 -z-10"></div>
+
+    <!-- Main App Container -->
+    <div id="app-container" class="hidden w-full h-full max-w-7xl mx-auto flex flex-col">
+        <!-- Header -->
+        <header class="flex-shrink-0 flex justify-between items-center bg-gray-900/50 backdrop-blur-sm p-4 rounded-2xl shadow-lg">
+            <h1 class="font-serif-display text-xl md:text-2xl text-amber-400">Abstinence Phoenix</h1>
+            <div class="flex items-center gap-2 md:gap-4">
+                <div class="text-right">
+                    <h4 class="text-xs text-gray-400">Coins</h4>
+                    <p id="coin-count" class="font-bold text-yellow-400">0</p>
+                </div>
+                <nav class="flex items-center gap-2 text-sm">
+                    <a href="/" class="nav-button">Journey</a>
+                    <a href="/progression.html" class="nav-button">Progression</a>
+                    <a href="/aviary.html" class="nav-button active">Aviary</a>
+                    <a href="/shop.html" class="nav-button">Shop</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow flex flex-col items-center justify-center p-4 overflow-y-auto">
+            <h2 class="font-serif-display text-4xl text-center text-amber-400 mb-8">The Great Aviary</h2>
+
+            <!-- Loading Spinner -->
+            <div id="loading-spinner">
+                <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden text-center text-gray-400">
+                <p>Your Aviary is empty.</p>
+                <p class="text-sm mt-2">When a streak ends, your phoenix will be immortalized here.</p>
+            </div>
+
+            <!-- Aviary Grid -->
+            <div id="aviary-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full">
+                <!-- Phoenix cards will be injected here by aviary.js -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Container -->
+    <div id="modal-container" class="fixed inset-0 z-50 overflow-y-auto hidden"></div>
+
+</body>
+</html>
+
