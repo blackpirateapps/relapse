@@ -41,3 +41,4 @@ export async function initDb() {
 }
 
 export default client;
+

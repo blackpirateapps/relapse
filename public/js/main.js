@@ -1,5 +1,3 @@
-import { ranks, visuals } from './visuals.js';
-
 document.addEventListener('DOMContentLoaded', () => {
     // --- Element Selectors ---
     const loginScreen = document.getElementById('login-screen');
@@ -36,6 +34,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let timerInterval;
     let isPreviewing = false;
     let activePreviewUpgrades = {};
+
+    // --- Ranks and Shop Data ---
+    const ranks = [
+        { name: "Ashen Egg", id: "egg", hours: 0 },
+        { name: "Fledgling Hatchling", id: "hatchling", hours: 24 },
+        { name: "Ember Chick", id: "chick", hours: 72 },
+        { name: "Flame Youngling", id: "youngling", hours: 168 },
+        { name: "Sunfire Phoenix", id: "sunfire", hours: 336 },
+        { name: "Blaze Guardian", id: "guardian", hours: 720 },
+        { name: "Solar Drake", id: "drake", hours: 2160 },
+        { name: "Celestial Phoenix", id: "celestial-phoenix", hours: 4320 }
+    ];
     
     const shopItems = [
         { id: 'aura', name: 'Aura of Resolve', cost: 500, description: 'Adds a soft, glowing aura to your phoenix.', type: 'cosmetic' },
@@ -99,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Core Logic & UI Updates ---
     function applyBackground(upgrades) {
         const body = document.body;
-        body.className = body.className.replace(/bg-(volcanic-lair|celestial-sky|default)/g, '');
+        body.className = document.body.className.replace(/bg-(volcanic-lair|celestial-sky|default)/g, '');
 
         if (upgrades && upgrades.celestialSky) {
             body.classList.add('bg-celestial-sky');
@@ -175,11 +185,31 @@ document.addEventListener('DOMContentLoaded', () => {
         if (totalHours <= 0) return 0;
         return Math.floor(10 * Math.pow(totalHours, 1.2));
     }
-
+    
+    // NEW RENDER PHOENIX FUNCTION
     function renderPhoenix(level, upgrades = {}) {
-        const visual = visuals[level] || visuals[0];
-        return visual.svg(upgrades);
+        const rank = ranks[level];
+        if (!rank) return '';
+
+        let baseName = rank.id;
+        let suffix = [];
+
+        // Note: The order you check these matters for filenames!
+        // e.g., egg-aura-celestial.svg vs egg-celestial-aura.svg
+        // A consistent order is best. Let's use alphabetical.
+        if (upgrades.aura) suffix.push('aura');
+        if (upgrades.celestialFlames) suffix.push('celestial');
+        // Add future cosmetic upgrades here in alphabetical order
+
+        const finalName = suffix.length > 0 ? `${baseName}-${suffix.join('-')}` : baseName;
+        
+        // Fallback: if a combination file doesn't exist, show the base version.
+        const path = `/img/${finalName}.svg`;
+        const fallbackPath = `/img/${baseName}.svg`;
+
+        return `<img src="${path}" alt="${rank.name}" onerror="this.onerror=null;this.src='${fallbackPath}';">`;
     }
+
 
     function formatStreak(seconds) {
         if (!seconds || seconds < 0) return "0d 0h";
@@ -375,13 +405,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const item = shopItems.find(i => i.id === itemId);
         if (!item) return;
 
-        // Toggle the item in the preview state
         activePreviewUpgrades[itemId] = !activePreviewUpgrades[itemId];
         if (!activePreviewUpgrades[itemId]) delete activePreviewUpgrades[itemId];
 
         const tempUpgrades = { ...state.upgrades, ...activePreviewUpgrades };
         
-        // Apply the correct preview effect
         if (item.type === 'cosmetic') {
             const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
             const currentRank = getRank(totalHours);
@@ -406,7 +434,6 @@ document.addEventListener('DOMContentLoaded', () => {
         activePreviewUpgrades = {};
         previewBanner.classList.add('hidden');
         
-        // Restore visuals from permanent state
         applyBackground(state.upgrades);
         const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
         const currentRank = getRank(totalHours);
