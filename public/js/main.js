@@ -37,8 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPreviewing = false;
     
     const shopItems = [
-        { id: 'aura', name: 'Aura of Resolve', cost: 500, description: 'Adds a soft, glowing aura to your phoenix.' },
-        { id: 'celestialFlames', name: 'Celestial Flames', cost: 1200, description: 'Changes phoenix flames to a cool blue.' },
+        { id: 'aura', name: 'Aura of Resolve', cost: 500, description: 'Adds a soft, glowing aura to your phoenix.', type: 'cosmetic' },
+        { id: 'celestialFlames', name: 'Celestial Flames', cost: 1200, description: 'Changes phoenix visuals to a cool blue.', type: 'cosmetic' },
+        { id: 'volcanicLair', name: 'Volcanic Lair', cost: 10000, description: 'A dark, fiery background theme.', type: 'theme' },
+        { id: 'celestialSky', name: 'Celestial Sky', cost: 50000, description: 'A beautiful, star-filled background theme.', type: 'theme' },
     ];
 
     // --- Authentication & Initialization ---
@@ -82,14 +84,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initializeApp(data) {
         state = data;
+        if (typeof state.upgrades === 'string') {
+            state.upgrades = JSON.parse(state.upgrades);
+        }
         loadingSpinner.classList.add('hidden');
         loginScreen.classList.add('hidden');
         appScreen.classList.remove('hidden');
+        applyBackground(state.upgrades);
         startTimer();
         updateUI();
     }
 
     // --- Core Logic & UI Updates ---
+    function applyBackground(upgrades) {
+        const body = document.body;
+        // Reset to default first
+        body.classList.remove('bg-volcanic-lair', 'bg-celestial-sky');
+        body.classList.add('bg-default');
+
+        // Apply the best owned theme
+        if (upgrades && upgrades.celestialSky) {
+            body.classList.replace('bg-default', 'bg-celestial-sky');
+        } else if (upgrades && upgrades.volcanicLair) {
+            body.classList.replace('bg-default', 'bg-volcanic-lair');
+        }
+    }
+
     function startTimer() {
         if (timerInterval) clearInterval(timerInterval);
         if (!state.lastRelapse) return;
@@ -128,15 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
         const currentRank = getRank(totalHours);
-
-        if (typeof state.upgrades === 'string') {
-            try {
-                state.upgrades = JSON.parse(state.upgrades);
-            } catch (e) {
-                console.error("Failed to parse upgrades:", e);
-                state.upgrades = {};
-            }
-        }
         
         rankNameDisplay.textContent = currentRank.name;
         phoenixDisplay.innerHTML = renderPhoenix(currentRank.level, state.upgrades);
@@ -189,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
         const currentRank = getRank(totalHours);
         const nextRank = ranks[currentRank.level + 1];
-        const currentHourlyRate = Math.floor(10 * 1.2 * Math.pow(totalHours, 0.2));
+        const currentHourlyRate = totalHours > 0 ? Math.floor(10 * 1.2 * Math.pow(totalHours, 0.2)) : 12;
         
         let rankListHtml = ranks.map((rank, index) => {
             const isCurrent = currentRank.level === index;
@@ -230,28 +241,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateShopSection() {
-        let itemsHtml = shopItems.map(item => {
-            const isOwned = state.upgrades && state.upgrades[item.id];
-            const actionButtons = isOwned ?
-                `<button class="text-sm font-bold py-2 px-4 rounded-lg bg-gray-500 cursor-not-allowed" disabled>Owned</button>` :
-                `<div class="flex gap-2">
-                    <button class="preview-button text-sm font-bold py-2 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-700" data-item-id="${item.id}" data-item-name="${item.name}">Preview</button>
-                    <button class="buy-button text-sm font-bold py-2 px-4 rounded-lg bg-purple-600 hover:bg-purple-700" data-item-id="${item.id}" data-item-cost="${item.cost}" data-item-name="${item.name}">${item.cost.toLocaleString()} Coins</button>
-                 </div>`;
-            
-            return `
-                <div class="bg-gray-700 p-4 rounded-lg flex justify-between items-center">
-                    <div>
-                        <h4 class="font-semibold ${isOwned ? 'text-green-400' : 'text-white'}">${item.name} ${isOwned ? '(Owned)' : ''}</h4>
-                        <p class="text-sm text-gray-400">${item.description}</p>
-                    </div>
-                    ${actionButtons}
-                </div>`;
-        }).join('');
-        
+        const cosmeticItems = shopItems.filter(item => item.type === 'cosmetic');
+        const themeItems = shopItems.filter(item => item.type === 'theme');
+
+        const createItemsHtml = (items) => {
+            return items.map(item => {
+                const isOwned = state.upgrades && state.upgrades[item.id];
+                const actionButtons = isOwned ?
+                    `<button class="text-sm font-bold py-2 px-4 rounded-lg bg-gray-500 cursor-not-allowed" disabled>Owned</button>` :
+                    `<div class="flex gap-2">
+                        <button class="preview-button text-sm font-bold py-2 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-700" data-item-id="${item.id}" data-item-name="${item.name}">Preview</button>
+                        <button class="buy-button text-sm font-bold py-2 px-4 rounded-lg bg-purple-600 hover:bg-purple-700" data-item-id="${item.id}" data-item-cost="${item.cost}" data-item-name="${item.name}">${item.cost.toLocaleString()} Coins</button>
+                     </div>`;
+                
+                return `
+                    <div class="bg-gray-700 p-4 rounded-lg flex justify-between items-center">
+                        <div>
+                            <h4 class="font-semibold ${isOwned ? 'text-green-400' : 'text-white'}">${item.name} ${isOwned ? '(Owned)' : ''}</h4>
+                            <p class="text-sm text-gray-400">${item.description}</p>
+                        </div>
+                        ${actionButtons}
+                    </div>`;
+            }).join('');
+        };
+
         shopContent.innerHTML = `
             <div class="flex justify-between items-center mb-6">
-                <h3 class="font-serif-display text-2xl text-amber-400">Customize Your Phoenix</h3>
+                <h3 class="font-serif-display text-2xl text-amber-400">The Shop</h3>
                 <div class="flex items-center">
                     <span class="text-sm text-gray-300 mr-3">Test Items</span>
                     <label for="preview-toggle" class="flex items-center cursor-pointer">
@@ -263,8 +279,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     </label>
                 </div>
             </div>
-            <p class="text-gray-300 mb-4 text-center">Use your coins to purchase permanent cosmetic upgrades.</p>
-            <div class="space-y-4">${itemsHtml}</div>
+            
+            <h4 class="text-lg font-semibold text-indigo-300 mb-3 mt-4">Phoenix Cosmetics</h4>
+            <div class="space-y-4">${createItemsHtml(cosmeticItems)}</div>
+
+            <h4 class="text-lg font-semibold text-indigo-300 mb-3 mt-8">App Themes</h4>
+            <div class="space-y-4">${createItemsHtml(themeItems)}</div>
         `;
 
         document.querySelectorAll('.buy-button').forEach(button => button.addEventListener('click', handleBuyItem));
@@ -321,6 +341,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/api/relapse', { method: 'POST' });
             if (!response.ok) throw new Error('Failed to post relapse');
             state = await response.json();
+             if (typeof state.upgrades === 'string') {
+                state.upgrades = JSON.parse(state.upgrades);
+            }
             clearInterval(timerInterval);
             if (state.lastRelapse) startTimer();
             exitPreview();
@@ -372,7 +395,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(err.message || 'Failed to buy item');
                 }
                 state = await response.json();
+                 if (typeof state.upgrades === 'string') {
+                    state.upgrades = JSON.parse(state.upgrades);
+                }
                 exitPreview();
+                applyBackground(state.upgrades);
                 updateUI();
                 closeModal();
             } catch (error) {

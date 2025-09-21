@@ -29,7 +29,12 @@ export async function initDb() {
                 0,
                 0,
                 0,
-                JSON.stringify({ aura: false, celestialFlames: false })
+                JSON.stringify({ 
+                    aura: false, 
+                    celestialFlames: false,
+                    volcanicLair: false,
+                    celestialSky: false 
+                })
             ],
         });
     }

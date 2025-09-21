@@ -4,6 +4,8 @@ import { checkAuth } from './auth.js';
 const shopItems = [
     { id: 'aura', cost: 500 },
     { id: 'celestialFlames', cost: 1200 },
+    { id: 'volcanicLair', cost: 10000 },
+    { id: 'celestialSky', cost: 50000 },
 ];
 
 export default async function handler(req, res) {
@@ -28,9 +30,17 @@ export default async function handler(req, res) {
         const totalCoins = state.coinsAtLastRelapse + streakCoins;
 
         if (totalCoins >= item.cost && !upgrades[itemId]) {
-            const newCoinBalance = totalCoins - item.cost;
+            // Recalculate coins at the exact moment of purchase
+            const currentStreakMs = Date.now() - new Date(state.lastRelapse).getTime();
+            const currentTotalHours = currentStreakMs / (1000 * 60 * 60);
+            const currentStreakCoins = Math.floor(10 * Math.pow(currentTotalHours, 1.2));
+            const currentTotalCoins = state.coinsAtLastRelapse + currentStreakCoins;
+
+            const newCoinBalance = currentTotalCoins - item.cost;
             upgrades[itemId] = true;
 
+            // Update state with a new "lastRelapse" timestamp (which is just now)
+            // and the new coin balance, effectively "banking" the coins.
             await db.execute({
                 sql: "UPDATE user_state SET lastRelapse = ?, coinsAtLastRelapse = ?, upgrades = ? WHERE id = 1;",
                 args: [new Date().toISOString(), newCoinBalance, JSON.stringify(upgrades)]
