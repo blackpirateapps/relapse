@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abstinence Phoenix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .phoenix-container svg {
+            transition: all 0.5s ease-in-out;
+        }
+        .phoenix-fire {
+            animation: flicker 3s infinite alternate;
+        }
+        @keyframes flicker {
+          0%, 18%, 22%, 25%, 53%, 57%, 100% {
+              filter: drop-shadow(0 0 8px #f59e0b) drop-shadow(0 0 12px #ef4444);
+          }
+          20%, 24%, 55% {
+              filter: drop-shadow(0 0 4px #f59e0b) drop-shadow(0 0 8px #ef4444);
+          }
+        }
+        .egg-pulse {
+            animation: pulse-egg 5s infinite ease-in-out;
+        }
+        @keyframes pulse-egg {
+          0%, 100% {
+            transform: scale(1);
+            filter: drop-shadow(0 0 3px #6b7280);
+          }
+          50% {
+            transform: scale(1.03);
+            filter: drop-shadow(0 0 8px #a1a1aa);
+          }
+        }
+        .modal-backdrop {
+            background-color: rgba(0,0,0,0.75);
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white antialiased">
+
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900">
+        <div class="w-full max-w-sm text-center">
+            <h1 class="text-4xl font-bold text-amber-400 mb-2">Phoenix Journey</h1>
+            <p class="text-gray-400 mb-6">Enter to begin.</p>
+            <form id="login-form">
+                <input id="password-input" type="password" placeholder="Password" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-3 mb-4 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 transition-colors text-white font-bold py-3 px-4 rounded-lg shadow-md">
+                    Unlock
+                </button>
+                <p id="login-error" class="text-red-500 text-sm mt-4 h-5"></p>
+            </form>
+        </div>
+    </div>
+
+    <div id="app" class="min-h-screen flex-col items-center justify-center p-4 text-center hidden">
+        
+        <!-- Phoenix and Title -->
+        <div class="mb-4">
+            <h1 class="text-4xl font-bold text-amber-400">The Phoenix Journey</h1>
+            <p class="text-gray-400">Rise from the ashes of old habits.</p>
+        </div>
+
+        <!-- Phoenix Visualization -->
+        <div id="phoenix-container" class="phoenix-container w-48 h-48 my-4 flex items-center justify-center">
+            <!-- SVG will be injected here by JS -->
+        </div>
+
+        <!-- Progression Stats -->
+        <div class="bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-lg mb-6 text-left">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-sm text-gray-500">CURRENT RANK</p>
+                    <h2 id="rank" class="text-xl font-semibold text-sky-400 tracking-wider"></h2>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">NEXT RANK</p>
+                    <p id="next-rank" class="text-xl font-semibold text-gray-300"></p>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 my-4"></div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-sm text-gray-500">TOTAL COINS</p>
+                    <div class="flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-400"><circle cx="12" cy="12" r="8"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        <p id="coins" class="text-xl font-semibold text-yellow-400">0</p>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">CURRENT GAIN</p>
+                    <p id="hourly-gain" class="text-xl font-semibold text-yellow-400"></p>
+                </div>
+            </div>
+            <div class="text-center mt-4 grid grid-cols-2 gap-4">
+                <button id="view-ranks-btn" class="text-sm text-sky-400 hover:text-sky-300 transition-colors w-full">View Ranks</button>
+                <button id="shop-btn" class="text-sm text-yellow-400 hover:text-yellow-300 transition-colors w-full">Customize</button>
+            </div>
+        </div>
+
+        <!-- Streak Timer -->
+        <div class="bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-lg mb-6">
+            <p class="text-sm text-gray-500 mb-2">CURRENT STREAK</p>
+            <div id="timer" class="text-4xl md:text-5xl font-bold tracking-tighter text-white">
+                <span id="days">00</span>:<span id="hours">00</span>:<span id="minutes">00</span>:<span id="seconds">00</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-md mb-6">
+            <button id="urge-btn" class="w-full bg-sky-600 hover:bg-sky-700 transition-colors text-white font-bold py-3 px-4 rounded-lg shadow-md">
+                I Feel An Urge
+            </button>
+            <button id="relapse-btn" class="w-full bg-red-700 hover:bg-red-800 transition-colors text-white font-bold py-3 px-4 rounded-lg shadow-md">
+                I Relapsed
+            </button>
+        </div>
+
+        <!-- Stats -->
+        <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 w-full max-w-md shadow-md">
+            <h3 class="text-lg font-semibold mb-2 text-gray-300">Statistics</h3>
+            <div class="flex justify-around text-center">
+                <div>
+                    <p class="text-xs text-gray-500">LONGEST STREAK</p>
+                    <p id="longest-streak" class="text-xl font-semibold"></p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500">RELAPSE COUNT</p>
+                    <p id="relapse-count" class="text-xl font-semibold"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals (Urge, Relapse, Ranks, Shop) remain the same as before -->
+    <div id="urge-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 text-center">
+            <h3 class="text-2xl font-bold text-sky-400 mb-4">Channel This Energy!</h3>
+            <div id="urge-content" class="text-lg text-gray-300 mb-6 min-h-[80px] flex items-center justify-center"></div>
+            <button id="close-urge-modal" class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">Got it</button>
+        </div>
+    </div>
+    <div id="relapse-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6 text-center">
+            <h3 class="text-2xl font-bold text-red-500 mb-2">Are you sure?</h3>
+            <p class="text-gray-400 mb-6">Confirming will reset your streak. A new journey begins from the ashes.</p>
+            <div class="flex justify-center gap-4">
+                 <button id="cancel-relapse" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">Cancel</button>
+                <button id="confirm-relapse" class="bg-red-700 hover:bg-red-800 text-white font-bold py-2 px-6 rounded-lg transition-colors">Confirm Relapse</button>
+            </div>
+        </div>
+    </div>
+    <div id="ranks-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-sky-400">Phoenix Ranks</h3>
+                <button id="close-ranks-modal" class="text-gray-400 text-3xl leading-none hover:text-white">&times;</button>
+            </div>
+            <ul id="all-ranks-list" class="space-y-2 text-left max-h-60 overflow-y-auto"></ul>
+        </div>
+    </div>
+    <div id="shop-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="bg-gray-800 rounded-xl shadow-2xl w-full max-w-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-yellow-400">Phoenix Sanctum</h3>
+                <button id="close-shop-modal" class="text-gray-400 text-3xl leading-none hover:text-white">&times;</button>
+            </div>
+            <div id="shop-items-container" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Elements ---
+            const dom = {
+                app: document.getElementById('app'),
+                loginOverlay: document.getElementById('login-overlay'),
+                loginForm: document.getElementById('login-form'),
+                passwordInput: document.getElementById('password-input'),
+                loginError: document.getElementById('login-error'),
+                days: document.getElementById('days'),
+                hours: document.getElementById('hours'),
+                minutes: document.getElementById('minutes'),
+                seconds: document.getElementById('seconds'),
+                rank: document.getElementById('rank'),
+                nextRank: document.getElementById('next-rank'),
+                hourlyGain: document.getElementById('hourly-gain'),
+                longestStreak: document.getElementById('longest-streak'),
+                relapseCount: document.getElementById('relapse-count'),
+                phoenixContainer: document.getElementById('phoenix-container'),
+                urgeBtn: document.getElementById('urge-btn'),
+                relapseBtn: document.getElementById('relapse-btn'),
+                urgeModal: document.getElementById('urge-modal'),
+                relapseModal: document.getElementById('relapse-modal'),
+                ranksModal: document.getElementById('ranks-modal'),
+                closeUrgeModal: document.getElementById('close-urge-modal'),
+                cancelRelapse: document.getElementById('cancel-relapse'),
+                confirmRelapse: document.getElementById('confirm-relapse'),
+                urgeContent: document.getElementById('urge-content'),
+                coins: document.getElementById('coins'),
+                viewRanksBtn: document.getElementById('view-ranks-btn'),
+                closeRanksModal: document.getElementById('close-ranks-modal'),
+                allRanksList: document.getElementById('all-ranks-list'),
+                shopBtn: document.getElementById('shop-btn'),
+                shopModal: document.getElementById('shop-modal'),
+                closeShopModal: document.getElementById('close-shop-modal'),
+                shopItemsContainer: document.getElementById('shop-items-container')
+            };
+
+            // --- Static Data ---
+            const ranks = [ { days: 0, name: 'Ashen Egg' }, { days: 1, name: 'Hatchling' }, { days: 3, name: 'Fledgling' }, { days: 7, name: 'Young Phoenix' }, { days: 14, name: 'Firebird' }, { days: 30, name: 'Sun Guardian' }, { days: 60, name: 'Blazing Ascendant' }, { days: 90, name: 'Celestial Phoenix' }, { days: 180, name: 'Starforged' }, { days: 365, name: 'Eternal Flame' }];
+            const urgeActivities = ["Do 10 push-ups right now.", "Take a 5-minute cold shower.", "Step outside and take 10 deep breaths.", "Drink a large glass of cold water.", "Write down why you started this journey.", "Listen to your most powerful, motivating song.", "Clean or organize one thing in your room.", "Read one chapter of a book.", "Watch a funny video online.", "Plan something you're looking forward to this week."];
+            const phoenixSVGs = {
+                egg: `<svg viewBox="0 0 100 100" class="w-full h-full egg-pulse"><defs><radialGradient id="eggGradient" cx="40%" cy="40%" r="60%"><stop offset="0%" stop-color="#9ca3af" /><stop offset="100%" stop-color="#4b5563" /></radialGradient></defs><path d="M50 90C35 90 25 75 25 55S35 20 50 20s25 15 25 35-15 35-25 35z" fill="url(#eggGradient)" stroke="#374151" stroke-width="1.5"/></svg>`,
+                hatchling: `<svg viewBox="0 0 100 100" class="w-full h-full text-amber-300"><path d="M50,90 C30,90 20,70 20,50 C20,30 30,10 50,10 C70,10 80,30 80,50 C80,70 70,90 50,90 Z M45,40 L55,40 M45,45 L55,55 M55,45 L45,55" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"/><circle cx="40" cy="45" r="3" fill="black" /><circle cx="60" cy="45" r="3" fill="black" /><path d="M45 60 Q50 65 55 60" stroke="black" fill="none" stroke-width="2"/></svg>`,
+                phoenix: `<svg viewBox="0 0 200 200" class="w-full h-full text-amber-500 phoenix-fire"><path fill="currentColor" d="M100 130c-15 0-25-10-25-25s10-25 25-25 25 10 25 25-10 25-25 25z"/><path fill="#f87171" d="M100 130 q-5 -40 -30 -60 c-10 30 0 60 30 60z"/><path fill="#f87171" d="M100 130 q5 -40 30 -60 c10 30 0 60 -30 60z"/><path fill="#fb923c" d="M100 50 c-30 20 -40 50 -20 70 c10-10 10-30 20-40z"/><path fill="#fb923c" d="M100 50 c30 20 40 50 20 70 c-10-10 -10-30 -20-40z"/><path fill="#facc15" d="M100 30 c-20 20-30 40-10 60 c10-15 10-30 10-40z"/><path fill="#facc15" d="M100 30 c20 20 30 40 10 60 c-10-15 -10-30 -10-40z"/></svg>`,
+                celestial: `<svg viewBox="0 0 200 200" class="w-full h-full text-sky-400 phoenix-fire" style="--tw-shadow-color: #38bdf8;"><path fill="currentColor" d="M100 130c-15 0-25-10-25-25s10-25 25-25 25 10 25 25-10 25-25 25z"/><path fill="#60a5fa" d="M100 130 q-5 -40 -30 -60 c-10 30 0 60 30 60z"/><path fill="#60a5fa" d="M100 130 q5 -40 30 -60 c10 30 0 60 -30 60z"/><path fill="#93c5fd" d="M100 50 c-30 20 -40 50 -20 70 c10-10 10-30 20-40z"/><path fill="#93c5fd" d="M100 50 c30 20 40 50 20 70 c-10-10 -10-30 -20-40z"/><path fill="#e0f2fe" d="M100 30 c-20 20-30 40-10 60 c10-15 10-30 10-40z"/><path fill="#e0f2fe" d="M100 30 c20 20 30 40 10 60 c-10-15 -10-30 -10-40z"/></svg>`
+            };
+            const shopItems = [{ id: 'aura', name: 'Aura of Resolve', cost: 500, description: 'Adds a persistent, glowing aura around your Phoenix.' }, { id: 'celestialFlames', name: 'Celestial Flames', cost: 1200, description: 'Changes the fire color to a cool, ethereal blue.' }];
+
+            // --- State ---
+            let state = {};
+            let timerInterval;
+
+            // --- API Functions ---
+            async function apiFetch(endpoint, options = {}) {
+                const response = await fetch(endpoint, options);
+                if (response.status === 401) {
+                    showLogin();
+                    throw new Error('Unauthorized');
+                }
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.message || 'API Error');
+                }
+                return response.json();
+            }
+
+            // --- UI Functions ---
+            function showLogin() {
+                dom.loginOverlay.classList.remove('hidden');
+                dom.app.classList.add('hidden');
+                dom.app.classList.remove('flex');
+            }
+
+            function showApp() {
+                dom.loginOverlay.classList.add('hidden');
+                dom.app.classList.remove('hidden');
+                dom.app.classList.add('flex');
+            }
+            
+            function formatTime(ms) {
+                if (ms < 0) ms = 0;
+                const totalSeconds = Math.floor(ms / 1000);
+                const d = Math.floor(totalSeconds / 86400);
+                const h = Math.floor((totalSeconds % 86400) / 3600);
+                const m = Math.floor((totalSeconds % 3600) / 60);
+                const s = totalSeconds % 60;
+                return { d, h, m, s, totalDays: ms / (1000 * 60 * 60 * 24) };
+            }
+
+            function pad(num) { return num.toString().padStart(2, '0'); }
+
+            function updateTimer() {
+                const streakMs = Date.now() - new Date(state.lastRelapse).getTime();
+                const t = formatTime(streakMs);
+                dom.days.textContent = pad(t.d);
+                dom.hours.textContent = pad(t.h);
+                dom.minutes.textContent = pad(t.m);
+                dom.seconds.textContent = pad(t.s);
+                const totalHours = streakMs / (1000 * 60 * 60);
+                const streakCoins = Math.floor(10 * Math.pow(totalHours, 1.2));
+                const totalCoins = state.coinsAtLastRelapse + streakCoins;
+                dom.coins.textContent = Math.floor(totalCoins);
+            }
+
+            function getPhoenixSVG(days) {
+                let svg;
+                if (days >= 90) svg = phoenixSVGs.celestial;
+                else if (days >= 3) svg = phoenixSVGs.phoenix;
+                else if (days >= 1) svg = phoenixSVGs.hatchling;
+                else svg = phoenixSVGs.egg;
+                
+                if (state.upgrades.celestialFlames && (days >= 3)) {
+                   svg = svg.replace(/text-amber-500/g, 'text-sky-400').replace(/#f87171/g, '#60a5fa').replace(/#fb923c/g, '#93c5fd').replace(/#facc15/g, '#e0f2fe');
+                }
+                if (state.upgrades.aura) {
+                    const auraFilter = `<filter id="aura"><feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/><feFlood flood-color="${state.upgrades.celestialFlames || days >= 90 ? '#38bdf8' : '#f59e0b'}" result="color"/><feComposite in2="blur" operator="in" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+                    svg = svg.replace('<defs>', `<defs>${auraFilter}`);
+                    svg = svg.replace('<svg ', '<svg style="filter: url(#aura);" ');
+                }
+                return svg;
+            }
+
+            function updateUI() {
+                const streakMs = Date.now() - new Date(state.lastRelapse).getTime();
+                const { totalDays } = formatTime(streakMs);
+                const totalHours = streakMs / (1000 * 60 * 60);
+                const currentRank = [...ranks].reverse().find(r => totalDays >= r.days);
+                dom.rank.textContent = currentRank.name;
+                const currentRankIndex = ranks.findIndex(r => r.name === currentRank.name);
+                const nextRankObj = ranks[currentRankIndex + 1];
+                if (nextRankObj) dom.nextRank.textContent = `${nextRankObj.name} in ${Math.ceil(nextRankObj.days - totalDays)}d`;
+                else dom.nextRank.textContent = 'Max Rank Reached!';
+                const gain = (10 * Math.pow(totalHours + 1, 1.2)) - (10 * Math.pow(totalHours, 1.2));
+                dom.hourlyGain.textContent = `~${gain.toFixed(2)} / hr`;
+                dom.phoenixContainer.innerHTML = getPhoenixSVG(totalDays);
+                const longestStreakTime = formatTime(state.longestStreak);
+                dom.longestStreak.textContent = `${longestStreakTime.d}d ${longestStreakTime.h}h`;
+                dom.relapseCount.textContent = state.relapseCount;
+                updateTimer();
+            }
+
+            function closeAllModals() {
+                [dom.urgeModal, dom.relapseModal, dom.ranksModal, dom.shopModal].forEach(m => m.classList.add('hidden'));
+            }
+            
+            function populateShop() {
+                const totalCoins = parseFloat(dom.coins.textContent);
+                dom.shopItemsContainer.innerHTML = '';
+                shopItems.forEach(item => {
+                    const isOwned = state.upgrades[item.id];
+                    const canAfford = totalCoins >= item.cost;
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'bg-gray-700/50 p-4 rounded-lg flex items-center justify-between';
+                    itemEl.innerHTML = `<div><h4 class="font-semibold text-white">${item.name}</h4><p class="text-sm text-gray-400">${item.description}</p><p class="text-sm font-semibold text-yellow-400 mt-1">${item.cost} coins</p></div><button data-id="${item.id}" class="buy-btn text-sm font-bold py-2 px-4 rounded-md transition-colors ${isOwned ? 'bg-green-600 cursor-not-allowed' : (canAfford ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-gray-600 text-gray-400 cursor-not-allowed')}" ${isOwned || !canAfford ? 'disabled' : ''}>${isOwned ? 'Owned' : 'Buy'}</button>`;
+                    dom.shopItemsContainer.appendChild(itemEl);
+                });
+            }
+
+            // --- Event Handlers ---
+            dom.loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                dom.loginError.textContent = '';
+                const password = dom.passwordInput.value;
+                try {
+                    await apiFetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password })
+                    });
+                    await initializeApp();
+                } catch (err) {
+                    dom.loginError.textContent = 'Incorrect password.';
+                }
+            });
+
+            dom.confirmRelapse.addEventListener('click', async () => {
+                try {
+                    const newState = await apiFetch('/api/relapse', { method: 'POST' });
+                    state = newState;
+                    updateUI();
+                    closeAllModals();
+                } catch (err) {
+                    console.error("Failed to process relapse:", err);
+                }
+            });
+
+            dom.shopItemsContainer.addEventListener('click', async (e) => {
+                if (e.target.matches('.buy-btn')) {
+                    const itemId = e.target.dataset.id;
+                    try {
+                        const newState = await apiFetch('/api/buy', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ itemId })
+                        });
+                        state = newState;
+                        updateUI();
+                        populateShop();
+                    } catch(err) {
+                        console.error("Purchase failed:", err);
+                        alert("Purchase failed. Not enough coins?");
+                    }
+                }
+            });
+
+            // --- Initialization ---
+            async function initializeApp() {
+                try {
+                    state = await apiFetch('/api/state');
+                    state.upgrades = JSON.parse(state.upgrades); // Un-stringify upgrades
+                    
+                    showApp();
+
+                    dom.allRanksList.innerHTML = ''; // Clear previous
+                    ranks.forEach(rank => {
+                        const li = document.createElement('li');
+                        li.className = 'flex items-center gap-3 bg-gray-700/50 p-2 rounded-md';
+                        li.innerHTML = `<div class="w-10 h-10 flex-shrink-0">${getPhoenixSVG(rank.days)}</div><div class="flex-grow"><span class="font-semibold text-gray-300">${rank.name}</span></div><span class="text-sm text-gray-400 font-medium">${rank.days} days</span>`;
+                        dom.allRanksList.appendChild(li);
+                    });
+
+                    updateUI();
+                    if (timerInterval) clearInterval(timerInterval);
+                    timerInterval = setInterval(() => {
+                        updateTimer();
+                        if (Math.floor(Date.now() / 1000) % 10 === 0) updateUI();
+                    }, 1000);
+
+                } catch (err) {
+                    // This will be caught by the apiFetch wrapper, which calls showLogin()
+                    console.log("Not authenticated, showing login.");
+                }
+            }
+
+            // --- Generic Event Listeners ---
+            dom.urgeBtn.addEventListener('click', () => {
+                dom.urgeContent.textContent = urgeActivities[Math.floor(Math.random() * urgeActivities.length)];
+                dom.urgeModal.classList.remove('hidden');
+            });
+            dom.relapseBtn.addEventListener('click', () => dom.relapseModal.classList.remove('hidden'));
+            dom.viewRanksBtn.addEventListener('click', () => dom.ranksModal.classList.remove('hidden'));
+            dom.shopBtn.addEventListener('click', () => {
+                populateShop();
+                dom.shopModal.classList.remove('hidden');
+            });
+            [dom.closeUrgeModal, dom.cancelRelapse, dom.closeRanksModal, dom.closeShopModal].forEach(btn => btn.addEventListener('click', closeAllModals));
+            [dom.urgeModal, dom.relapseModal, dom.ranksModal, dom.shopModal].forEach(m => m.addEventListener('click', e => { if (e.target === m) closeAllModals()}));
+
+            initializeApp();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "phoenix-journey-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A gamified app to track and discourage relapse.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@libsql/client": "latest",
+    "cookie": "latest"
+  },
+  "devDependencies": {
+    "vercel": "latest"
+  }
+}
+
