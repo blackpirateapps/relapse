@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let state = {};
     let timerInterval;
     let isPreviewing = false;
+    let activePreviewUpgrades = {};
     
     const shopItems = [
         { id: 'aura', name: 'Aura of Resolve', cost: 500, description: 'Adds a soft, glowing aura to your phoenix.', type: 'cosmetic' },
@@ -98,15 +99,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Core Logic & UI Updates ---
     function applyBackground(upgrades) {
         const body = document.body;
-        // Reset to default first
-        body.classList.remove('bg-volcanic-lair', 'bg-celestial-sky');
-        body.classList.add('bg-default');
+        body.className = body.className.replace(/bg-(volcanic-lair|celestial-sky|default)/g, '');
 
-        // Apply the best owned theme
         if (upgrades && upgrades.celestialSky) {
-            body.classList.replace('bg-default', 'bg-celestial-sky');
+            body.classList.add('bg-celestial-sky');
         } else if (upgrades && upgrades.volcanicLair) {
-            body.classList.replace('bg-default', 'bg-volcanic-lair');
+            body.classList.add('bg-volcanic-lair');
+        } else {
+            body.classList.add('bg-default');
         }
     }
 
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateUI() {
-        if (isPreviewing) return; // Don't update UI if a preview is active
+        if (isPreviewing) return;
 
         const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
         const currentRank = getRank(totalHours);
@@ -158,10 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         longestStreakDisplay.textContent = formatStreak(state.longestStreak / 1000); 
 
-        relapseButton.textContent = 'I Relapsed';
-        relapseButton.classList.remove('bg-green-600', 'hover:bg-green-700');
-        relapseButton.classList.add('bg-red-700', 'hover:bg-red-800');
-        
         updateProgressionSection();
         updateShopSection();
     }
@@ -182,10 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderPhoenix(level, upgrades = {}) {
         const visual = visuals[level] || visuals[0];
-        if (typeof visual.svg === 'function') {
-            return visual.svg(upgrades);
-        }
-        return visual.svg;
+        return visual.svg(upgrades);
     }
 
     function formatStreak(seconds) {
@@ -266,30 +259,15 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         shopContent.innerHTML = `
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-serif-display text-2xl text-amber-400">The Shop</h3>
-                <div class="flex items-center">
-                    <span class="text-sm text-gray-300 mr-3">Test Items</span>
-                    <label for="preview-toggle" class="flex items-center cursor-pointer">
-                        <div class="relative">
-                            <input type="checkbox" id="preview-toggle" class="sr-only">
-                            <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
-                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
-                        </div>
-                    </label>
-                </div>
-            </div>
-            
+            <h3 class="font-serif-display text-2xl mb-6 text-amber-400 text-center">The Shop</h3>
             <h4 class="text-lg font-semibold text-indigo-300 mb-3 mt-4">Phoenix Cosmetics</h4>
             <div class="space-y-4">${createItemsHtml(cosmeticItems)}</div>
-
             <h4 class="text-lg font-semibold text-indigo-300 mb-3 mt-8">App Themes</h4>
             <div class="space-y-4">${createItemsHtml(themeItems)}</div>
         `;
 
         document.querySelectorAll('.buy-button').forEach(button => button.addEventListener('click', handleBuyItem));
         document.querySelectorAll('.preview-button').forEach(button => button.addEventListener('click', handlePreviewItem));
-        document.getElementById('preview-toggle').addEventListener('change', handlePreviewToggle);
     }
 
     // --- Event Handlers ---
@@ -303,15 +281,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     relapseButton.addEventListener('click', () => {
-        const title = 'A New Beginning';
-        const confirmText = 'Confirm';
-        const message = 'Are you sure you want to log a relapse? This will reset your current streak timer.';
-
-         showModal(title, `
-            <p class="text-gray-300 mb-6">${message}</p>
+        showModal('A New Beginning', `
+            <p class="text-gray-300 mb-6">Are you sure you want to log a relapse? This will reset your current streak timer.</p>
             <div class="flex justify-end gap-4">
                 <button id="cancel-relapse" class="bg-gray-600 hover:bg-gray-700 font-bold py-2 px-4 rounded-lg">Cancel</button>
-                <button id="confirm-relapse" class="bg-red-700 hover:bg-red-800 font-bold py-2 px-4 rounded-lg">${confirmText}</button>
+                <button id="confirm-relapse" class="bg-red-700 hover:bg-red-800 font-bold py-2 px-4 rounded-lg">Confirm</button>
             </div>
         `, false);
 
@@ -322,17 +296,9 @@ document.addEventListener('DOMContentLoaded', () => {
     navButtons.forEach(button => {
         button.addEventListener('click', () => {
             const targetSection = button.dataset.section;
-            
             navButtons.forEach(btn => btn.setAttribute('data-active', 'false'));
             button.setAttribute('data-active', 'true');
-
-            appSections.forEach(section => {
-                if (section.id === `${targetSection}-section`) {
-                    section.classList.remove('hidden');
-                } else {
-                    section.classList.add('hidden');
-                }
-            });
+            appSections.forEach(section => section.classList.toggle('hidden', section.id !== `${targetSection}-section`));
         });
     });
 
@@ -341,9 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/api/relapse', { method: 'POST' });
             if (!response.ok) throw new Error('Failed to post relapse');
             state = await response.json();
-             if (typeof state.upgrades === 'string') {
-                state.upgrades = JSON.parse(state.upgrades);
-            }
+             if (typeof state.upgrades === 'string') { state.upgrades = JSON.parse(state.upgrades); }
             clearInterval(timerInterval);
             if (state.lastRelapse) startTimer();
             exitPreview();
@@ -368,19 +332,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const previewUpgrades = { ...state.upgrades, [itemId]: true };
         const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
         const currentRank = getRank(totalHours);
-        const previewPhoenixSVG = renderPhoenix(currentRank.level, previewUpgrades);
     
-        const modalContent = `
+        showModal(`Confirm Purchase`, `
             <p class="text-gray-300 mb-4">Are you sure you want to purchase "${itemName}" for ${itemCost.toLocaleString()} coins?</p>
             <div class="my-6 p-4 bg-gray-900 rounded-lg flex justify-center items-center">
-                <div class="w-32 h-32">${previewPhoenixSVG}</div>
+                <div class="w-32 h-32">${renderPhoenix(currentRank.level, previewUpgrades)}</div>
             </div>
             <div class="flex justify-end gap-4">
                 <button id="cancel-purchase" class="bg-gray-600 hover:bg-gray-700 font-bold py-2 px-4 rounded-lg">Cancel</button>
-                <button id="confirm-purchase" class="bg-purple-600 hover:bg-purple-700 font-bold py-2 px-4 rounded-lg">Confirm Purchase</button>
+                <button id="confirm-purchase" class="bg-purple-600 hover:bg-purple-700 font-bold py-2 px-4 rounded-lg">Confirm</button>
             </div>
-        `;
-        showModal(`Confirm Purchase`, modalContent, false);
+        `, false);
     
         document.getElementById('cancel-purchase').onclick = closeModal;
         document.getElementById('confirm-purchase').onclick = async () => {
@@ -395,9 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error(err.message || 'Failed to buy item');
                 }
                 state = await response.json();
-                 if (typeof state.upgrades === 'string') {
-                    state.upgrades = JSON.parse(state.upgrades);
-                }
+                 if (typeof state.upgrades === 'string') { state.upgrades = JSON.parse(state.upgrades); }
                 exitPreview();
                 applyBackground(state.upgrades);
                 updateUI();
@@ -410,46 +370,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // --- Preview Mode Functions ---
-    let previewToggleState = false;
-    let activePreviewUpgrades = {};
-
-    function handlePreviewToggle(e) {
-        previewToggleState = e.target.checked;
-        if (!previewToggleState) {
-            exitPreview();
-            activePreviewUpgrades = {};
-        }
-        const shopButtons = shopContent.querySelectorAll('.preview-button, .buy-button');
-        shopButtons.forEach(btn => {
-            if (previewToggleState) {
-                btn.classList.add('opacity-50', 'cursor-not-allowed');
-                if (btn.classList.contains('preview-button')) {
-                     btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                }
-            } else {
-                 btn.classList.remove('opacity-50', 'cursor-not-allowed');
-            }
-        });
-    }
-
     function handlePreviewItem(e) {
-        if (!previewToggleState) return;
-
         const itemId = e.target.dataset.itemId;
-        
-        if (activePreviewUpgrades[itemId]) {
-            delete activePreviewUpgrades[itemId];
-        } else {
-            activePreviewUpgrades[itemId] = true;
-        }
+        const item = shopItems.find(i => i.id === itemId);
+        if (!item) return;
+
+        // Toggle the item in the preview state
+        activePreviewUpgrades[itemId] = !activePreviewUpgrades[itemId];
+        if (!activePreviewUpgrades[itemId]) delete activePreviewUpgrades[itemId];
 
         const tempUpgrades = { ...state.upgrades, ...activePreviewUpgrades };
         
-        const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
-        const currentRank = getRank(totalHours);
-        phoenixDisplay.innerHTML = renderPhoenix(currentRank.level, tempUpgrades);
+        // Apply the correct preview effect
+        if (item.type === 'cosmetic') {
+            const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
+            const currentRank = getRank(totalHours);
+            phoenixDisplay.innerHTML = renderPhoenix(currentRank.level, tempUpgrades);
+        } else if (item.type === 'theme') {
+            applyBackground(tempUpgrades);
+        }
         
-        const activePreviewNames = Object.keys(activePreviewUpgrades).map(id => shopItems.find(item => item.id === id).name).join(', ');
+        const activePreviewNames = Object.keys(activePreviewUpgrades).map(id => shopItems.find(i => i.id === id).name).join(', ');
 
         if (activePreviewNames) {
             isPreviewing = true;
@@ -464,6 +405,9 @@ document.addEventListener('DOMContentLoaded', () => {
         isPreviewing = false;
         activePreviewUpgrades = {};
         previewBanner.classList.add('hidden');
+        
+        // Restore visuals from permanent state
+        applyBackground(state.upgrades);
         const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
         const currentRank = getRank(totalHours);
         phoenixDisplay.innerHTML = renderPhoenix(currentRank.level, state.upgrades);
@@ -473,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Modal ---
     function showModal(title, content, showClose = true) {
-        let closeButtonHtml = showClose ? '<button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>' : '';
+        let closeButtonHtml = showClose ? `<button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>` : '';
         modalContentContainer.innerHTML = `
             <h3 class="font-serif-display text-2xl mb-4 text-amber-400">${title}</h3>
             ${closeButtonHtml}
@@ -493,3 +437,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Initial Load ---
     checkAuthAndInitialize();
 });
+
