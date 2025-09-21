@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progression - Abstinence Phoenix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <script type="module" src="/js/progression.js" defer></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-default text-white">
+    <div id="app-container" class="hidden min-h-screen flex flex-col p-4 sm:p-6 overflow-hidden">
+        <!-- Header -->
+        <header class="w-full max-w-5xl mx-auto flex justify-between items-center mb-6 flex-shrink-0">
+            <h1 class="font-serif-display text-2xl text-amber-400">Progression</h1>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <h4 class="text-sm text-gray-400">Coins</h4>
+                    <p id="coin-count" class="text-xl font-bold text-yellow-400">0</p>
+                </div>
+                <nav class="flex gap-2">
+                    <a href="/" class="nav-button">Journey</a>
+                    <a href="/progression.html" class="nav-button active">Progression</a>
+                    <a href="/shop.html" class="nav-button">Shop</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content: Horizontal Scrolling Container -->
+        <main id="progression-container" class="flex-grow flex items-center snap-x snap-mandatory overflow-x-auto pb-8">
+            <!-- Progression cards will be injected here by progression.js -->
+        </main>
+    </div>
+    <div id="loading-spinner" class="w-full max-w-sm text-center">...</div>
+</body>
+</html>
