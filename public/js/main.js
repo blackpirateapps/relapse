@@ -36,16 +36,20 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: "Solar Drake", hours: 2160 }, { name: "Celestial Phoenix", hours: 4320 }
     ];
 
-    // FIX: Removed hardcoded size classes from visuals. They will now adapt to their container.
+    // FIX: Corrected flame color logic to use 'celestialFlames' upgrade.
+    const flameColor = (upgrades) => upgrades.celestialFlames ? '#3B82F6' : '#F59E0B';
+    const secondaryFlameColor = (upgrades) => upgrades.celestialFlames ? '#60A5FA' : '#DC2626';
+    const celestialPrimaryColor = (upgrades) => upgrades.celestialFlames ? '#6D28D9' : '#9333EA';
+
     const visuals = {
         0: { name: 'Ashen Egg', svg: `<img src="/img/egg.png" alt="Ashen Egg" class="w-full h-full object-contain">` },
-        1: { name: 'Fledgling Hatchling', svg: (upgrades) => `<svg viewBox="0 0 200 200"><g class="${upgrades.aura ? 'phoenix-pulse' : ''}"><path fill="${upgrades.flameColor || '#F59E0B'}" d="M100 20c-20 0-40 10-50 30-10 20-10 50 0 70 10 20 30 30 50 30s40-10 50-30c10-20 10-50 0-70-10-20-30-30-50-30zm0 10c15 0 30 8 40 25 8 17 8 43 0 60-10 15-25 25-40 25s-30-10-40-25c-8-17-8-43 0-60 10-17 25-25 40-25z M100 60 a 5 5 0 0 1 0 10 a 5 5 0 0 1 0 -10 M70 80 a 5 5 0 0 1 0 10 a 5 5 0 0 1 0 -10 M130 80 a 5 5 0 0 1 0 10 a 5 5 0 0 1 0 -10 M100 100 q -20 20 0 40 q 20 -20 0 -40"></path></g></svg>` },
-        2: { name: 'Ember Chick', svg: (upgrades) => `<svg viewBox="0 0 200 200"><g class="${upgrades.aura ? 'phoenix-pulse' : ''}"><path fill="${upgrades.flameColor || '#F59E0B'}" d="M100 20 C60 20 40 60 40 100 C40 140 60 180 100 180 C140 180 160 140 160 100 C160 60 140 20 100 20 Z M100 50 C110 50 110 60 100 60 C90 60 90 50 100 50 Z M80 80 C85 80 85 85 80 85 C75 85 75 80 80 80 Z M120 80 C125 80 125 85 120 85 C115 85 115 80 120 80 Z M100 100 C120 100 130 130 100 150 C70 130 80 100 100 100 Z"></path></g></svg>` },
-        3: { name: 'Flame Youngling', svg: (upgrades) => `<svg viewBox="0 0 200 200"><g class="${upgrades.aura ? 'phoenix-pulse' : ''}"><path fill="${upgrades.flameColor || '#DC2626'}" d="M100 10 C 50 10, 50 80, 100 130 C 150 80, 150 10, 100 10 M100 120 C 80 150, 120 150, 100 190 C 80 150, 120 150, 100 120"></path><path fill="${upgrades.flameColor || '#F59E0B'}" d="M100 30 C 70 30, 70 80, 100 110 C 130 80, 130 30, 100 30"></path></g></svg>` },
-        4: { name: 'Sunfire Phoenix', svg: (upgrades) => `<svg viewBox="0 0 200 200"><g class="${upgrades.aura ? 'phoenix-pulse' : ''}"><path class="phoenix-fire" fill="${upgrades.flameColor || '#F59E0B'}" d="M28.6,115.3c-2.4,5.4-3.5,11.3-3.5,17.5c0,29.3,23.7,53,53,53s53-23.7,53-53c0-6.2-1.1-12.1-3.5-17.5c-3.1,10-10.9,17.5-20.7,17.5c-12,0-21.7-9.7-21.7-21.7c0-6.4,2.8-12.2,7.2-16.1c-4.8-1.5-10-2.3-15.3-2.3C70.7,75,46.1,98.7,46.1,128c0-9.8,7.9-17.7,17.7-17.7C54,110.3,41.2,107.2,28.6,115.3z"/><path class="phoenix-fire" fill="${upgrades.flameColor || '#DC2626'}" d="M100,5C72.4,5,50,27.4,50,55s22.4,50,50,50s50-22.4,50-50S127.6,5,100,5z M100,85c-16.6,0-30-13.4-30-30s13.4-30,30-30s30,13.4,30,30S116.6,85,100,85z"/></g></svg>` },
-        5: { name: 'Blaze Guardian', svg: (upgrades) => `<svg viewBox="0 0 200 200"><g class="phoenix-fire ${upgrades.aura ? 'phoenix-pulse' : ''}"><path fill="${upgrades.flameColor || '#DC2626'}" d="M100,10c-30,0-55,25-55,55s25,55,55,55s55-25,55-55S130,10,100,10z M100,100c-19.3,0-35-15.7-35-35s15.7-35,35-35s35,15.7,35,35S119.3,100,100,100z"/><path fill="${upgrades.flameColor || '#F59E0B'}" d="M100,120c-40,0-70,40-20,70c50,30,50-30,20-70z"/></g></svg>` },
-        6: { name: 'Solar Drake', svg: (upgrades) => `<svg viewBox="0 0 200 200"><g class="phoenix-fire ${upgrades.aura ? 'phoenix-pulse' : ''}"><path fill="${upgrades.flameColor || '#F59E0B'}" d="M 98.5,10.2 C 54.4,21.5 35.2,69.5 54.7,109.1 C 65.5,131.2 92.2,143.4 116.8,138.3 C 141.4,133.2 161.4,113.1 166.5,88.5 C 172.5,59.8 153.3,-1.1 98.5,10.2 z"/><path fill="${upgrades.flameColor || '#DC2626'}" d="M 100,140 C 50,140 40,190 100,190 C 160,190 150,140 100,140 z"/></g></svg>` },
-        7: { name: 'Celestial Phoenix', svg: (upgrades) => `<svg viewBox="0 0 200 200"><g class="phoenix-fire ${upgrades.aura ? 'phoenix-pulse' : ''}"><path fill="${upgrades.flameColor || '#9333EA'}" d="M100 5C50 5 10 50 10 100c0 50 40 95 90 95s90-45 90-95C190 50 150 5 100 5zm0 170c-41.4 0-75-33.6-75-75S58.6 25 100 25s75 33.6 75 75-33.6 75-75 75z"/><path fill="${upgrades.flameColor || '#F59E0B'}" d="M100 60c-22.1 0-40 17.9-40 40s17.9 40 40 40 40-17.9 40-40-17.9-40-40-40z"/></g></svg>` }
+        1: { name: 'Fledgling Hatchling', svg: (upgrades) => `<svg viewBox="0 0 200 200"><g class="${upgrades.aura ? 'phoenix-pulse' : ''}"><path fill="${flameColor(upgrades)}" d="M100 20c-20 0-40 10-50 30-10 20-10 50 0 70 10 20 30 30 50 30s40-10 50-30c10-20 10-50 0-70-10-20-30-30-50-30zm0 10c15 0 30 8 40 25 8 17 8 43 0 60-10 15-25 25-40 25s-30-10-40-25c-8-17-8-43 0-60 10-17 25-25 40-25z M100 60 a 5 5 0 0 1 0 10 a 5 5 0 0 1 0 -10 M70 80 a 5 5 0 0 1 0 10 a 5 5 0 0 1 0 -10 M130 80 a 5 5 0 0 1 0 10 a 5 5 0 0 1 0 -10 M100 100 q -20 20 0 40 q 20 -20 0 -40"></path></g></svg>` },
+        2: { name: 'Ember Chick', svg: (upgrades) => `<svg viewBox="0 0 200 200"><g class="${upgrades.aura ? 'phoenix-pulse' : ''}"><path fill="${flameColor(upgrades)}" d="M100 20 C60 20 40 60 40 100 C40 140 60 180 100 180 C140 180 160 140 160 100 C160 60 140 20 100 20 Z M100 50 C110 50 110 60 100 60 C90 60 90 50 100 50 Z M80 80 C85 80 85 85 80 85 C75 85 75 80 80 80 Z M120 80 C125 80 125 85 120 85 C115 85 115 80 120 80 Z M100 100 C120 100 130 130 100 150 C70 130 80 100 100 100 Z"></path></g></svg>` },
+        3: { name: 'Flame Youngling', svg: (upgrades) => `<svg viewBox="0 0 200 200"><g class="${upgrades.aura ? 'phoenix-pulse' : ''}"><path fill="${secondaryFlameColor(upgrades)}" d="M100 10 C 50 10, 50 80, 100 130 C 150 80, 150 10, 100 10 M100 120 C 80 150, 120 150, 100 190 C 80 150, 120 150, 100 120"></path><path fill="${flameColor(upgrades)}" d="M100 30 C 70 30, 70 80, 100 110 C 130 80, 130 30, 100 30"></path></g></svg>` },
+        4: { name: 'Sunfire Phoenix', svg: (upgrades) => `<svg viewBox="0 0 200 200"><g class="${upgrades.aura ? 'phoenix-pulse' : ''}"><path class="phoenix-fire" fill="${flameColor(upgrades)}" d="M28.6,115.3c-2.4,5.4-3.5,11.3-3.5,17.5c0,29.3,23.7,53,53,53s53-23.7,53-53c0-6.2-1.1-12.1-3.5-17.5c-3.1,10-10.9,17.5-20.7,17.5c-12,0-21.7-9.7-21.7-21.7c0-6.4,2.8-12.2,7.2-16.1c-4.8-1.5-10-2.3-15.3-2.3C70.7,75,46.1,98.7,46.1,128c0-9.8,7.9-17.7,17.7-17.7C54,110.3,41.2,107.2,28.6,115.3z"/><path class="phoenix-fire" fill="${secondaryFlameColor(upgrades)}" d="M100,5C72.4,5,50,27.4,50,55s22.4,50,50,50s50-22.4,50-50S127.6,5,100,5z M100,85c-16.6,0-30-13.4-30-30s13.4-30,30-30s30,13.4,30,30S116.6,85,100,85z"/></g></svg>` },
+        5: { name: 'Blaze Guardian', svg: (upgrades) => `<svg viewBox="0 0 200 200"><g class="phoenix-fire ${upgrades.aura ? 'phoenix-pulse' : ''}"><path fill="${secondaryFlameColor(upgrades)}" d="M100,10c-30,0-55,25-55,55s25,55,55,55s55-25,55-55S130,10,100,10z M100,100c-19.3,0-35-15.7-35-35s15.7-35,35-35s35,15.7,35,35S119.3,100,100,100z"/><path fill="${flameColor(upgrades)}" d="M100,120c-40,0-70,40-20,70c50,30,50-30,20-70z"/></g></svg>` },
+        6: { name: 'Solar Drake', svg: (upgrades) => `<svg viewBox="0 0 200 200"><g class="phoenix-fire ${upgrades.aura ? 'phoenix-pulse' : ''}"><path fill="${flameColor(upgrades)}" d="M 98.5,10.2 C 54.4,21.5 35.2,69.5 54.7,109.1 C 65.5,131.2 92.2,143.4 116.8,138.3 C 141.4,133.2 161.4,113.1 166.5,88.5 C 172.5,59.8 153.3,-1.1 98.5,10.2 z"/><path fill="${secondaryFlameColor(upgrades)}" d="M 100,140 C 50,140 40,190 100,190 C 160,190 150,140 100,140 z"/></g></svg>` },
+        7: { name: 'Celestial Phoenix', svg: (upgrades) => `<svg viewBox="0 0 200 200"><g class="phoenix-fire ${upgrades.aura ? 'phoenix-pulse' : ''}"><path fill="${celestialPrimaryColor(upgrades)}" d="M100 5C50 5 10 50 10 100c0 50 40 95 90 95s90-45 90-95C190 50 150 5 100 5zm0 170c-41.4 0-75-33.6-75-75S58.6 25 100 25s75 33.6 75 75-33.6 75-75 75z"/><path fill="${flameColor(upgrades)}" d="M100 60c-22.1 0-40 17.9-40 40s17.9 40 40 40 40-17.9 40-40-17.9-40-40-40z"/></g></svg>` }
     };
 
     // --- Authentication & Initialization ---
@@ -99,11 +103,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Core Logic & UI Updates ---
     function startTimer() {
         if (timerInterval) clearInterval(timerInterval);
-        if (!state.startTime) return;
+        // FIX: Changed state.startTime to state.lastRelapse to match the database.
+        if (!state.lastRelapse) return;
 
         timerInterval = setInterval(() => {
             const now = Date.now();
-            const start = new Date(state.startTime).getTime();
+            // FIX: Changed state.startTime to state.lastRelapse.
+            const start = new Date(state.lastRelapse).getTime();
             const diff = now - start;
 
             if (diff < 0) {
@@ -119,7 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
             timerDisplay.textContent = `${String(days).padStart(2, '0')}:${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             
             const totalHours = diff / (1000 * 60 * 60);
-            state.coins = calculateCoins(totalHours) + (state.bankedCoins || 0);
+            // FIX: Updated coin calculation to match the backend logic.
+            const streakCoins = calculateCoins(totalHours);
+            state.coins = (state.coinsAtLastRelapse || 0) + streakCoins;
             coinCountDisplay.textContent = Math.floor(state.coins).toLocaleString();
 
             const currentRank = getRank(totalHours);
@@ -130,29 +138,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateUI() {
-        // FIX: The relapse button now changes based on whether a streak is active.
-        if (!state.startTime) {
-            timerDisplay.textContent = "00:00:00:00";
-            rankNameDisplay.textContent = "Start your journey";
-            phoenixDisplay.innerHTML = renderPhoenix(0, state.upgrades);
-            coinCountDisplay.textContent = (state.bankedCoins || 0).toLocaleString();
-            longestStreakDisplay.textContent = formatStreak(state.longestStreak || 0);
+        // FIX: Simplified UI update logic to always show a running timer.
+        const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
+        const currentRank = getRank(totalHours);
 
-            relapseButton.textContent = 'Start My Journey';
-            relapseButton.classList.remove('bg-red-700', 'hover:bg-red-800');
-            relapseButton.classList.add('bg-green-600', 'hover:bg-green-700');
-        } else {
-            const totalHours = (Date.now() - new Date(state.startTime).getTime()) / (1000 * 60 * 60);
-            const currentRank = getRank(totalHours);
-            rankNameDisplay.textContent = currentRank.name;
-            phoenixDisplay.innerHTML = renderPhoenix(currentRank.level, state.upgrades);
-            coinCountDisplay.textContent = Math.floor(state.coins).toLocaleString();
-            longestStreakDisplay.textContent = formatStreak(state.longestStreak);
-
-            relapseButton.textContent = 'I Relapsed';
-            relapseButton.classList.remove('bg-green-600', 'hover:bg-green-700');
-            relapseButton.classList.add('bg-red-700', 'hover:bg-red-800');
+        // Parse upgrades from JSON string if it's not already an object
+        if (typeof state.upgrades === 'string') {
+            try {
+                state.upgrades = JSON.parse(state.upgrades);
+            } catch (e) {
+                console.error("Failed to parse upgrades:", e);
+                state.upgrades = {};
+            }
         }
+        
+        rankNameDisplay.textContent = currentRank.name;
+        phoenixDisplay.innerHTML = renderPhoenix(currentRank.level, state.upgrades);
+        
+        const streakCoins = calculateCoins(totalHours);
+        const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
+        coinCountDisplay.textContent = Math.floor(totalCoins).toLocaleString();
+        
+        // Use longestStreak value directly from state object, which is in milliseconds
+        longestStreakDisplay.textContent = formatStreak(state.longestStreak / 1000); 
+
+        // Ensure relapse button is always styled for relapse action
+        relapseButton.textContent = 'I Relapsed';
+        relapseButton.classList.remove('bg-green-600', 'hover:bg-green-700');
+        relapseButton.classList.add('bg-red-700', 'hover:bg-red-800');
+        
         updateProgressionSection();
         updateShopSection();
     }
@@ -165,12 +179,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return { ...ranks[0], level: 0 };
     }
-            
+
+    // FIX: Replaced coin calculation with the one from the backend for consistency.
     function calculateCoins(totalHours) {
         if (totalHours <= 0) return 0;
-        const accelerationFactor = Math.floor(totalHours / 12);
-        const averageRate = 10 + (accelerationFactor / 2);
-        return totalHours * averageRate;
+        return Math.floor(10 * Math.pow(totalHours, 1.2));
     }
 
     function renderPhoenix(level, upgrades = {}) {
@@ -190,10 +203,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Section Content Updaters ---
     function updateProgressionSection() {
-        const totalHours = state.startTime ? (Date.now() - new Date(state.startTime).getTime()) / (1000 * 60 * 60) : 0;
+        // FIX: Changed state.startTime to state.lastRelapse.
+        const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
         const currentRank = getRank(totalHours);
         const nextRank = ranks[currentRank.level + 1];
-        const currentHourlyRate = 10 + Math.floor(totalHours / 12);
+        // FIX: Calculate current hourly rate based on a snapshot, though the actual gain is non-linear.
+        const currentHourlyRate = Math.floor(10 * 1.2 * Math.pow(totalHours, 0.2));
         
         let rankListHtml = ranks.map((rank, index) => {
             const isCurrent = currentRank.level === index;
@@ -202,7 +217,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isCurrent) textClass = 'text-amber-400 font-bold';
             else if (isAchieved) textClass = 'text-green-400';
 
-            // FIX: Added flex-shrink-0 to the icon container to prevent it from being squished.
             return `<li class="flex items-center justify-between p-2 rounded-md ${isCurrent ? 'bg-gray-700' : ''}">
                         <div class="flex items-center gap-4">
                           <div class="w-10 h-10 flex-shrink-0">${renderPhoenix(index, state.upgrades)}</div>
@@ -220,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="text-lg text-amber-400 font-semibold">${currentRank.name}</p>
                 </div>
                  <div>
-                    <h4 class="text-sm text-gray-400">Hourly Coin Gain</h4>
+                    <h4 class="text-sm text-gray-400">Approx. Coin Gain</h4>
                     <p class="text-lg text-yellow-400 font-semibold">${currentHourlyRate} coins/hr</p>
                 </div>
             </div>
@@ -235,9 +249,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateShopSection() {
+        // FIX: Corrected item ID and cost to match backend logic.
         const shopItems = [
             { id: 'aura', name: 'Aura of Resolve', cost: 500, description: 'Adds a soft, glowing aura to your phoenix.' },
-            { id: 'flameColor', name: 'Celestial Flames', cost: 1000, description: 'Changes phoenix flames to a cool blue.' },
+            { id: 'celestialFlames', name: 'Celestial Flames', cost: 1200, description: 'Changes phoenix flames to a cool blue.' },
         ];
 
         let itemsHtml = shopItems.map(item => {
@@ -281,18 +296,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     relapseButton.addEventListener('click', () => {
-        const isStarting = !state.startTime;
-        const title = isStarting ? 'Begin Your Journey?' : 'A New Beginning';
-        const confirmText = isStarting ? 'Start' : 'Confirm';
-        const message = isStarting 
-            ? 'This will start your timer and your journey to a new you.'
-            : 'Are you sure you want to log a relapse?';
+        // FIX: Simplified modal to always show the relapse confirmation.
+        const title = 'A New Beginning';
+        const confirmText = 'Confirm';
+        const message = 'Are you sure you want to log a relapse? This will reset your current streak timer.';
 
          showModal(title, `
             <p class="text-gray-300 mb-6">${message}</p>
             <div class="flex justify-end gap-4">
                 <button id="cancel-relapse" class="bg-gray-600 hover:bg-gray-700 font-bold py-2 px-4 rounded-lg">Cancel</button>
-                <button id="confirm-relapse" class="${isStarting ? 'bg-green-600 hover:bg-green-700' : 'bg-red-700 hover:bg-red-800'} font-bold py-2 px-4 rounded-lg">${confirmText}</button>
+                <button id="confirm-relapse" class="bg-red-700 hover:bg-red-800 font-bold py-2 px-4 rounded-lg">${confirmText}</button>
             </div>
         `, false);
 
@@ -323,7 +336,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Failed to post relapse');
             state = await response.json();
             clearInterval(timerInterval);
-            if (state.startTime) startTimer();
+            // FIX: Use state.lastRelapse to restart the timer.
+            if (state.lastRelapse) startTimer();
             updateUI();
             closeModal();
         } catch (error) {
@@ -334,10 +348,10 @@ document.addEventListener('DOMContentLoaded', () => {
     async function handleBuyItem(e) {
         const button = e.target;
         const itemId = button.dataset.itemId;
-        const itemCost = parseInt(button.dataset.itemCost);
+        const itemCost = parseInt(button.dataset.itemCost, 10);
 
         if (state.coins < itemCost) {
-            alert("Not enough coins!"); // Replace with better UI
+            showModal('Transaction Failed', '<p>You do not have enough coins to purchase this item.</p>');
             return;
         }
 
@@ -349,13 +363,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             if (!response.ok) {
                 const err = await response.json();
-                throw new Error(err.error || 'Failed to buy item');
+                throw new Error(err.message || 'Failed to buy item');
             }
             state = await response.json();
             updateUI();
         } catch (error) {
             console.error('Purchase error:', error);
-            alert(`Purchase failed: ${error.message}`);
+            showModal('Purchase Error', `<p>${error.message}</p>`);
         }
     }
     
@@ -381,4 +395,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Initial Load ---
     checkAuthAndInitialize();
 });
-
