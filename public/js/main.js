@@ -24,9 +24,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const appSections = document.querySelectorAll('.app-section');
     const progressionContent = document.getElementById('progression-content');
     const shopContent = document.getElementById('shop-content');
+    
+    // NEW: Preview Banner Elements
+    const previewBanner = document.getElementById('preview-banner');
+    const previewBannerText = document.getElementById('preview-banner-text');
+    const exitPreviewButton = document.getElementById('exit-preview-button');
+
 
     let state = {};
     let timerInterval;
+    let isPreviewing = false;
     
     // --- Ranks and Visuals ---
     const ranks = [
@@ -36,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: "Solar Drake", hours: 2160 }, { name: "Celestial Phoenix", hours: 4320 }
     ];
 
-    // FIX: Corrected flame color logic to use 'celestialFlames' upgrade.
     const flameColor = (upgrades) => upgrades.celestialFlames ? '#3B82F6' : '#F59E0B';
     const secondaryFlameColor = (upgrades) => upgrades.celestialFlames ? '#60A5FA' : '#DC2626';
     const celestialPrimaryColor = (upgrades) => upgrades.celestialFlames ? '#6D28D9' : '#9333EA';
@@ -51,6 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
         6: { name: 'Solar Drake', svg: (upgrades) => `<svg viewBox="0 0 200 200"><g class="phoenix-fire ${upgrades.aura ? 'phoenix-pulse' : ''}"><path fill="${flameColor(upgrades)}" d="M 98.5,10.2 C 54.4,21.5 35.2,69.5 54.7,109.1 C 65.5,131.2 92.2,143.4 116.8,138.3 C 141.4,133.2 161.4,113.1 166.5,88.5 C 172.5,59.8 153.3,-1.1 98.5,10.2 z"/><path fill="${secondaryFlameColor(upgrades)}" d="M 100,140 C 50,140 40,190 100,190 C 160,190 150,140 100,140 z"/></g></svg>` },
         7: { name: 'Celestial Phoenix', svg: (upgrades) => `<svg viewBox="0 0 200 200"><g class="phoenix-fire ${upgrades.aura ? 'phoenix-pulse' : ''}"><path fill="${celestialPrimaryColor(upgrades)}" d="M100 5C50 5 10 50 10 100c0 50 40 95 90 95s90-45 90-95C190 50 150 5 100 5zm0 170c-41.4 0-75-33.6-75-75S58.6 25 100 25s75 33.6 75 75-33.6 75-75 75z"/><path fill="${flameColor(upgrades)}" d="M100 60c-22.1 0-40 17.9-40 40s17.9 40 40 40 40-17.9 40-40-17.9-40-40-40z"/></g></svg>` }
     };
+    
+    const shopItems = [
+        { id: 'aura', name: 'Aura of Resolve', cost: 500, description: 'Adds a soft, glowing aura to your phoenix.' },
+        { id: 'celestialFlames', name: 'Celestial Flames', cost: 1200, description: 'Changes phoenix flames to a cool blue.' },
+    ];
 
     // --- Authentication & Initialization ---
     async function checkAuthAndInitialize() {
@@ -103,12 +114,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Core Logic & UI Updates ---
     function startTimer() {
         if (timerInterval) clearInterval(timerInterval);
-        // FIX: Changed state.startTime to state.lastRelapse to match the database.
         if (!state.lastRelapse) return;
 
         timerInterval = setInterval(() => {
             const now = Date.now();
-            // FIX: Changed state.startTime to state.lastRelapse.
             const start = new Date(state.lastRelapse).getTime();
             const diff = now - start;
 
@@ -125,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
             timerDisplay.textContent = `${String(days).padStart(2, '0')}:${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             
             const totalHours = diff / (1000 * 60 * 60);
-            // FIX: Updated coin calculation to match the backend logic.
             const streakCoins = calculateCoins(totalHours);
             state.coins = (state.coinsAtLastRelapse || 0) + streakCoins;
             coinCountDisplay.textContent = Math.floor(state.coins).toLocaleString();
@@ -138,11 +146,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateUI() {
-        // FIX: Simplified UI update logic to always show a running timer.
+        if (isPreviewing) return; // Don't update UI if a preview is active
+
         const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
         const currentRank = getRank(totalHours);
 
-        // Parse upgrades from JSON string if it's not already an object
         if (typeof state.upgrades === 'string') {
             try {
                 state.upgrades = JSON.parse(state.upgrades);
@@ -159,10 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
         coinCountDisplay.textContent = Math.floor(totalCoins).toLocaleString();
         
-        // Use longestStreak value directly from state object, which is in milliseconds
         longestStreakDisplay.textContent = formatStreak(state.longestStreak / 1000); 
 
-        // Ensure relapse button is always styled for relapse action
         relapseButton.textContent = 'I Relapsed';
         relapseButton.classList.remove('bg-green-600', 'hover:bg-green-700');
         relapseButton.classList.add('bg-red-700', 'hover:bg-red-800');
@@ -180,7 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return { ...ranks[0], level: 0 };
     }
 
-    // FIX: Replaced coin calculation with the one from the backend for consistency.
     function calculateCoins(totalHours) {
         if (totalHours <= 0) return 0;
         return Math.floor(10 * Math.pow(totalHours, 1.2));
@@ -203,11 +208,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Section Content Updaters ---
     function updateProgressionSection() {
-        // FIX: Changed state.startTime to state.lastRelapse.
         const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
         const currentRank = getRank(totalHours);
         const nextRank = ranks[currentRank.level + 1];
-        // FIX: Calculate current hourly rate based on a snapshot, though the actual gain is non-linear.
         const currentHourlyRate = Math.floor(10 * 1.2 * Math.pow(totalHours, 0.2));
         
         let rankListHtml = ranks.map((rank, index) => {
@@ -249,40 +252,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateShopSection() {
-        // FIX: Corrected item ID and cost to match backend logic.
-        const shopItems = [
-            { id: 'aura', name: 'Aura of Resolve', cost: 500, description: 'Adds a soft, glowing aura to your phoenix.' },
-            { id: 'celestialFlames', name: 'Celestial Flames', cost: 1200, description: 'Changes phoenix flames to a cool blue.' },
-        ];
-
         let itemsHtml = shopItems.map(item => {
             const isOwned = state.upgrades && state.upgrades[item.id];
+            // NEW: Added a preview button for unowned items
+            const actionButtons = isOwned ?
+                `<button class="text-sm font-bold py-2 px-4 rounded-lg bg-gray-500 cursor-not-allowed" disabled>Owned</button>` :
+                `<div class="flex gap-2">
+                    <button class="preview-button text-sm font-bold py-2 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-700" data-item-id="${item.id}" data-item-name="${item.name}">Preview</button>
+                    <button class="buy-button text-sm font-bold py-2 px-4 rounded-lg bg-purple-600 hover:bg-purple-700" data-item-id="${item.id}" data-item-cost="${item.cost}" data-item-name="${item.name}">${item.cost.toLocaleString()} Coins</button>
+                 </div>`;
+            
             return `
                 <div class="bg-gray-700 p-4 rounded-lg flex justify-between items-center">
                     <div>
                         <h4 class="font-semibold ${isOwned ? 'text-green-400' : 'text-white'}">${item.name} ${isOwned ? '(Owned)' : ''}</h4>
                         <p class="text-sm text-gray-400">${item.description}</p>
                     </div>
-                    <button 
-                        class="buy-button text-sm font-bold py-2 px-4 rounded-lg ${isOwned ? 'bg-gray-500 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'}"
-                        data-item-id="${item.id}"
-                        data-item-cost="${item.cost}"
-                        ${isOwned ? 'disabled' : ''}>
-                        ${isOwned ? 'Owned' : `${item.cost.toLocaleString()} Coins`}
-                    </button>
-                </div>
-            `;
+                    ${actionButtons}
+                </div>`;
         }).join('');
         
         shopContent.innerHTML = `
-            <h3 class="font-serif-display text-2xl mb-6 text-amber-400 text-center">Customize Your Phoenix</h3>
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-serif-display text-2xl text-amber-400">Customize Your Phoenix</h3>
+                <div class="flex items-center">
+                    <span class="text-sm text-gray-300 mr-3">Test Items</span>
+                    <label for="preview-toggle" class="flex items-center cursor-pointer">
+                        <div class="relative">
+                            <input type="checkbox" id="preview-toggle" class="sr-only">
+                            <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
+                            <div class="dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+                        </div>
+                    </label>
+                </div>
+            </div>
             <p class="text-gray-300 mb-4 text-center">Use your coins to purchase permanent cosmetic upgrades.</p>
             <div class="space-y-4">${itemsHtml}</div>
         `;
 
-        document.querySelectorAll('.buy-button').forEach(button => {
-            button.addEventListener('click', handleBuyItem);
-        });
+        document.querySelectorAll('.buy-button').forEach(button => button.addEventListener('click', handleBuyItem));
+        document.querySelectorAll('.preview-button').forEach(button => button.addEventListener('click', handlePreviewItem));
+        document.getElementById('preview-toggle').addEventListener('change', handlePreviewToggle);
     }
 
     // --- Event Handlers ---
@@ -296,7 +306,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     relapseButton.addEventListener('click', () => {
-        // FIX: Simplified modal to always show the relapse confirmation.
         const title = 'A New Beginning';
         const confirmText = 'Confirm';
         const message = 'Are you sure you want to log a relapse? This will reset your current streak timer.';
@@ -336,8 +345,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Failed to post relapse');
             state = await response.json();
             clearInterval(timerInterval);
-            // FIX: Use state.lastRelapse to restart the timer.
             if (state.lastRelapse) startTimer();
+            exitPreview(); // Exit preview mode on relapse
             updateUI();
             closeModal();
         } catch (error) {
@@ -345,34 +354,124 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // UPDATED: handleBuyItem now shows a confirmation modal with a preview.
     async function handleBuyItem(e) {
         const button = e.target;
         const itemId = button.dataset.itemId;
+        const itemName = button.dataset.itemName;
         const itemCost = parseInt(button.dataset.itemCost, 10);
-
+    
         if (state.coins < itemCost) {
             showModal('Transaction Failed', '<p>You do not have enough coins to purchase this item.</p>');
             return;
         }
-
-        try {
-            const response = await fetch('/api/buy', { 
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ itemId }),
-            });
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.message || 'Failed to buy item');
+    
+        const previewUpgrades = { ...state.upgrades, [itemId]: true };
+        const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
+        const currentRank = getRank(totalHours);
+        const previewPhoenixSVG = renderPhoenix(currentRank.level, previewUpgrades);
+    
+        const modalContent = `
+            <p class="text-gray-300 mb-4">Are you sure you want to purchase "${itemName}" for ${itemCost.toLocaleString()} coins?</p>
+            <div class="my-6 p-4 bg-gray-900 rounded-lg flex justify-center items-center">
+                <div class="w-32 h-32">${previewPhoenixSVG}</div>
+            </div>
+            <div class="flex justify-end gap-4">
+                <button id="cancel-purchase" class="bg-gray-600 hover:bg-gray-700 font-bold py-2 px-4 rounded-lg">Cancel</button>
+                <button id="confirm-purchase" class="bg-purple-600 hover:bg-purple-700 font-bold py-2 px-4 rounded-lg">Confirm Purchase</button>
+            </div>
+        `;
+        showModal(`Confirm Purchase`, modalContent, false);
+    
+        document.getElementById('cancel-purchase').onclick = closeModal;
+        document.getElementById('confirm-purchase').onclick = async () => {
+            try {
+                const response = await fetch('/api/buy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ itemId }),
+                });
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.message || 'Failed to buy item');
+                }
+                state = await response.json();
+                exitPreview(); // Exit any active preview
+                updateUI();
+                closeModal();
+            } catch (error) {
+                closeModal();
+                showModal('Purchase Error', `<p>${error.message}</p>`);
             }
-            state = await response.json();
-            updateUI();
-        } catch (error) {
-            console.error('Purchase error:', error);
-            showModal('Purchase Error', `<p>${error.message}</p>`);
-        }
+        };
     }
     
+    // --- NEW: Preview Mode Functions ---
+    let previewToggleState = false;
+    let activePreviewUpgrades = {};
+
+    function handlePreviewToggle(e) {
+        previewToggleState = e.target.checked;
+        if (!previewToggleState) {
+            exitPreview();
+            activePreviewUpgrades = {};
+        }
+        // Update button styles based on toggle state
+        const shopButtons = shopContent.querySelectorAll('.preview-button, .buy-button');
+        shopButtons.forEach(btn => {
+            if (previewToggleState) {
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+                if (btn.classList.contains('preview-button')) {
+                     btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            } else {
+                 btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        });
+    }
+
+    function handlePreviewItem(e) {
+        if (!previewToggleState) return;
+
+        const itemId = e.target.dataset.itemId;
+        const itemName = e.target.dataset.itemName;
+        
+        // Toggle the preview upgrade
+        if (activePreviewUpgrades[itemId]) {
+            delete activePreviewUpgrades[itemId];
+        } else {
+            activePreviewUpgrades[itemId] = true;
+        }
+
+        const tempUpgrades = { ...state.upgrades, ...activePreviewUpgrades };
+        
+        const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
+        const currentRank = getRank(totalHours);
+        phoenixDisplay.innerHTML = renderPhoenix(currentRank.level, tempUpgrades);
+        
+        const activePreviewNames = Object.keys(activePreviewUpgrades).map(id => shopItems.find(item => item.id === id).name).join(', ');
+
+        if (activePreviewNames) {
+            isPreviewing = true;
+            previewBannerText.textContent = `Previewing: ${activePreviewNames}`;
+            previewBanner.classList.remove('hidden');
+        } else {
+            exitPreview();
+        }
+    }
+
+    function exitPreview() {
+        isPreviewing = false;
+        activePreviewUpgrades = {};
+        previewBanner.classList.add('hidden');
+        // Restore the original phoenix
+        const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
+        const currentRank = getRank(totalHours);
+        phoenixDisplay.innerHTML = renderPhoenix(currentRank.level, state.upgrades);
+    }
+    
+    exitPreviewButton.addEventListener('click', exitPreview);
+
     // --- Modal ---
     function showModal(title, content, showClose = true) {
         let closeButtonHtml = showClose ? '<button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>' : '';
