@@ -6,10 +6,12 @@ body {
     font-family: 'Playfair Display', serif;
 }
 
-/* --- Background Themes --- */
-.bg-default { background-color: #111827; }
-.bg-volcanic-lair { background-image: linear-gradient(to top, #250909, #4b0a0a, #111827); }
-.bg-celestial-sky { background-image: linear-gradient(to top, #1e293b, #172554, #0c1445); }
+/* --- SVG Background --- */
+#background-container svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
 /* --- Navigation --- */
 .nav-button {
@@ -18,3 +20,4 @@ body {
 .nav-button.active {
     @apply bg-indigo-600 text-white shadow-lg;
 }
+

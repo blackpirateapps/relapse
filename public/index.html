@@ -6,14 +6,21 @@
     <title>Your Journey - Abstinence Phoenix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <!-- Link to the new page-specific JavaScript file as a module -->
     <script type="module" src="/js/journey.js" defer></script>
-    <!-- Link to the shared stylesheet -->
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="bg-default text-white">
+<body class="text-white">
+    <!-- SVG Background Container -->
+    <div id="background-container" class="fixed inset-0 -z-10"></div>
+
     <!-- This container is hidden until the app is initialized -->
     <div id="app-container" class="hidden min-h-screen flex flex-col p-4 sm:p-6">
+        <!-- Preview Banner -->
+        <div id="preview-banner" class="hidden w-full max-w-5xl mx-auto bg-indigo-600 p-3 rounded-lg text-center mb-6 shadow-lg flex justify-between items-center">
+            <span id="preview-banner-text" class="font-semibold"></span>
+            <button id="exit-preview-button" class="font-bold text-sm bg-indigo-800 hover:bg-indigo-900 px-3 py-1 rounded-md">Exit Preview</button>
+        </div>
+
         <!-- Header with Navigation -->
         <header class="w-full max-w-5xl mx-auto flex justify-between items-center mb-6">
             <h1 class="font-serif-display text-2xl text-amber-400">Abstinence Phoenix</h1>
@@ -23,48 +30,46 @@
                     <p id="coin-count" class="text-xl font-bold text-yellow-400">0</p>
                 </div>
                 <nav class="flex gap-2">
-                    <a href="/" class="nav-button active">Journey</a>
-                    <a href="/progression.html" class="nav-button">Progression</a>
-                    <a href="/shop.html" class="nav-button">Shop</a>
+                    <a href="#" data-section="journey" class="nav-button active">Journey</a>
+                    <a href="#" data-section="progression" class="nav-button">Progression</a>
+                    <a href="#" data-section="shop" class="nav-button">Shop</a>
                 </nav>
             </div>
         </header>
 
-        <!-- Main Content for the Journey Page -->
+        <!-- Main Content Sections -->
         <main class="flex-grow flex items-center justify-center">
-            <div class="w-full max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                <!-- Left Panel: Phoenix Display -->
+            <!-- Journey Section (Default View) -->
+            <div id="journey-section" class="app-section w-full max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                 <div class="bg-gray-800/50 backdrop-blur-sm p-8 rounded-2xl shadow-2xl flex flex-col items-center justify-center h-full">
-                    <div id="phoenix-display" class="w-48 h-48 mb-6 flex items-center justify-center">
-                        <!-- Phoenix SVG will be loaded here by JS -->
-                    </div>
-                    <h2 id="rank-name" class="font-serif-display text-3xl text-center text-amber-400">Loading...</h2>
+                    <div id="phoenix-display" class="w-48 h-48 mb-6 flex items-center justify-center"></div>
+                    <h2 id="rank-name" class="font-serif-display text-3xl text-center text-amber-400"></h2>
                     <p class="text-gray-400 text-center">Your symbol of progress.</p>
                 </div>
-
-                <!-- Right Panel: Controls & Stats -->
                 <div class="space-y-6">
                     <div class="bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-2xl">
                         <h3 class="font-serif-display text-2xl mb-4 text-center">Current Streak</h3>
                         <div id="timer" class="text-4xl font-mono text-center text-green-400 tracking-wider">00:00:00:00</div>
                         <div class="text-center text-gray-400 mt-2">Days : Hours : Mins : Secs</div>
                     </div>
-                    
                     <div class="bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-2xl text-center">
                         <h4 class="text-gray-400 text-sm">Longest Streak</h4>
                         <p id="longest-streak" class="text-2xl font-bold">0d 0h</p>
                     </div>
-
                     <div class="grid grid-cols-2 gap-4">
                         <button id="urge-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold p-4 rounded-lg transition-all duration-300 shadow-lg">I Feel An Urge</button>
                         <button id="relapse-button" class="bg-red-700 hover:bg-red-800 text-white font-bold p-4 rounded-lg transition-all duration-300 shadow-lg">I Relapsed</button>
                     </div>
                 </div>
             </div>
+            <!-- Progression Section -->
+            <div id="progression-section" class="app-section hidden w-full"></div>
+            <!-- Shop Section -->
+            <div id="shop-section" class="app-section hidden w-full max-w-5xl mx-auto"></div>
         </main>
     </div>
     
-    <!-- Login Screen (Initially visible, hidden by JS after auth check) -->
+    <!-- Login, Loading, and Modal Screens -->
     <div id="login-screen" class="min-h-screen flex items-center justify-center">
         <div class="w-full max-w-sm">
              <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl text-center">
@@ -76,24 +81,16 @@
             </div>
         </div>
     </div>
-    
-    <!-- Loading Spinner (Shown by JS during auth check) -->
     <div id="loading-spinner" class="min-h-screen flex items-center justify-center hidden">
-        <div class="w-full max-w-sm text-center">
-             <svg class="animate-spin h-10 w-10 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-        </div>
+         <svg class="animate-spin h-10 w-10 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
     </div>
-    
-    <!-- Modal Container -->
     <div id="modal-container" class="fixed inset-0 z-50 overflow-y-auto hidden">
       <div class="flex items-center justify-center min-h-screen p-4 text-center">
           <div id="modal-bg" class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" style="backdrop-filter: blur(5px);"></div>
-          <div id="modal-content" class="inline-block bg-gray-800/80 backdrop-blur-sm rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full p-8" style="animation: slide-up 0.3s ease-out;">
-             <!-- Modal content will be injected here by JS -->
-          </div>
+          <div id="modal-content" class="inline-block bg-gray-800/80 backdrop-blur-sm rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full p-8"></div>
       </div>
     </div>
 </body>
