@@ -1,21 +1,21 @@
 // --- DATA ---
 export const ranks = [
-    { name: "Ashen Egg I", id: "egg-1", hours: 0, storyline: "A silent promise, dormant and resilient.", reward: 0, color: '#94a3b8' },
-    { name: "Ashen Egg II", id: "egg-2", hours: 6, storyline: "A faint warmth begins to emanate from within.", reward: 50, color: '#a1a1aa' },
-    { name: "Ashen Egg III", id: "egg-3", hours: 12, storyline: "Small cracks appear, signs of life stirring inside.", reward: 100, color: '#d4d4d8' },
-    { name: "Fledgling Hatchling", id: "hatchling-1", hours: 24, storyline: "The shell cracks. A new life, fragile yet determined.", reward: 250, color: '#f87171' },
-    { name: "Ember Glance", id: "hatchling-2", hours: 36, storyline: "Its eyes, like tiny embers, begin to focus.", reward: 150, color: '#fb923c' },
-    { name: "First Steps", id: "hatchling-3", hours: 48, storyline: "Wobbly but resolute, it takes its first steps.", reward: 200, color: '#fbbf24' },
-    { name: "Ember Chick", id: "chick-1", hours: 72, storyline: "Small embers begin to glow in its downy feathers.", reward: 500, color: '#facc15' },
-    { name: "Warmth of Will", id: "chick-2", hours: 120, storyline: "The chick learns to control its inner warmth.", reward: 300, color: '#a3e635' },
-    { name: "Flame Youngling", id: "youngling-1", hours: 168, storyline: "The fire is now a steady, growing flame.", reward: 1000, color: '#4ade80' },
-    { name: "Spark of Defiance", id: "youngling-2", hours: 240, storyline: "It actively extinguishes small temptations.", reward: 750, color: '#34d399' },
-    { name: "Sunfire Phoenix", id: "sunfire-1", hours: 336, storyline: "Radiating a brilliant heat, a beacon of willpower.", reward: 2000, color: '#2dd4bf' },
-    { name: "Blinding Light", id: "sunfire-2", hours: 500, storyline: "Its light pushes back the shadows of doubt.", reward: 1500, color: '#67e8f9' },
-    { name: "Blaze Guardian", id: "guardian-1", hours: 720, storyline: "No longer just a creature, but a guardian of its flame.", reward: 4000, color: '#a78bfa' },
-    { name: "Vigilant Stance", id: "guardian-2", hours: 1440, storyline: "A fortress of resolve against old habits.", reward: 3000, color: '#c084fc' },
-    { name: "Solar Drake", id: "drake", hours: 2160, storyline: "Its power rivals that of a small star.", reward: 8000, color: '#f472b6' },
-    { name: "Celestial Phoenix", id: "celestial-phoenix", hours: 4320, storyline: "A cosmic force of pure, transcendent will.", reward: 15000, color: '#f9a8d4' }
+    { name: "Ashen Egg I", id: "egg-1", hours: 0, storyline: "A silent promise, dormant and resilient.", reward: 0, color: '#94a3b8', image: '/img/egg-1.webp' },
+    { name: "Ashen Egg II", id: "egg-2", hours: 6, storyline: "A faint warmth begins to emanate from within.", reward: 50, color: '#a1a1aa', image: '/img/egg-2.webp' },
+    { name: "Ashen Egg III", id: "egg-3", hours: 12, storyline: "Small cracks appear, signs of life stirring inside.", reward: 100, color: '#d4d4d8', image: '/img/egg-3.webp' },
+    { name: "Fledgling Hatchling", id: "hatchling-1", hours: 24, storyline: "The shell cracks. A new life, fragile yet determined.", reward: 250, color: '#f87171', image: '/img/hatchling-1.webp' },
+    { name: "Ember Glance", id: "hatchling-2", hours: 36, storyline: "Its eyes, like tiny embers, begin to focus.", reward: 150, color: '#fb923c', image: '/img/hatchling-2.webp' },
+    { name: "First Steps", id: "hatchling-3", hours: 48, storyline: "Wobbly but resolute, it takes its first steps.", reward: 200, color: '#fbbf24', image: '/img/hatchling-3.webp' },
+    { name: "Ember Chick", id: "chick-1", hours: 72, storyline: "Small embers begin to glow in its downy feathers.", reward: 500, color: '#facc15', image: '/img/chick-1.webp' },
+    { name: "Warmth of Will", id: "chick-2", hours: 120, storyline: "The chick learns to control its inner warmth.", reward: 300, color: '#a3e635', image: '/img/chick-2.webp' },
+    { name: "Flame Youngling", id: "youngling-1", hours: 168, storyline: "The fire is now a steady, growing flame.", reward: 1000, color: '#4ade80', image: '/img/youngling-1.webp' },
+    { name: "Spark of Defiance", id: "youngling-2", hours: 240, storyline: "It actively extinguishes small temptations.", reward: 750, color: '#34d399', image: '/img/youngling-2.webp' },
+    { name: "Sunfire Phoenix", id: "sunfire-1", hours: 336, storyline: "Radiating a brilliant heat, a beacon of willpower.", reward: 2000, color: '#2dd4bf', image: '/img/sunfire-1.webp' },
+    { name: "Blinding Light", id: "sunfire-2", hours: 500, storyline: "Its light pushes back the shadows of doubt.", reward: 1500, color: '#67e8f9', image: '/img/sunfire-2.webp' },
+    { name: "Blaze Guardian", id: "guardian-1", hours: 720, storyline: "No longer just a creature, but a guardian of its flame.", reward: 4000, color: '#a78bfa', image: '/img/guardian-1.webp' },
+    { name: "Vigilant Stance", id: "guardian-2", hours: 1440, storyline: "A fortress of resolve against old habits.", reward: 3000, color: '#c084fc', image: '/img/guardian-2.webp' },
+    { name: "Solar Drake", id: "drake", hours: 2160, storyline: "Its power rivals that of a small star.", reward: 8000, color: '#f472b6', image: '/img/drake.webp' },
+    { name: "Celestial Phoenix", id: "celestial-phoenix", hours: 4320, storyline: "A cosmic force of pure, transcendent will.", reward: 15000, color: '#f9a8d4', image: '/img/celestial-phoenix.webp' }
 ];
 
 export const shopItems = [
@@ -132,25 +132,8 @@ export function getRank(totalHours) {
 export function renderPhoenix(level, upgrades = {}) {
     const rank = ranks[level];
     if (!rank) return '';
-    const size = 256;
-    const center = size / 2;
-    const baseRadius = 20 + level * 3;
-    const numFlames = 3 + Math.floor(level / 2);
-    const flameLength = 40 + level * 4;
-    const color = upgrades.celestialFlames ? '#67e8f9' : rank.color;
-
-    let flamesSVG = '';
-    for (let i = 0; i < numFlames; i++) {
-        const angle = (360 / numFlames) * i;
-        flamesSVG += `<path d="M${center},${center - baseRadius} Q${center + 20},${center - baseRadius - flameLength / 2} ${center},${center - baseRadius - flameLength} Q${center - 20},${center - baseRadius - flameLength / 2} ${center},${center - baseRadius}" fill="${color}" fill-opacity="0.7" transform="rotate(${angle} ${center} ${center})"><animateTransform attributeName="transform" type="rotate" from="${angle} ${center} ${center}" to="${angle+5} ${center} ${center}" dur="3s" repeatCount="indefinite" /></path>`;
-    }
-
-    let auraSVG = '';
-    if (upgrades.aura) {
-        auraSVG = `<circle cx="${center}" cy="${center}" r="${baseRadius + flameLength / 2}" fill="${color}" fill-opacity="0.15"><animate attributeName="r" from="${baseRadius + flameLength / 2}" to="${baseRadius + flameLength / 2 + 10}" dur="2s" begin="0s" repeatCount="indefinite" /><animate attributeName="opacity" from="0.15" to="0" dur="2s" begin="0s" repeatCount="indefinite" /></circle>`;
-    }
-
-    return `<svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg"><defs><filter id="glow"><feGaussianBlur stdDeviation="3.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>${auraSVG}<g style="filter: url(#glow);">${flamesSVG}<circle cx="${center}" cy="${center}" r="${baseRadius}" fill="${color}" /></g></svg>`;
+    // Now renders an img tag with the webp path from the ranks data
+    return `<img src="${rank.image}" alt="${rank.name}" class="w-full h-full object-contain">`;
 }
 
 export function showModal(title, content, options = {}) {
@@ -209,3 +192,4 @@ export function initStarfield() {
     }
     tick();
 }
+
