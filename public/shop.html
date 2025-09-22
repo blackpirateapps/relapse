@@ -1,46 +1,73 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop - Abstinence Phoenix</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <script type="module" src="/js/shop.js" defer></script>
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        :root {
+            --glow-color: #fde047;
+            --background-start: #0f0c29;
+            --background-mid: #302b63;
+            --background-end: #24243e;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: linear-gradient(135deg, var(--background-start), var(--background-mid), var(--background-end));
+            overflow-x: hidden;
+            color: #d1d5db;
+        }
+        .font-serif-display { font-family: 'Playfair Display', serif; }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+        .sidebar { transition: transform 0.3s ease-in-out; }
+        .sidebar-nav-item { position: relative; transition: all 0.3s ease; }
+        .sidebar-nav-item:hover, .sidebar-nav-item.active { color: white; background: rgba(255, 255, 255, 0.1); }
+        .sidebar-nav-item.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); height: 75%; width: 4px; background-color: var(--glow-color); border-radius: 0 4px 4px 0; }
+        #starfield { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; }
+    </style>
 </head>
-<body class="bg-default text-white">
-    <div id="background-container" class="fixed inset-0 -z-10"></div>
-    <div id="app-container" class="hidden min-h-screen flex flex-col p-4 sm:p-6">
-        <!-- Header -->
-        <header id="app-header" class="w-full max-w-5xl mx-auto flex justify-between items-center mb-6">
-            <h1 class="font-serif-display text-2xl text-amber-400">The Shop</h1>
-            <div class="flex items-center gap-4">
-                <div class="text-right">
-                    <h4 class="text-sm text-gray-400">Coins</h4>
-                    <p id="coin-count" class="text-xl font-bold text-yellow-400">0</p>
-                </div>
-                <nav class="flex gap-2">
-                    <a href="/" class="nav-button">Journey</a>
-                    <a href="/progression.html" class="nav-button">Progression</a>
-                       <a href="/aviary.html" class="nav-button">Aviary</a>
-                    <a href="/shop.html" class="nav-button active">Shop</a>
-                </nav>
-            </div>
-        </header>
 
-        <!-- Main Content -->
-        <main id="shop-container" class="w-full max-w-5xl mx-auto">
-            <!-- Shop items will be injected here by shop.js -->
-        </main>
+<body>
+    <canvas id="starfield"></canvas>
+    <div id="loading-spinner" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900">
+        <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
     </div>
-    <div id="loading-spinner" class="min-h-screen flex items-center justify-center">
-        <svg class="animate-spin h-10 w-10 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
+
+    <div id="app-container" class="hidden relative min-h-screen md:flex">
+        <!-- Sidebar will be injected by shared.js -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 overflow-y-auto h-screen">
+            <!-- Header -->
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 id="header-title" class="text-3xl font-bold text-white">The Shop</h1>
+                    <p id="header-subtitle" class="text-gray-400">Acquire new cosmetics and themes.</p>
+                </div>
+                <div class="card p-3 px-5 text-right">
+                    <p class="text-xs text-yellow-300 uppercase tracking-wider">Coins</p>
+                    <p id="coin-count" class="text-2xl font-bold text-white">0</p>
+                </div>
+            </header>
+
+            <!-- Shop Section -->
+            <section id="shop">
+                <div id="shop-container">
+                    <!-- Shop items will be injected here by shop.js -->
+                </div>
+            </section>
+        </main>
     </div>
     <div id="modal-container" class="fixed inset-0 z-50 overflow-y-auto hidden"></div>
 </body>
 </html>
-

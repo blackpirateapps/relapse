@@ -5,34 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Progression - Abstinence Phoenix</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <script type="module" src="/js/progression.js" defer></script>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        :root {
+            --glow-color: #fde047;
+            --background-start: #0f0c29;
+            --background-mid: #302b63;
+            --background-end: #24243e;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: linear-gradient(135deg, var(--background-start), var(--background-mid), var(--background-end));
+            overflow-x: hidden;
+            color: #d1d5db;
+        }
+        .font-serif-display { font-family: 'Playfair Display', serif; }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+        .sidebar { transition: transform 0.3s ease-in-out; }
+        .sidebar-nav-item { position: relative; transition: all 0.3s ease; }
+        .sidebar-nav-item:hover, .sidebar-nav-item.active { color: white; background: rgba(255, 255, 255, 0.1); }
+        .sidebar-nav-item.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); height: 75%; width: 4px; background-color: var(--glow-color); border-radius: 0 4px 4px 0; }
+        #starfield { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; }
+    </style>
 </head>
-<body class="bg-default">
-    <div id="loading-spinner" class="fixed inset-0 flex items-center justify-center bg-gray-900 z-50">
-        <!-- Spinner SVG -->
-        <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
+
+<body>
+    <canvas id="starfield"></canvas>
+    <div id="loading-spinner" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900">
+        <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
     </div>
 
-    <!-- The header and footer will be dynamically inserted here by shared.js -->
-    <div id="app-container" class="app-wrapper hidden">
-        <main class="flex flex-col flex-grow mt-6">
-            <section id="progress-summary" class="bg-gray-800/50 backdrop-blur-sm p-4 md:p-6 rounded-2xl shadow-lg mb-6 flex-shrink-0">
-                <!-- Summary content is injected by progression.js -->
-            </section>
-            
-            <!-- Horizontal Scroller Wrapper -->
-            <div id="progression-scroller" class="flex-grow min-h-0">
-                 <div id="progression-container">
-                    <!-- Progression cards are injected by progression.js -->
+    <div id="app-container" class="hidden relative min-h-screen md:flex">
+        <!-- Sidebar will be injected by shared.js -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10 overflow-y-auto h-screen">
+             <!-- Header -->
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 id="header-title" class="text-3xl font-bold text-white">Progression</h1>
+                    <p id="header-subtitle" class="text-gray-400">Witness the path of your evolution.</p>
                 </div>
-            </div>
+                <div class="card p-3 px-5 text-right">
+                    <p class="text-xs text-yellow-300 uppercase tracking-wider">Coins</p>
+                    <p id="coin-count" class="text-2xl font-bold text-white">0</p>
+                </div>
+            </header>
+            
+            <!-- Progression Section -->
+            <section id="progression">
+                <div id="progression-timeline" class="relative border-l-2 border-gray-700 ml-6">
+                    <!-- Timeline items will be injected here by progression.js -->
+                </div>
+            </section>
         </main>
     </div>
-
+    <div id="modal-container" class="fixed inset-0 z-50 overflow-y-auto hidden"></div>
 </body>
 </html>
-

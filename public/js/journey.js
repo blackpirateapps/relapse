@@ -1,4 +1,4 @@
-import { initializeApp, getState, getRank, renderPhoenix, calculateCoins, showModal, closeModal, updateCoinCount } from './shared.js';
+import { initializeApp, getRank, renderPhoenix, showModal, closeModal, updateCoinCount } from './shared.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     let state = {};
@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const elements = {
         timer: document.getElementById('timer'),
         rankName: document.getElementById('rank-name'),
+        rankStory: document.getElementById('rank-story'),
         phoenixDisplay: document.getElementById('phoenix-display'),
         longestStreak: document.getElementById('longest-streak'),
         urgeButton: document.getElementById('urge-button'),
@@ -26,7 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
         const currentRank = getRank(totalHours);
         elements.rankName.textContent = currentRank.name;
-        elements.phoenixDisplay.innerHTML = renderPhoenix(currentRank.level, state.upgrades);
+        elements.rankStory.textContent = currentRank.storyline;
+        elements.phoenixDisplay.innerHTML = renderPhoenix(currentRank.level, state.equipped_upgrades);
         elements.longestStreak.textContent = formatStreak(state.longestStreak / 1000);
     }
 
@@ -44,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const seconds = Math.floor((diff % (1000 * 60)) / 1000);
             elements.timer.textContent = `${String(days).padStart(2, '0')}:${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             
-            updateCoinCount(); // Update coins for the header
+            updateCoinCount();
         }, 1000);
     }
 
@@ -80,12 +82,12 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.urgeButton.addEventListener('click', () => {
         const tasks = ["Do 10 push-ups.", "Step outside for 5 minutes.", "Drink a full glass of cold water."];
         const randomTask = tasks[Math.floor(Math.random() * tasks.length)];
-        showModal('A Moment of Strength', `<p class="text-gray-300">${randomTask}</p>`);
+        showModal('A Moment of Strength', `<p>${randomTask}</p>`);
     });
 
     elements.relapseButton.addEventListener('click', () => {
-        showModal('A New Beginning', `
-            <p class="text-gray-300 mb-6">Are you sure? This will reset your current streak.</p>
+        showModal('Confirm Relapse', `
+            <p class="mb-6">Are you sure? This will reset your streak and archive your current phoenix.</p>
             <div class="flex justify-end gap-4">
                 <button id="cancel-relapse" class="bg-gray-600 hover:bg-gray-700 font-bold py-2 px-4 rounded-lg">Cancel</button>
                 <button id="confirm-relapse" class="bg-red-700 hover:bg-red-800 font-bold py-2 px-4 rounded-lg">Confirm</button>
@@ -98,4 +100,3 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('cancel-relapse').onclick = closeModal;
     });
 });
-
