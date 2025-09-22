@@ -56,12 +56,9 @@ export async function initializeApp(callback) {
         const response = await fetch('/api/state');
         if (response.ok) {
             state = await response.json();
-            if (typeof state.upgrades === 'string') {
-                state.upgrades = JSON.parse(state.upgrades || '{}');
-            }
-            if (typeof state.equipped_upgrades === 'string') {
-                state.equipped_upgrades = JSON.parse(state.equipped_upgrades || '{}');
-            }
+            if (typeof state.upgrades === 'string') state.upgrades = JSON.parse(state.upgrades || '{}');
+            if (typeof state.equipped_upgrades === 'string') state.equipped_upgrades = JSON.parse(state.equipped_upgrades || '{}');
+            
             if(appContainer) appContainer.classList.remove('hidden');
             if(loadingSpinner) loadingSpinner.classList.add('hidden');
             
@@ -92,17 +89,25 @@ export function getState() {
 export async function applyBackground(upgrades, container = document.getElementById('background-container')) {
     if (!container) return;
 
-    let theme = 'default';
+    let theme = null;
     if (upgrades?.celestialSky) theme = 'celestial-sky';
     else if (upgrades?.volcanicLair) theme = 'volcanic-lair';
 
-    try {
-        const response = await fetch(`/img/bg-${theme}.svg`);
-        if (!response.ok) throw new Error('Background not found');
-        container.innerHTML = await response.text();
-    } catch (error) {
-        console.error("Failed to load background:", error);
-        container.innerHTML = '<div class="w-full h-full bg-gray-900"></div>';
+    if (theme) {
+        try {
+            const response = await fetch(`/img/bg-${theme}.svg`);
+            if (!response.ok) throw new Error('Background not found');
+            container.innerHTML = await response.text();
+            container.style.opacity = 1;
+        } catch (error) {
+            console.error("Failed to load background:", error);
+            container.innerHTML = '';
+            container.style.opacity = 0;
+        }
+    } else {
+        // No theme equipped, clear the SVG container to reveal the CSS background
+        container.innerHTML = '';
+        container.style.opacity = 0;
     }
 }
 
@@ -121,7 +126,7 @@ export function updateCoinCount() {
     const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
     const streakCoins = calculateCoins(totalHours);
     const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
-    state.coins = totalCoins; // Keep state updated
+    state.coins = totalCoins;
     coinCountDisplay.textContent = Math.floor(totalCoins).toLocaleString();
 }
 
