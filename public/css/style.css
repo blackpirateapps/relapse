@@ -1,26 +1,170 @@
+/* --- BASE & FONTS --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
+html {
+    height: 100%;
+}
+
 body {
     font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    color: #fff;
+    transition: background-image 0.5s ease-in-out;
 }
 
 .font-serif-display {
     font-family: 'Playfair Display', serif;
 }
 
-/* --- SVG Background --- */
-#background-container svg {
+
+/* --- BACKGROUND THEMES --- */
+.bg-default { background-color: #111827; }
+.bg-volcanic-lair { background-image: linear-gradient(to top, #1f2937, #4b0a0a, #111827); }
+.bg-celestial-sky { background-image: linear-gradient(to top, #1f2937, #222e8f, #0c1445); }
+
+
+/* --- LAYOUT & CONTAINERS --- */
+.app-wrapper {
+    display: flex;
+    flex-direction: column;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-.bg-default, .bg-volcanic-lair, .bg-celestial-sky {
-    background-color: #111827; /* Fallback color */
+    max-width: 64rem; /* 1024px */
+    margin: auto;
+    padding: 1.5rem; /* 24px */
+    flex-grow: 1;
 }
 
-/* --- Navigation --- */
-.nav-button {
-    @apply bg-gray-700/50 hover:bg-gray-600/50 font-bold py-2 px-4 rounded-lg transition-all duration-300;
+main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Allows content to scroll if needed */
 }
+
+
+/* --- HEADER & NAVIGATION --- */
+header {
+    transition: all 0.3s ease-in-out;
+}
+
+.nav-button {
+    padding: 0.5rem 1.25rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+    background-color: transparent;
+    border: 2px solid transparent;
+}
+
+.nav-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
 .nav-button.active {
-    @apply bg-indigo-600 text-white shadow-lg;
+    background-color: #4f46e5;
+    color: white;
+    border-color: #818cf8;
+}
+
+/* CELESTIAL NAVIGATION THEME */
+header.celestial-nav {
+    background: linear-gradient(to right, #1e3a8a, #4c1d95);
+    border: 1px solid #4f46e5;
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.5);
+}
+
+header.celestial-nav .nav-button:hover {
+    background-color: #4f46e5;
+}
+
+header.celestial-nav .nav-button.active {
+    background-color: #a5b4fc;
+    color: #1e3a8a;
+    border-color: #6366f1;
+}
+
+
+/* --- LOGIN & LOADING --- */
+.login-container {
+    max-width: 24rem; /* 384px */
+    margin: auto;
+}
+
+
+/* --- JOURNEY PAGE --- */
+.phoenix-container {
+    width: 18rem; /* 288px */
+    height: 18rem; /* 288px */
+}
+
+.stat-card {
+    background-color: rgba(17, 24, 39, 0.5);
+    backdrop-filter: blur(8px);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+
+/* --- PROGRESSION PAGE --- */
+#progression-container {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+}
+
+#progression-container > div {
+    scroll-snap-align: center;
+    flex-shrink: 0;
+    width: 100%;
+}
+
+
+/* --- SHOP & AVIARY PAGES --- */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+/* --- MODALS & PREVIEW --- */
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    overflow-y: auto;
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    animation: slide-up 0.3s ease-out;
+}
+
+.preview-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background-color: rgba(17, 24, 39, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 

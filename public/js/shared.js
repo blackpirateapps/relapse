@@ -38,6 +38,7 @@ export const shopItems = [
     { id: 'celestialFlames', name: 'Celestial Flames', cost: 1200, description: 'Changes phoenix visuals to a cool blue.', type: 'cosmetic', image: '/img/celestial.svg' },
     { id: 'volcanicLair', name: 'Volcanic Lair', cost: 10000, description: 'A dark, fiery background theme.', type: 'theme', image: '/img/bg-volcanic-lair.svg' },
     { id: 'celestialSky', name: 'Celestial Sky', cost: 50000, description: 'A beautiful, star-filled background theme.', type: 'theme', image: '/img/bg-celestial-sky.svg' },
+    { id: 'navStyle', name: 'Celestial Navigation', cost: 500, description: 'Applies a stylish cosmic theme to the main menu.', type: 'theme', image: '/img/nav-style.svg'}
 ];
 
 // --- CORE FUNCTIONS ---
@@ -63,6 +64,7 @@ export async function initializeApp(callback) {
             
             updateCoinCount();
             await applyBackground(state.upgrades);
+            applyNavStyle(state.upgrades); // Apply the nav style on load
             if (callback) callback(state);
         } else {
              if(loadingSpinner) loadingSpinner.classList.add('hidden');
@@ -99,6 +101,16 @@ export async function applyBackground(upgrades) {
     } catch (error) {
         console.error("Failed to load background:", error);
         backgroundContainer.innerHTML = '<div class="w-full h-full bg-gray-900"></div>';
+    }
+}
+
+// NEW function to apply the navigation style
+export function applyNavStyle(upgrades) {
+    const header = document.getElementById('app-header');
+    if (header && upgrades?.navStyle) {
+        header.classList.add('celestial-nav');
+    } else if (header) {
+        header.classList.remove('celestial-nav');
     }
 }
 

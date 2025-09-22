@@ -8,7 +8,6 @@ const client = createClient({
 // Function to initialize and migrate the database schema
 export async function initDb() {
     // --- Schema Creation ---
-    // Create the main user state table if it doesn't exist
     await client.execute(`
         CREATE TABLE IF NOT EXISTS user_state (
             id INTEGER PRIMARY KEY,
@@ -19,8 +18,6 @@ export async function initDb() {
             upgrades TEXT NOT NULL
         );
     `);
-
-    // Create the history table for the Aviary if it doesn't exist
     await client.execute(`
         CREATE TABLE IF NOT EXISTS phoenix_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,27 +32,19 @@ export async function initDb() {
     `);
 
     // --- Schema Migration ---
-    // This section safely adds new columns to existing tables without errors.
     try {
-        // Add the 'lastClaimedLevel' column to user_state if it's missing.
         await client.execute(`
             ALTER TABLE user_state ADD COLUMN lastClaimedLevel INTEGER NOT NULL DEFAULT 0;
         `);
-        console.log("Successfully migrated user_state table: added lastClaimedLevel column.");
     } catch (e) {
-        // This will likely throw an error if the column already exists, which is safe to ignore.
-        if (e.message.includes("duplicate column name")) {
-             // Column already exists, which is fine.
-        } else {
-            console.error("Error migrating user_state table:", e);
+        if (!e.message.includes("duplicate column name")) {
+             console.error("Error migrating user_state table:", e);
         }
     }
     
     // --- Initial Data ---
-    // Check if the single user row exists
     const { rows } = await client.execute("SELECT id FROM user_state WHERE id = 1;");
     if (rows.length === 0) {
-        // Insert the initial state with the new column included
         await client.execute({
             sql: "INSERT INTO user_state (id, lastRelapse, longestStreak, relapseCount, coinsAtLastRelapse, upgrades, lastClaimedLevel) VALUES (?, ?, ?, ?, ?, ?, ?);",
             args: [
@@ -68,9 +57,10 @@ export async function initDb() {
                     aura: false, 
                     celestialFlames: false,
                     volcanicLair: false,
-                    celestialSky: false 
+                    celestialSky: false,
+                    navStyle: false // Add this line
                 }),
-                0 // Start at level 0
+                0
             ],
         });
     }
