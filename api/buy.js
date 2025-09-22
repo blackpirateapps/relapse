@@ -1,13 +1,13 @@
 import db from './db.js';
 import { checkAuth } from './auth.js';
-import { ranks } from './ranks.js'; // Assuming ranks are in a shared file
+import { ranks } from './ranks.js'; // Correctly import from the new file
 
 const shopItems = [
     { id: 'aura', cost: 500 },
     { id: 'celestialFlames', cost: 1200 },
     { id: 'volcanicLair', cost: 10000 },
     { id: 'celestialSky', cost: 50000 },
-    { id: 'navStyle', cost: 500 } // Add this line
+    { id: 'navStyle', cost: 500 }
 ];
 
 export default async function handler(req, res) {
@@ -29,7 +29,7 @@ export default async function handler(req, res) {
         const streakMs = Date.now() - new Date(state.lastRelapse).getTime();
         const totalHours = streakMs / (1000 * 60 * 60);
         
-        // Calculate total coins (streak coins + level rewards)
+        // Calculate total coins (streak coins + level rewards that might not be claimed yet)
         const currentRank = ranks.slice().reverse().find(r => totalHours >= r.hours);
         const lastClaimedRankLevel = state.lastClaimedLevel || 0;
         let levelUpReward = 0;
@@ -43,16 +43,13 @@ export default async function handler(req, res) {
         const totalCoins = state.coinsAtLastRelapse + streakCoins + levelUpReward;
 
         if (totalCoins >= item.cost && !upgrades[itemId]) {
-            const newCoinBalance = totalCoins - item.cost;
+            // "Bank" all current coins and rewards before making the purchase
+            const finalCoinBalance = totalCoins - item.cost;
             upgrades[itemId] = true;
 
-            const newLastRelapse = new Date().toISOString();
-            
-            // On purchase, we "bank" the current streak coins and reset the timer from now
-            // This prevents issues with coin calculation after purchase
             await db.execute({
-                sql: "UPDATE user_state SET lastRelapse = ?, coinsAtLastRelapse = ?, upgrades = ? WHERE id = 1;",
-                args: [newLastRelapse, newCoinBalance, JSON.stringify(upgrades)]
+                sql: "UPDATE user_state SET coinsAtLastRelapse = ?, upgrades = ?, lastClaimedLevel = ? WHERE id = 1;",
+                args: [finalCoinBalance, JSON.stringify(upgrades), currentRank.level]
             });
             
             const { rows: updatedRows } = await db.execute("SELECT * FROM user_state WHERE id = 1;");

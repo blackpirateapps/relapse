@@ -1,17 +1,6 @@
 import db, { initDb } from './db.js';
 import { checkAuth } from './auth.js';
-
-// Ranks data is needed on the server to calculate rewards
-const ranks = [
-    { name: "Ashen Egg I", id: "egg", hours: 0, reward: 0 }, { name: "Ashen Egg II", id: "egg", hours: 6, reward: 50 }, { name: "Ashen Egg III", id: "egg", hours: 12, reward: 100 },
-    { name: "Fledgling Hatchling", id: "hatchling", hours: 24, reward: 250 }, { name: "Ember Glance", id: "hatchling", hours: 36, reward: 150 }, { name: "First Steps", id: "hatchling", hours: 48, reward: 200 },
-    { name: "Ember Chick", id: "chick", hours: 72, reward: 500 }, { name: "Warmth of Will", id: "chick", hours: 120, reward: 300 },
-    { name: "Flame Youngling", id: "youngling", hours: 168, reward: 1000 }, { name: "Spark of Defiance", id: "youngling", hours: 240, reward: 750 },
-    { name: "Sunfire Phoenix", id: "sunfire", hours: 336, reward: 2000 }, { name: "Blinding Light", id: "sunfire", hours: 500, reward: 1500 },
-    { name: "Blaze Guardian", id: "guardian", hours: 720, reward: 4000 }, { name: "Vigilant Stance", id: "guardian", hours: 1440, reward: 3000 },
-    { name: "Solar Drake", id: "drake", hours: 2160, reward: 8000 },
-    { name: "Celestial Phoenix", id: "celestial-phoenix", hours: 4320, reward: 15000 }
-];
+import { ranks } from './ranks.js'; // Import from the new shared file
 
 function getRank(totalHours) {
     for (let i = ranks.length - 1; i >= 0; i--) {
@@ -67,3 +56,4 @@ export default async function handler(req, res) {
         res.status(500).json({ message: 'Failed to fetch state from database.' });
     }
 }
+
