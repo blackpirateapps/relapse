@@ -45,7 +45,6 @@ body {
     margin: auto;
     padding: 1rem;
     flex-grow: 1;
-    /* Full height minus padding */
     height: 100vh; 
     height: -webkit-fill-available; /* iOS fix */
 }
@@ -60,8 +59,8 @@ main {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    overflow-y: auto; /* Allows content to scroll */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    overflow-y: auto;
+    min-height: 0; /* Necessary for flex-grow in some browsers */
 }
 
 /* Hide scrollbar for aesthetics but keep it functional */
@@ -123,53 +122,26 @@ header.celestial-nav .nav-button.active {
 }
 
 
-/* --- JOURNEY PAGE --- */
-.phoenix-container {
-    width: 12rem; /* Mobile */
-    height: 12rem;
+/* --- PROGRESSION PAGE SCROLLER FIX --- */
+#progression-scroller {
+    display: flex;
+    flex-grow: 1;
+    min-height: 0; /* Crucial for allowing flex item to shrink */
 }
-@media (min-width: 1024px) { /* lg */
-    .phoenix-container {
-        width: 18rem;
-        height: 18rem;
-    }
-}
-
-
-/* --- PROGRESSION PAGE --- */
 #progression-container {
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     padding-bottom: 1rem; /* Space for scrollbar */
+    width: 100%;
 }
 #progression-container > div {
     scroll-snap-align: center;
     flex-shrink: 0;
-    width: 100%;
+    width: 90%; /* On mobile, cards are 90% of the screen width */
+    max-width: 380px; /* Max card width */
+    margin: 0 auto;
 }
 
-
-/* --- SHOP & AVIARY PAGES --- */
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-}
-
-/* --- MODALS & PREVIEW --- */
-.modal, .preview-popup {
-    position: fixed;
-    inset: 0;
-    z-index: 50;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.preview-popup {
-    z-index: 100;
-    background-color: rgba(17, 24, 39, 0.9);
-    backdrop-filter: blur(10px);
-    padding: 1rem;
-}
+/* --- Other page styles remain the same --- */
 

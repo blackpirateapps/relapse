@@ -45,6 +45,9 @@ export const shopItems = [
 let state = {};
 
 export async function initializeApp(callback) {
+    // --- NEW --- Create nav first, so other functions can find the coin count
+    createHeaderAndFooter(window.location.pathname); 
+
     const loadingSpinner = document.getElementById('loading-spinner');
     const loginScreen = document.getElementById('login-screen');
     const appContainer = document.getElementById('app-container');
@@ -82,6 +85,46 @@ export async function initializeApp(callback) {
     return state;
 }
 
+// --- NEW NAVIGATION FUNCTION ---
+export function createHeaderAndFooter(currentPagePath) {
+    const navLinks = [
+        { href: "/", text: "Journey" },
+        { href: "/progression.html", text: "Progression" },
+        { href: "/aviary.html", text: "Aviary" },
+        { href: "/shop.html", text: "Shop" }
+    ];
+
+    const createLinks = (isMobile) => navLinks.map(link => `
+        <a href="${link.href}" class="nav-button ${currentPagePath === link.href ? 'active' : ''} ${isMobile ? 'flex-1 text-center' : ''}">${link.text}</a>
+    `).join('');
+
+    const headerHTML = `
+        <a href="/" class="font-serif-display text-xl md:text-2xl text-amber-400">Abstinence Phoenix</a>
+        <nav class="hidden md:flex items-center gap-2">${createLinks(false)}</nav>
+        <div class="flex items-center gap-4">
+            <span id="coin-count" class="font-bold text-yellow-400 text-lg">0</span>
+        </div>`;
+    
+    const footerHTML = `
+        <nav class="flex justify-around bg-gray-900/50 backdrop-blur-sm p-2 rounded-2xl shadow-lg">${createLinks(true)}</nav>`;
+
+    const header = document.createElement('header');
+    header.id = 'app-header';
+    header.className = 'flex-shrink-0';
+    header.innerHTML = headerHTML;
+
+    const footer = document.createElement('footer');
+    footer.className = 'md:hidden flex-shrink-0 mt-4';
+    footer.innerHTML = footerHTML;
+
+    const appContainer = document.getElementById('app-container');
+    if (appContainer) {
+        appContainer.prepend(header);
+        appContainer.append(footer);
+    }
+}
+
+
 export function getState() {
     return state;
 }
@@ -105,7 +148,6 @@ export async function applyBackground(upgrades, container = document.getElementB
             container.style.opacity = 0;
         }
     } else {
-        // No theme equipped, clear the SVG container to reveal the CSS background
         container.innerHTML = '';
         container.style.opacity = 0;
     }

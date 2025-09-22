@@ -10,50 +10,29 @@
 </head>
 <body class="bg-default">
     <div id="loading-spinner" class="fixed inset-0 flex items-center justify-center bg-gray-900 z-50">
+        <!-- Spinner SVG -->
         <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
     </div>
 
+    <!-- The header and footer will be dynamically inserted here by shared.js -->
     <div id="app-container" class="app-wrapper hidden">
-        <header id="app-header" class="flex-shrink-0">
-            <a href="/" class="font-serif-display text-xl md:text-2xl text-amber-400">Abstinence Phoenix</a>
-            <nav class="hidden md:flex items-center gap-2">
-                <a href="/" class="nav-button">Journey</a>
-                <a href="/progression.html" class="nav-button active">Progression</a>
-                <a href="/aviary.html" class="nav-button">Aviary</a>
-                <a href="/shop.html" class="nav-button">Shop</a>
-            </nav>
-            <div class="flex items-center gap-4">
-                <span id="coin-count" class="font-bold text-yellow-400 text-lg">0</span>
-            </div>
-        </header>
-
-        <!-- Main content area -->
         <main class="flex flex-col flex-grow mt-6">
             <section id="progress-summary" class="bg-gray-800/50 backdrop-blur-sm p-4 md:p-6 rounded-2xl shadow-lg mb-6 flex-shrink-0">
                 <!-- Summary content is injected by progression.js -->
             </section>
             
             <!-- Horizontal Scroller Wrapper -->
-            <div class="flex-grow w-full flex overflow-hidden">
-                 <div id="progression-container" class="flex-grow w-full">
+            <div id="progression-scroller" class="flex-grow min-h-0">
+                 <div id="progression-container">
                     <!-- Progression cards are injected by progression.js -->
                 </div>
             </div>
         </main>
-        
-        <!-- Mobile Navigation -->
-        <footer class="md:hidden flex-shrink-0 mt-4">
-            <nav class="flex justify-around bg-gray-900/50 backdrop-blur-sm p-2 rounded-2xl shadow-lg">
-                <a href="/" class="nav-button flex-1 text-center">Journey</a>
-                <a href="/progression.html" class="nav-button active flex-1 text-center">Progression</a>
-                <a href="/aviary.html" class="nav-button flex-1 text-center">Aviary</a>
-                <a href="/shop.html" class="nav-button flex-1 text-center">Shop</a>
-            </nav>
-        </footer>
     </div>
+
 </body>
 </html>
 
