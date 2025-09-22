@@ -5,7 +5,6 @@ const client = createClient({
     authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
-// Function to initialize and migrate the database schema
 export async function initDb() {
     // --- Schema Creation ---
     await client.execute(`
@@ -32,35 +31,25 @@ export async function initDb() {
     `);
 
     // --- Schema Migration ---
+    // Safely add new columns to existing tables without errors.
     try {
-        await client.execute(`
-            ALTER TABLE user_state ADD COLUMN lastClaimedLevel INTEGER NOT NULL DEFAULT 0;
-        `);
-    } catch (e) {
-        if (!e.message.includes("duplicate column name")) {
-             console.error("Error migrating user_state table:", e);
-        }
-    }
+        await client.execute(`ALTER TABLE user_state ADD COLUMN lastClaimedLevel INTEGER NOT NULL DEFAULT 0;`);
+    } catch (e) { /* Ignore errors if column already exists */ }
     
+    try {
+        // Add the new column for equipped items
+        await client.execute(`ALTER TABLE user_state ADD COLUMN equipped_upgrades TEXT;`);
+    } catch (e) { /* Ignore errors if column already exists */ }
+
     // --- Initial Data ---
     const { rows } = await client.execute("SELECT id FROM user_state WHERE id = 1;");
     if (rows.length === 0) {
         await client.execute({
-            sql: "INSERT INTO user_state (id, lastRelapse, longestStreak, relapseCount, coinsAtLastRelapse, upgrades, lastClaimedLevel) VALUES (?, ?, ?, ?, ?, ?, ?);",
-            args: [
-                1,
-                new Date().toISOString(),
+            sql: "INSERT INTO user_state (id, lastRelapse, longestStreak, relapseCount, coinsAtLastRelapse, upgrades, lastClaimedLevel, equipped_upgrades) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+            args: [ 1, new Date().toISOString(), 0, 0, 0,
+                JSON.stringify({}), // Start with no items owned
                 0,
-                0,
-                0,
-                JSON.stringify({ 
-                    aura: false, 
-                    celestialFlames: false,
-                    volcanicLair: false,
-                    celestialSky: false,
-                    navStyle: false // Add this line
-                }),
-                0
+                JSON.stringify({})  // Start with no items equipped
             ],
         });
     }

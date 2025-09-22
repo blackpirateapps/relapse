@@ -57,14 +57,17 @@ export async function initializeApp(callback) {
         if (response.ok) {
             state = await response.json();
             if (typeof state.upgrades === 'string') {
-                state.upgrades = JSON.parse(state.upgrades);
+                state.upgrades = JSON.parse(state.upgrades || '{}');
+            }
+            if (typeof state.equipped_upgrades === 'string') {
+                state.equipped_upgrades = JSON.parse(state.equipped_upgrades || '{}');
             }
             if(appContainer) appContainer.classList.remove('hidden');
             if(loadingSpinner) loadingSpinner.classList.add('hidden');
             
             updateCoinCount();
-            await applyBackground(state.upgrades);
-            applyNavStyle(state.upgrades); // Apply the nav style on load
+            await applyBackground(state.equipped_upgrades);
+            applyNavStyle(state.equipped_upgrades);
             if (callback) callback(state);
         } else {
              if(loadingSpinner) loadingSpinner.classList.add('hidden');
@@ -86,9 +89,8 @@ export function getState() {
     return state;
 }
 
-export async function applyBackground(upgrades) {
-    const backgroundContainer = document.getElementById('background-container');
-    if (!backgroundContainer) return;
+export async function applyBackground(upgrades, container = document.getElementById('background-container')) {
+    if (!container) return;
 
     let theme = 'default';
     if (upgrades?.celestialSky) theme = 'celestial-sky';
@@ -97,16 +99,14 @@ export async function applyBackground(upgrades) {
     try {
         const response = await fetch(`/img/bg-${theme}.svg`);
         if (!response.ok) throw new Error('Background not found');
-        backgroundContainer.innerHTML = await response.text();
+        container.innerHTML = await response.text();
     } catch (error) {
         console.error("Failed to load background:", error);
-        backgroundContainer.innerHTML = '<div class="w-full h-full bg-gray-900"></div>';
+        container.innerHTML = '<div class="w-full h-full bg-gray-900"></div>';
     }
 }
 
-// NEW function to apply the navigation style
-export function applyNavStyle(upgrades) {
-    const header = document.getElementById('app-header');
+export function applyNavStyle(upgrades, header = document.getElementById('app-header')) {
     if (header && upgrades?.navStyle) {
         header.classList.add('celestial-nav');
     } else if (header) {
