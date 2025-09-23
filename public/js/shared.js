@@ -21,14 +21,13 @@ export const ranks = [
 
 export const shopItems = [
     // --- PHOENIX SKINS (NEW) ---
-    // To add a new skin, copy this object, change the details, and make sure the 'images' array has one image for each rank (16 total).
     {
         id: 'bluePhoenix',
         name: 'Blue Phoenix',
-        cost: 1000,
+        cost: 1500, // << PRICE UPDATED
         description: 'A mystical phoenix born of celestial ice, its flames burn with a cool, determined light.',
         type: 'phoenix_skin',
-        previewImage: '/img/skins/blue/celestial-phoenix.webp', // Image for the shop preview
+        previewImage: '/img/skins/blue/celestial-phoenix.webp',
         images: [
             '/img/skins/blue/egg-1.webp', '/img/skins/blue/egg-2.webp', '/img/skins/blue/egg-3.webp',
             '/img/skins/blue/hatchling-1.webp', '/img/skins/blue/hatchling-2.webp', '/img/skins/blue/hatchling-3.webp',
@@ -165,30 +164,21 @@ export function getRank(totalHours) {
     return { ...ranks[0], level: 0 };
 }
 
-/**
- * Renders the phoenix image, applying any equipped skin.
- * @param {number} level The current rank level (0-15).
- * @param {object} equipped_upgrades The user's equipped items object.
- * @returns {string} An HTML img tag.
- */
 export function renderPhoenix(level, equipped_upgrades = {}) {
     const defaultRank = ranks[level];
-    if (!defaultRank) return ''; // Safety check
+    if (!defaultRank) return '';
 
-    let imageUrl = defaultRank.image; // Default image
+    let imageUrl = defaultRank.image;
 
-    // Find if a skin is equipped
     const equippedSkinId = Object.keys(equipped_upgrades).find(id => equipped_upgrades[id] && shopItems.find(item => item.id === id && item.type === 'phoenix_skin'));
     
     if (equippedSkinId) {
         const skin = shopItems.find(item => item.id === equippedSkinId);
-        // Use the skin's image for the current level, with a fallback to the default
         if (skin && skin.images && skin.images[level]) {
             imageUrl = skin.images[level];
         }
     }
     
-    // Use an onerror handler to fall back to the default image if a skin image fails to load
     return `<img src="${imageUrl}" alt="${defaultRank.name}" class="w-full h-full object-contain" onerror="this.onerror=null;this.src='${defaultRank.image}';">`;
 }
 
@@ -249,3 +239,4 @@ export function initStarfield() {
     }
     tick();
 }
+
