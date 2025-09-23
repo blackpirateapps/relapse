@@ -1,26 +1,63 @@
 // --- DATA ---
 export const ranks = [
-    { name: "Ashen Egg I", id: "egg-1", hours: 0, storyline: "A silent promise, dormant and resilient.", reward: 0, color: '#94a3b8', image: '/img/egg-1.webp' },
-    { name: "Ashen Egg II", id: "egg-2", hours: 6, storyline: "A faint warmth begins to emanate from within.", reward: 50, color: '#a1a1aa', image: '/img/egg-2.webp' },
-    { name: "Ashen Egg III", id: "egg-3", hours: 12, storyline: "Small cracks appear, signs of life stirring inside.", reward: 100, color: '#d4d4d8', image: '/img/egg-3.webp' },
-    { name: "Fledgling Hatchling", id: "hatchling-1", hours: 24, storyline: "The shell cracks. A new life, fragile yet determined.", reward: 250, color: '#f87171', image: '/img/hatchling-1.webp' },
-    { name: "Ember Glance", id: "hatchling-2", hours: 36, storyline: "Its eyes, like tiny embers, begin to focus.", reward: 150, color: '#fb923c', image: '/img/hatchling-2.webp' },
-    { name: "First Steps", id: "hatchling-3", hours: 48, storyline: "Wobbly but resolute, it takes its first steps.", reward: 200, color: '#fbbf24', image: '/img/hatchling-3.webp' },
-    { name: "Ember Chick", id: "chick-1", hours: 72, storyline: "Small embers begin to glow in its downy feathers.", reward: 500, color: '#facc15', image: '/img/chick-1.webp' },
-    { name: "Warmth of Will", id: "chick-2", hours: 120, storyline: "The chick learns to control its inner warmth.", reward: 300, color: '#a3e635', image: '/img/chick-2.webp' },
-    { name: "Flame Youngling", id: "youngling-1", hours: 168, storyline: "The fire is now a steady, growing flame.", reward: 1000, color: '#4ade80', image: '/img/youngling-1.webp' },
-    { name: "Spark of Defiance", id: "youngling-2", hours: 240, storyline: "It actively extinguishes small temptations.", reward: 750, color: '#34d399', image: '/img/youngling-2.webp' },
-    { name: "Sunfire Phoenix", id: "sunfire-1", hours: 336, storyline: "Radiating a brilliant heat, a beacon of willpower.", reward: 2000, color: '#2dd4bf', image: '/img/sunfire-1.webp' },
-    { name: "Blinding Light", id: "sunfire-2", hours: 500, storyline: "Its light pushes back the shadows of doubt.", reward: 1500, color: '#67e8f9', image: '/img/sunfire-2.webp' },
-    { name: "Blaze Guardian", id: "guardian-1", hours: 720, storyline: "No longer just a creature, but a guardian of its flame.", reward: 4000, color: '#a78bfa', image: '/img/guardian-1.webp' },
-    { name: "Vigilant Stance", id: "guardian-2", hours: 1440, storyline: "A fortress of resolve against old habits.", reward: 3000, color: '#c084fc', image: '/img/guardian-2.webp' },
-    { name: "Solar Drake", id: "drake", hours: 2160, storyline: "Its power rivals that of a small star.", reward: 8000, color: '#f472b6', image: '/img/drake.webp' },
-    { name: "Celestial Phoenix", id: "celestial-phoenix", hours: 4320, storyline: "A cosmic force of pure, transcendent will.", reward: 15000, color: '#f9a8d4', image: '/img/celestial-phoenix.webp' }
+    // Note: There are 16 ranks, so level ranges from 0 to 15.
+    { name: "Ashen Egg I", id: "egg-1", hours: 0, storyline: "A silent promise, dormant and resilient.", reward: 0, image: '/img/default/egg-1.webp' },
+    { name: "Ashen Egg II", id: "egg-2", hours: 6, storyline: "A faint warmth begins to emanate from within.", reward: 50, image: '/img/default/egg-2.webp' },
+    { name: "Ashen Egg III", id: "egg-3", hours: 12, storyline: "Small cracks appear, signs of life stirring inside.", reward: 100, image: '/img/default/egg-3.webp' },
+    { name: "Fledgling Hatchling", id: "hatchling-1", hours: 24, storyline: "The shell cracks. A new life, fragile yet determined.", reward: 250, image: '/img/default/hatchling-1.webp' },
+    { name: "Ember Glance", id: "hatchling-2", hours: 36, storyline: "Its eyes, like tiny embers, begin to focus.", reward: 150, image: '/img/default/hatchling-2.webp' },
+    { name: "First Steps", id: "hatchling-3", hours: 48, storyline: "Wobbly but resolute, it takes its first steps.", reward: 200, image: '/img/default/hatchling-3.webp' },
+    { name: "Ember Chick", id: "chick-1", hours: 72, storyline: "Small embers begin to glow in its downy feathers.", reward: 500, image: '/img/default/chick-1.webp' },
+    { name: "Warmth of Will", id: "chick-2", hours: 120, storyline: "The chick learns to control its inner warmth.", reward: 300, image: '/img/default/chick-2.webp' },
+    { name: "Flame Youngling", id: "youngling-1", hours: 168, storyline: "The fire is now a steady, growing flame.", reward: 1000, image: '/img/default/youngling-1.webp' },
+    { name: "Spark of Defiance", id: "youngling-2", hours: 240, storyline: "It actively extinguishes small temptations.", reward: 750, image: '/img/default/youngling-2.webp' },
+    { name: "Sunfire Phoenix", id: "sunfire-1", hours: 336, storyline: "Radiating a brilliant heat, a beacon of willpower.", reward: 2000, image: '/img/default/sunfire-1.webp' },
+    { name: "Blinding Light", id: "sunfire-2", hours: 500, storyline: "Its light pushes back the shadows of doubt.", reward: 1500, image: '/img/default/sunfire-2.webp' },
+    { name: "Blaze Guardian", id: "guardian-1", hours: 720, storyline: "No longer just a creature, but a guardian of its flame.", reward: 4000, image: '/img/default/guardian-1.webp' },
+    { name: "Vigilant Stance", id: "guardian-2", hours: 1440, storyline: "A fortress of resolve against old habits.", reward: 3000, image: '/img/default/guardian-2.webp' },
+    { name: "Solar Drake", id: "drake", hours: 2160, storyline: "Its power rivals that of a small star.", reward: 8000, image: '/img/default/drake.webp' },
+    { name: "Celestial Phoenix", id: "celestial-phoenix", hours: 4320, storyline: "A cosmic force of pure, transcendent will.", reward: 15000, image: '/img/default/celestial-phoenix.webp' }
 ];
 
 export const shopItems = [
-    { id: 'aura', name: 'Aura of Resolve', cost: 500, description: 'A soft, glowing aura for your phoenix.', type: 'cosmetic' },
-    { id: 'celestialFlames', name: 'Celestial Flames', cost: 1200, description: 'Changes phoenix visuals to a cool blue.', type: 'cosmetic' },
+    // --- PHOENIX SKINS (NEW) ---
+    // To add a new skin, copy this object, change the details, and make sure the 'images' array has one image for each rank (16 total).
+    {
+        id: 'bluePhoenix',
+        name: 'Blue Phoenix',
+        cost: 1000,
+        description: 'A mystical phoenix born of celestial ice, its flames burn with a cool, determined light.',
+        type: 'phoenix_skin',
+        previewImage: '/img/skins/blue/celestial-phoenix.webp', // Image for the shop preview
+        images: [
+            '/img/skins/blue/egg-1.webp', '/img/skins/blue/egg-2.webp', '/img/skins/blue/egg-3.webp',
+            '/img/skins/blue/hatchling-1.webp', '/img/skins/blue/hatchling-2.webp', '/img/skins/blue/hatchling-3.webp',
+            '/img/skins/blue/chick-1.webp', '/img/skins/blue/chick-2.webp',
+            '/img/skins/blue/youngling-1.webp', '/img/skins/blue/youngling-2.webp',
+            '/img/skins/blue/sunfire-1.webp', '/img/skins/blue/sunfire-2.webp',
+            '/img/skins/blue/guardian-1.webp', '/img/skins/blue/guardian-2.webp',
+            '/img/skins/blue/drake.webp', '/img/skins/blue/celestial-phoenix.webp'
+        ]
+    },
+    {
+        id: 'greenPhoenix',
+        name: 'Verdant Phoenix',
+        cost: 4000,
+        description: 'A phoenix intertwined with the essence of a life-giving forest, symbolizing growth and renewal.',
+        type: 'phoenix_skin',
+        previewImage: '/img/skins/green/celestial-phoenix.webp',
+        images: [
+            '/img/skins/green/egg-1.webp', '/img/skins/green/egg-2.webp', '/img/skins/green/egg-3.webp',
+            '/img/skins/green/hatchling-1.webp', '/img/skins/green/hatchling-2.webp', '/img/skins/green/hatchling-3.webp',
+            '/img/skins/green/chick-1.webp', '/img/skins/green/chick-2.webp',
+            '/img/skins/green/youngling-1.webp', '/img/skins/green/youngling-2.webp',
+            '/img/skins/green/sunfire-1.webp', '/img/skins/green/sunfire-2.webp',
+            '/img/skins/green/guardian-1.webp', '/img/skins/green/guardian-2.webp',
+            '/img/skins/green/drake.webp', '/img/skins/green/celestial-phoenix.webp'
+        ]
+    },
+
+    // --- THEMES (EXISTING) ---
     { id: 'volcanicLair', name: 'Volcanic Lair', cost: 10000, description: 'A dark, fiery background theme.', type: 'theme' },
     { id: 'celestialSky', name: 'Celestial Sky', cost: 50000, description: 'A beautiful, star-filled background theme.', type: 'theme' }
 ];
@@ -48,7 +85,7 @@ export async function initializeApp(callback) {
             if (loadingSpinner) loadingSpinner.classList.add('hidden');
             
             updateCoinCount();
-            initStarfield(); // Initialize animated background
+            initStarfield();
             if (callback) callback(state);
         } else {
             if (loadingSpinner) loadingSpinner.classList.add('hidden');
@@ -101,7 +138,6 @@ function createSidebar() {
     }
 }
 
-
 export function getState() {
     return state;
 }
@@ -129,12 +165,33 @@ export function getRank(totalHours) {
     return { ...ranks[0], level: 0 };
 }
 
-export function renderPhoenix(level, upgrades = {}) {
-    const rank = ranks[level];
-    if (!rank) return '';
-    // Now renders an img tag with the webp path from the ranks data
-    return `<img src="${rank.image}" alt="${rank.name}" class="w-full h-full object-contain">`;
+/**
+ * Renders the phoenix image, applying any equipped skin.
+ * @param {number} level The current rank level (0-15).
+ * @param {object} equipped_upgrades The user's equipped items object.
+ * @returns {string} An HTML img tag.
+ */
+export function renderPhoenix(level, equipped_upgrades = {}) {
+    const defaultRank = ranks[level];
+    if (!defaultRank) return ''; // Safety check
+
+    let imageUrl = defaultRank.image; // Default image
+
+    // Find if a skin is equipped
+    const equippedSkinId = Object.keys(equipped_upgrades).find(id => equipped_upgrades[id] && shopItems.find(item => item.id === id && item.type === 'phoenix_skin'));
+    
+    if (equippedSkinId) {
+        const skin = shopItems.find(item => item.id === equippedSkinId);
+        // Use the skin's image for the current level, with a fallback to the default
+        if (skin && skin.images && skin.images[level]) {
+            imageUrl = skin.images[level];
+        }
+    }
+    
+    // Use an onerror handler to fall back to the default image if a skin image fails to load
+    return `<img src="${imageUrl}" alt="${defaultRank.name}" class="w-full h-full object-contain" onerror="this.onerror=null;this.src='${defaultRank.image}';">`;
 }
+
 
 export function showModal(title, content, options = {}) {
     const { showClose = true, size = 'max-w-lg' } = options;
@@ -192,4 +249,3 @@ export function initStarfield() {
     }
     tick();
 }
-
