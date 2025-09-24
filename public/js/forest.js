@@ -147,24 +147,64 @@ function renderShop() {
   
   const treeTypesArray = Object.values(treeTypes);
   
-  shopContainer.innerHTML = treeTypesArray.map(tree => `
-    <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-      <div class="flex items-center gap-4 mb-3">
-        <img src="${tree.stages[0].image}" alt="${tree.name}" 
-             class="w-16 h-16 object-cover rounded" 
+  shopContainer.innerHTML = treeTypesArray.map(tree => {
+    // Create gallery of all stages
+    const stageGallery = tree.stages.map((stage, index) => `
+      <div class="text-center">
+        <img src="${stage.image}" alt="${stage.status}" 
+             class="w-12 h-12 object-cover rounded mb-1 border border-gray-600"
              onerror="this.style.display='none'">
-        <div>
-          <h3 class="text-lg font-semibold text-white">${tree.name}</h3>
-          <p class="text-sm text-gray-300">${tree.cost.toLocaleString()} Coins</p>
-        </div>
+        <p class="text-xs text-gray-400">${stage.status}</p>
+        <p class="text-xs text-gray-500">${stage.hours}h</p>
       </div>
-      <p class="text-sm text-gray-400 mb-4">${tree.description}</p>
-      <button onclick="buyTree('${tree.id}')" 
-              class="w-full bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded transition-colors">
-        Buy for ${tree.cost.toLocaleString()} Coins
-      </button>
-    </div>
-  `).join('');
+    `).join('');
+
+    return `
+      <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
+        <!-- Tree Header -->
+        <div class="flex items-center gap-4 mb-4">
+          <img src="${tree.stages[0].image}" alt="${tree.name}" 
+               class="w-16 h-16 object-cover rounded" 
+               onerror="this.style.display='none'">
+          <div>
+            <h3 class="text-lg font-semibold text-white">${tree.name}</h3>
+            <p class="text-sm text-gray-300">${tree.cost.toLocaleString()} Coins</p>
+            <p class="text-xs text-gray-400 mt-1">${tree.growthHours}h to mature</p>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <p class="text-sm text-gray-400 mb-4">${tree.description}</p>
+
+        <!-- Growth Stages Gallery -->
+        <div class="mb-4">
+          <h4 class="text-sm font-semibold text-white mb-3">Growth Stages:</h4>
+          <div class="grid grid-cols-${Math.min(tree.stages.length, 4)} gap-2 mb-2">
+            ${stageGallery}
+          </div>
+          ${tree.stages.length > 4 ? `
+            <div class="grid grid-cols-${tree.stages.length - 4} gap-2 justify-center">
+              ${tree.stages.slice(4).map((stage, index) => `
+                <div class="text-center">
+                  <img src="${stage.image}" alt="${stage.status}" 
+                       class="w-12 h-12 object-cover rounded mb-1 border border-gray-600"
+                       onerror="this.style.display='none'">
+                  <p class="text-xs text-gray-400">${stage.status}</p>
+                  <p class="text-xs text-gray-500">${stage.hours}h</p>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+
+        <!-- Buy Button -->
+        <button onclick="buyTree('${tree.id}')" 
+                class="w-full bg-green-600 hover:bg-green-500 text-white px-4 py-3 rounded transition-colors font-semibold">
+          Buy for ${tree.cost.toLocaleString()} Coins
+        </button>
+      </div>
+    `;
+  }).join('');
 }
 
 window.buyTree = async function(treeId) {
@@ -172,6 +212,7 @@ window.buyTree = async function(treeId) {
   if (!tree) return;
   
   const button = event.target;
+  const originalText = button.textContent;
   button.disabled = true;
   button.textContent = 'Purchasing...';
   
@@ -200,6 +241,19 @@ window.buyTree = async function(treeId) {
         <h3 class="text-lg font-semibold mb-2">${tree.name}</h3>
         <p class="text-sm text-gray-300 mb-4">${tree.stages[0].status}</p>
         <p class="text-sm text-gray-400">${tree.description}</p>
+        
+        <!-- Show growth timeline in modal -->
+        <div class="mt-4 p-3 bg-gray-700 rounded">
+          <h4 class="text-sm font-semibold text-white mb-2">Growth Timeline:</h4>
+          <div class="grid grid-cols-${Math.min(tree.stages.length, 3)} gap-1 text-xs">
+            ${tree.stages.slice(0, 6).map(stage => `
+              <div class="text-center">
+                <img src="${stage.image}" class="w-8 h-8 mx-auto mb-1 rounded" onerror="this.style.display='none'">
+                <p class="text-gray-300">${stage.hours}h</p>
+              </div>
+            `).join('')}
+          </div>
+        </div>
       </div>
       <p class="text-green-400 mt-4 text-center">You have planted a new sapling in your forest. Nurture it well!</p>
     `);
@@ -212,7 +266,7 @@ window.buyTree = async function(treeId) {
     `);
   } finally {
     button.disabled = false;
-    button.textContent = `Buy for ${tree.cost.toLocaleString()} Coins`;
+    button.textContent = originalText;
   }
 }
 
