@@ -1,6 +1,6 @@
 import { initializeApp, showModal, closeModal, updateCoinCount } from './shared.js';
 
-// The API now points to your new, separate Vercel deployment.
+// The API points to your new, separate Vercel deployment.
 const FOREST_API_URL = 'https://api-relapse.vercel.app/api/forest';
 
 // --- Tree Configuration ---
@@ -37,14 +37,14 @@ initializeApp(async (initState) => {
     updateStats();
 });
 
-// Fetches tree data from your new external API
+// Fetches tree data from your public external API
 async function fetchForestData() {
     try {
         const loadingIndicator = document.getElementById('forest-loading');
         if(loadingIndicator) loadingIndicator.classList.remove('hidden');
 
-        // We must include credentials to send the auth cookie to the external API
-        const response = await fetch(FOREST_API_URL, { credentials: 'include' });
+        // No special headers are needed for a public API
+        const response = await fetch(FOREST_API_URL);
 
         if (!response.ok) {
             throw new Error(`Failed to fetch forest data: ${response.statusText}`);
@@ -148,7 +148,7 @@ function renderShop() {
     document.getElementById('buy-sapling-btn').addEventListener('click', () => handleBuySapling(sapling.id));
 }
 
-// Handles the purchase of a new sapling by calling the external API
+// Handles the purchase of a new sapling by calling the public external API
 async function handleBuySapling(treeId) {
     const button = document.getElementById('buy-sapling-btn');
     button.disabled = true;
@@ -159,7 +159,6 @@ async function handleBuySapling(treeId) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ treeId: treeId, growthHours: treeTypes[treeId].growthHours }),
-            credentials: 'include' // Important for sending the cookie
         });
 
         const result = await response.json();
@@ -178,8 +177,9 @@ async function handleBuySapling(treeId) {
         console.error(error);
         showModal('Purchase Failed', `<p>${error.message}</p>`);
     } finally {
+        const sapling = treeTypes.tree_of_tranquility;
         button.disabled = false;
-        button.textContent = `Buy for ${treeTypes[treeId].cost.toLocaleString()} Coins`;
+        button.textContent = `Buy for ${sapling.cost.toLocaleString()} Coins`;
     }
 }
 
