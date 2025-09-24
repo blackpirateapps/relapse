@@ -49,25 +49,25 @@ function renderForest() {
     forestContainer.innerHTML = forestData.map(tree => {
         const now = new Date();
         const matureDate = new Date(tree.matureDate);
-        let imageSrc = '/img/trees/withered.svg';
+        let imageSrc = '/img/trees/withered.png'; // Changed to .png
         let statusText = 'Withered';
         let statusColor = 'text-red-400';
         let timerHtml = '';
 
         if (tree.status === 'growing') {
             if (now < matureDate) {
-                imageSrc = '/img/trees/growing.svg';
+                imageSrc = '/img/trees/growing.png'; // Changed to .png
                 statusText = 'Growing';
                 statusColor = 'text-yellow-400';
                 timerHtml = `<div class="tree-timer text-xs text-cyan-300" data-mature-date="${tree.matureDate}"></div>`;
             } else {
                  // If the server hasn't updated it yet, we can assume it's mature
-                imageSrc = '/img/trees/matured.svg';
+                imageSrc = '/img/trees/matured.png'; // Changed to .png
                 statusText = 'Matured';
                 statusColor = 'text-green-400';
             }
         } else if (tree.status === 'matured') {
-            imageSrc = '/img/trees/matured.svg';
+            imageSrc = '/img/trees/matured.png'; // Changed to .png
             statusText = 'Matured';
             statusColor = 'text-green-400';
         }
@@ -96,7 +96,7 @@ function renderShop() {
          <div class="card p-6 flex flex-col text-center">
             <h3 class="font-serif-display text-xl text-white">${sapling.name}</h3>
             <div class="w-24 h-24 my-4 mx-auto">
-                <img src="/img/trees/growing.svg" alt="Sapling">
+                <img src="/img/trees/growing.png" alt="Sapling">
             </div>
             <p class="text-gray-400 text-sm flex-grow">${sapling.description}</p>
             <div class="mt-4">
@@ -166,7 +166,7 @@ function updateTimers() {
                 timerEl.textContent = formatRemainingTime(remaining);
             } else {
                 timerEl.textContent = 'Matured!';
-                timerEl.closest('.card').querySelector('img').src = '/img/trees/matured.svg';
+                timerEl.closest('.card').querySelector('img').src = '/img/trees/matured.png'; // Changed to .png
                 timerEl.closest('.card').querySelector('.font-bold').textContent = 'Matured';
                 timerEl.closest('.card').querySelector('.font-bold').className = 'font-bold text-green-400';
             }
