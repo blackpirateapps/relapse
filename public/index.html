@@ -1,100 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Journey - Abstinence Phoenix</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <script type="module" src="/js/journey.js" defer></script>
-    <link rel="stylesheet" href="/css/style.css">
-    <style>
-        :root {
-            --glow-color: #fde047;
-            --background-start: #0f0c29;
-            --background-mid: #302b63;
-            --background-end: #24243e;
-        }
-        body {
-            font-family: 'Manrope', sans-serif;
-            background: linear-gradient(135deg, var(--background-start), var(--background-mid), var(--background-end));
-            overflow-x: hidden;
-            color: #d1d5db;
-        }
-        .font-serif-display { font-family: 'Playfair Display', serif; }
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 1.5rem;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-        }
-        #starfield { position: fixed; width: 100%; height: 100%; top: 0; left: 0; z-index: -1; }
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
-        .phoenix-animation { animation: float 4s ease-in-out infinite; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Journey - Abstinence Phoenix</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+
+  <script type="module" src="js/journey.js" defer></script>
+  <link rel="stylesheet" href="css/style.css" />
+
+  <style>
+    :root {
+      --glow-color: #fde047;
+      --background-start: #0f0c29;
+      --background-mid: #302b63;
+      --background-end: #24243e;
+    }
+
+    body {
+      font-family: Manrope, sans-serif;
+      background: radial-gradient(1000px 600px at 20% -10%, rgba(253, 224, 71, 0.08), transparent 60%),
+                  linear-gradient(135deg, var(--background-start), var(--background-mid), var(--background-end));
+      color: #d1d5db;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    .font-serif-display { font-family: "Playfair Display", serif; }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1.25rem;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    .card-ring {
+      position: relative;
+      isolation: isolate;
+    }
+    .card-ring::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(253,224,71,0.35), rgba(147,197,253,0.2));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+      z-index: -1;
+    }
+
+    .starfield {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px) }
+      50% { transform: translateY(-10px) }
+      100% { transform: translateY(0px) }
+    }
+    .phoenix-animation { animation: float 4s ease-in-out infinite; }
+
+    /* Gentle twinkle for canvas overlay mask */
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.7 }
+      50% { opacity: 1 }
+    }
+    #starfield {
+      animation: twinkle 6s ease-in-out infinite;
+      mix-blend-mode: screen;
+      opacity: 0.8;
+    }
+
+    /* Improved focus styles */
+    :is(button, a, input):focus {
+      outline: 2px solid #fde047;
+      outline-offset: 2px;
+    }
+
+    /* Timer typography tweaks */
+    .timer-digits {
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 18px rgba(74, 222, 128, 0.2);
+    }
+
+    /* Pedestal glow under phoenix */
+    .pedestal {
+      width: 70%;
+      height: 10px;
+      filter: blur(12px);
+      background: radial-gradient(closest-side, rgba(253, 224, 71, 0.6), rgba(253, 224, 71, 0.05), transparent 70%);
+    }
+  </style>
 </head>
 
 <body>
-    <canvas id="starfield"></canvas>
-    <div id="loading-spinner" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900">
-        <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+  <!-- Background Starfield -->
+  <canvas id="starfield" class="starfield"></canvas>
+
+  <!-- Global Loading Spinner -->
+  <div id="loading-spinner" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50">
+    <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-label="Loading">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+  </div>
+
+  <!-- Login Screen -->
+  <div id="login-screen" class="hidden min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-sm card card-ring p-8 text-center">
+      <h1 class="font-serif-display text-3xl mb-2 text-white">Abstinence Phoenix</h1>
+      <p class="text-gray-300/90 mb-6">Enter the password to begin.</p>
+
+      <input type="password" id="password-input" class="w-full bg-gray-800/70 text-white p-3 rounded-lg border border-gray-700 focus:ring-2 focus:ring-yellow-400 focus:outline-none mb-4" placeholder="Password" aria-label="Password" />
+      <button id="login-button" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold p-3 rounded-lg transition-all duration-300 shadow-lg">
+        Enter
+      </button>
+      <p id="login-error" class="text-red-500 mt-4 text-sm h-4" aria-live="polite"></p>
     </div>
-    
-    <div id="login-screen" class="hidden min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-sm card p-8 text-center">
-            <h1 class="font-serif-display text-3xl mb-2 text-white">Abstinence Phoenix</h1>
-            <p class="text-gray-400 mb-6">Enter the password to begin.</p>
-            <input type="password" id="password-input" class="w-full bg-gray-700 text-white p-3 rounded-lg border border-gray-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none mb-4" placeholder="Password">
-            <button id="login-button" class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold p-3 rounded-lg transition-all duration-300 shadow-lg">Enter</button>
-            <p id="login-error" class="text-red-500 mt-4 text-sm h-4"></p>
+  </div>
+
+  <!-- App -->
+  <div id="app-container" class="hidden relative min-h-screen md:flex">
+    <!-- Sidebar injected by shared.js -->
+
+    <main class="flex-1 p-4 sm:p-6 md:p-10 overflow-y-auto h-screen">
+      <!-- Header -->
+      <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+        <div>
+          <h1 id="header-title" class="text-3xl font-bold text-white">Journey</h1>
+          <p id="header-subtitle" class="text-gray-300/90">Your path to rebirth begins now.</p>
         </div>
-    </div>
 
-    <div id="app-container" class="hidden relative min-h-screen md:flex">
-        <!-- Sidebar will be injected by shared.js -->
-        <main class="flex-1 p-4 sm:p-6 md:p-10 overflow-y-auto h-screen">
-            <header class="flex justify-between items-center mb-8">
-                <div>
-                    <h1 id="header-title" class="text-3xl font-bold text-white">Journey</h1>
-                    <p id="header-subtitle" class="text-gray-400">Your path to rebirth begins now.</p>
-                </div>
-                <!-- UPDATED: Coin Display -->
-                <div class="card p-3 px-5 text-right">
-                    <p class="text-xs text-yellow-300 uppercase tracking-wider">Coins</p>
-                    <p id="coin-count" class="text-2xl font-bold text-white">0</p>
-                    <p id="coin-rate" class="text-xs text-green-400 font-mono">+0/hr</p>
-                </div>
-            </header>
+        <!-- Coins Panel -->
+        <div class="card card-ring p-3 pl-5 pr-5">
+          <div class="flex items-center gap-3">
+            <div class="h-8 w-8 rounded-full bg-yellow-400/15 ring-1 ring-yellow-200/40 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2a9 9 0 100 18 9 9 0 000-18zm1 13.73V17h-2v-1.27a5.5 5.5 0 01-3.5-2.03l1.5-1.3c.57.69 1.44 1.18 2.5 1.32V10.5c-1.8-.45-3.5-1.2-3.5-3 0-1.81 1.5-3 3.5-3.23V3h2v1.27c1.39.15 2.62.73 3.5 1.6l-1.4 1.4c-.61-.58-1.44-.99-2.1-1.12v2.2c1.93.5 3.6 1.28 3.6 3.18 0 1.78-1.35 3.1-3.6 3.2z"/>
+              </svg>
+            </div>
+            <div class="text-right">
+              <p class="text-[10px] uppercase tracking-wider text-yellow-300">Coins</p>
+              <p id="coin-count" class="text-2xl font-bold text-white">0</p>
+              <p id="coin-rate" class="text-[11px] text-green-400 font-mono">0/hr</p>
+            </div>
+          </div>
+        </div>
+      </header>
 
-            <section id="journey">
-                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                    <div class="lg:col-span-3 card p-8 flex flex-col items-center justify-center h-full">
-                        <div id="phoenix-display" class="w-64 h-64 mb-6 phoenix-animation"></div>
-                        <h2 id="rank-name" class="font-serif-display text-3xl text-center text-white"></h2>
-                        <p id="rank-story" class="text-gray-400 text-center mt-2"></p>
-                    </div>
-                    <div class="lg:col-span-2 space-y-6">
-                        <div class="card p-6">
-                            <h3 class="font-serif-display text-2xl mb-4 text-center text-white">Current Streak</h3>
-                            <div id="timer" class="text-4xl sm:text-5xl font-mono text-center text-green-400 tracking-wider">00:00:00:00</div>
-                            <div class="text-center text-gray-400 mt-2 text-xs">Days : Hours : Mins : Secs</div>
-                        </div>
-                        <div class="card p-6 text-center">
-                            <h4 class="text-gray-400 text-sm">Longest Streak</h4>
-                            <p id="longest-streak" class="text-2xl font-bold text-white">0d 0h</p>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <button id="urge-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all duration-300 shadow-lg">I Feel An Urge</button>
-                            <button id="relapse-button" class="bg-red-700 hover:bg-red-800 text-white font-bold py-4 rounded-xl transition-all duration-300 shadow-lg">I Relapsed</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
-    </div>
-    <div id="modal-container" class="fixed inset-0 z-50 overflow-y-auto hidden"></div>
+      <!-- Journey -->
+      <section id="journey">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          <!-- Phoenix + Rank -->
+          <div class="lg:col-span-3 card card-ring p-8 flex flex-col items-center justify-center h-full">
+            <div id="phoenix-display" class="w-64 h-64 mb-6 phoenix-animation"></div>
+            <div class="pedestal rounded-full mb-2"></div>
+
+            <h2 id="rank-name" class="font-serif-display text-3xl text-center text-white">—</h2>
+            <p id="rank-story" class="text-gray-300/90 text-center mt-2">—</p>
+          </div>
+
+          <!-- Timer + Actions -->
+          <div class="lg:col-span-2 space-y-6">
+            <div class="card card-ring p-6">
+              <h3 class="font-serif-display text-2xl mb-4 text-center text-white">Current Streak</h3>
+              <div id="timer" class="timer-digits text-4xl sm:text-5xl font-mono text-center text-green-400">00:00:00:00</div>
+              <p class="text-center text-gray-400 mt-2 text-xs" aria-hidden="true">Days : Hours : Mins : Secs</p>
+            </div>
+
+            <div class="card card-ring p-6 text-center">
+              <h4 class="text-gray-300/90 text-sm">Longest Streak</h4>
+              <p id="longest-streak" class="text-2xl font-bold text-white mt-1">0d 0h</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <button id="urge-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all duration-300 shadow-lg flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-90" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M13 11V3a1 1 0 00-2 0v8H5a1 1 0 000 2h6v8a1 1 0 002 0v-8h6a1 1 0 000-2h-6z"/>
+                </svg>
+                I Feel An Urge
+              </button>
+
+              <button id="relapse-button" class="bg-red-700 hover:bg-red-800 text-white font-bold py-4 rounded-xl transition-all duration-300 shadow-lg flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 opacity-90" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 10V7h-2v5h5v-2h-3z"/>
+                </svg>
+                I Relapsed
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal Root -->
+  <div id="modal-container" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <!-- Content is injected dynamically by showModal/closeModal -->
+  </div>
 </body>
 </html>
