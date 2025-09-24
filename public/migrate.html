@@ -37,12 +37,12 @@
         <!-- Header -->
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-white mb-2">Database Migration</h1>
-            <p class="text-gray-400">Manage database schema updates and migrations</p>
+            <p class="text-gray-400">Manage database schema updates and shop data migration</p>
             <a href="/" class="text-blue-400 hover:text-blue-300 text-sm">← Back to Phoenix</a>
         </div>
 
         <!-- Migration Status -->
-        <div class="grid gap-6 md:grid-cols-2">
+        <div class="grid gap-6 lg:grid-cols-2">
             <!-- Current Status -->
             <div class="bg-gray-800 bg-opacity-50 p-6 rounded-lg border border-gray-700">
                 <h2 class="text-xl font-semibold mb-4">Current Status</h2>
@@ -70,9 +70,17 @@
                     </div>
                 </div>
 
+                <!-- Shop Data Status -->
+                <div class="mb-4">
+                    <h3 class="font-semibold mb-2">Shop Data</h3>
+                    <div id="shop-status" class="space-y-1 text-sm">
+                        <div>Checking shop data...</div>
+                    </div>
+                </div>
+
                 <!-- User Data Status -->
                 <div>
-                    <h3 class="font-semibold mb-2">Data</h3>
+                    <h3 class="font-semibold mb-2">User Data</h3>
                     <div id="data-status" class="space-y-1 text-sm">
                         <div>Checking data...</div>
                     </div>
@@ -94,9 +102,15 @@
                         <span>🚀</span> Run All Migrations
                     </button>
 
+                    <button id="migrate-shop-btn" onclick="migrateShopOnly()" 
+                            class="w-full bg-purple-600 hover:bg-purple-500 text-white px-4 py-3 rounded transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed">
+                        <span>🛍️</span> Migrate Shop Data Only
+                    </button>
+
                     <div class="text-xs text-gray-400">
                         <p>⚠️ Always backup your database before running migrations</p>
                         <p>✅ Migrations are designed to be safe and non-destructive</p>
+                        <p>🛍️ Shop migration will overwrite existing shop data in database</p>
                     </div>
                 </div>
             </div>
@@ -172,7 +186,7 @@
 
             // Update tables status
             const tablesStatus = document.getElementById('tables-status');
-            const tables = ['user_state', 'phoenix_history', 'forest', 'migrations'];
+            const tables = ['user_state', 'phoenix_history', 'forest', 'migrations', 'shop_items', 'shop_item_images'];
             tablesStatus.innerHTML = tables.map(table => {
                 const exists = migrationStatus.tables[table];
                 const dotClass = exists ? 'status-success' : 'status-error';
@@ -190,12 +204,23 @@
                 return `<div><span class="status-dot ${dotClass}"></span>${column}: ${status}</div>`;
             }).join('');
 
+            // Update shop data status
+            const shopStatus = document.getElementById('shop-status');
+            const shopData = migrationStatus.shopData;
+            const shopExists = shopData.migrated;
+            const dotClass = shopExists ? 'status-success' : 'status-error';
+            const status = shopExists ? 'migrated' : 'not migrated';
+            shopStatus.innerHTML = `
+                <div><span class="status-dot ${dotClass}"></span>Shop data: ${status}</div>
+                <div class="ml-4 text-xs text-gray-400">Items: ${shopData.itemCount} | Images: ${shopData.imageCount}</div>
+            `;
+
             // Update data status
             const dataStatus = document.getElementById('data-status');
             const userExists = migrationStatus.userExists;
-            const dotClass = userExists ? 'status-success' : 'status-error';
-            const status = userExists ? 'initialized' : 'missing';
-            dataStatus.innerHTML = `<div><span class="status-dot ${dotClass}"></span>Default user: ${status}</div>`;
+            const userDotClass = userExists ? 'status-success' : 'status-error';
+            const userStatus = userExists ? 'initialized' : 'missing';
+            dataStatus.innerHTML = `<div><span class="status-dot ${userDotClass}"></span>Default user: ${userStatus}</div>`;
 
             // Update migration history
             const historyContainer = document.getElementById('migration-history');
@@ -221,27 +246,45 @@
                 historyContainer.innerHTML = '<div class="text-gray-400">No migrations recorded</div>';
             }
 
-            // Update migrate button
+            // Update migrate buttons
             const migrateBtn = document.getElementById('migrate-all-btn');
+            const shopBtn = document.getElementById('migrate-shop-btn');
+            
             migrateBtn.disabled = !migrationStatus.needsMigration;
             if (!migrationStatus.needsMigration) {
                 migrateBtn.innerHTML = '<span>✅</span> Database Up to Date';
             }
+
+            shopBtn.disabled = !migrationStatus.tables.shop_items;
         }
 
         async function migrateAll() {
             const migrateBtn = document.getElementById('migrate-all-btn');
+            await performMigration(null, migrateBtn, 'Running Migrations...');
+        }
+
+        async function migrateShopOnly() {
+            const shopBtn = document.getElementById('migrate-shop-btn');
+            await performMigration(6, shopBtn, 'Migrating Shop Data...');
+        }
+
+        async function performMigration(migrationId, button, loadingText) {
             const resultsContainer = document.getElementById('migration-results');
             const resultsContent = document.getElementById('results-content');
             
-            migrateBtn.disabled = true;
-            migrateBtn.innerHTML = '<span class="animate-spin">⏳</span> Running Migrations...';
+            button.disabled = true;
+            button.innerHTML = `<span class="animate-spin">⏳</span> ${loadingText}`;
             
             try {
+                const requestBody = { action: 'migrate' };
+                if (migrationId) {
+                    requestBody.migrationId = migrationId;
+                }
+
                 const response = await fetch('/api/migrate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'migrate' })
+                    body: JSON.stringify(requestBody)
                 });
 
                 if (!response.ok) {
@@ -260,18 +303,26 @@
                         </div>
                     </div>
                     
-                    <div class="space-y-2">
+                    <div class="space-y-2 max-h-96 overflow-y-auto">
                         ${result.results.map(r => `
-                            <div class="p-2 bg-gray-700 rounded text-sm">
-                                <div class="flex items-center">
-                                    <span class="status-dot ${r.success ? 'status-success' : 'status-error'}"></span>
-                                    <strong>Migration ${r.migration}:</strong>
-                                    ${r.success ? 'Success' : 'Failed'}
+                            <div class="p-3 bg-gray-700 rounded text-sm">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <span class="status-dot ${r.success ? 'status-success' : 'status-error'}"></span>
+                                        <strong>Migration ${r.migration}:</strong>
+                                        ${r.success ? 'Success' : 'Failed'}
+                                    </div>
+                                    ${r.executedAt ? `<span class="text-xs text-gray-400">${new Date(r.executedAt).toLocaleString()}</span>` : ''}
                                 </div>
                                 ${r.error ? `<div class="text-red-400 text-xs mt-1">Error: ${r.error}</div>` : ''}
-                                ${r.results ? `
-                                    <div class="mt-1 text-xs text-gray-400">
-                                        ${r.results.length} SQL operations completed
+                                ${r.results && r.results.length > 0 ? `
+                                    <div class="mt-2 space-y-1">
+                                        ${r.results.map(res => `
+                                            <div class="text-xs ${res.success ? 'text-green-400' : 'text-red-400'} ml-4">
+                                                ${res.expected ? '⚠️' : (res.success ? '✅' : '❌')} ${res.sql || 'Operation completed'}
+                                                ${res.error && !res.expected ? ` - ${res.error}` : ''}
+                                            </div>
+                                        `).join('')}
                                     </div>
                                 ` : ''}
                             </div>
@@ -280,15 +331,22 @@
                 `;
 
                 // Update status
-                migrationStatus = result.status;
-                updateStatusDisplay();
+                if (result.status) {
+                    migrationStatus = result.status;
+                    updateStatusDisplay();
+                } else {
+                    // Refresh status
+                    await checkStatus();
+                }
                 
             } catch (error) {
                 console.error('Migration failed:', error);
                 showError('Migration failed: ' + error.message);
             } finally {
-                migrateBtn.disabled = false;
-                migrateBtn.innerHTML = '<span>🚀</span> Run All Migrations';
+                button.disabled = false;
+                const originalText = migrationId ? 'Migrate Shop Data Only' : 'Run All Migrations';
+                const originalIcon = migrationId ? '🛍️' : '🚀';
+                button.innerHTML = `<span>${originalIcon}</span> ${originalText}`;
             }
         }
 
