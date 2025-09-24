@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Admin - Phoenix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .bg-pattern {
+            background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3), transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15), transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.15), transparent 50%);
+        }
+        
+        .stage-input {
+            border: 1px solid #374151;
+            background: #1f2937;
+        }
+        
+        .stage-input:focus {
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen bg-pattern">
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+            <p class="mt-2 text-sm text-gray-300">Loading...</p>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-white mb-2">Shop Item Admin</h1>
+            <p class="text-gray-400">Create and manage phoenix skins and tree saplings</p>
+            <a href="/" class="text-blue-400 hover:text-blue-300 text-sm">← Back to Phoenix</a>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="mb-6">
+            <div class="border-b border-gray-700">
+                <nav class="-mb-px flex space-x-8">
+                    <button id="create-tab" onclick="showTab('create')" 
+                            class="tab-button py-2 px-1 border-b-2 font-medium text-sm border-blue-500 text-blue-400">
+                        Create New Item
+                    </button>
+                    <button id="manage-tab" onclick="showTab('manage')" 
+                            class="tab-button py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-400 hover:text-gray-300">
+                        Manage Existing
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Create Tab -->
+        <div id="create-content" class="tab-content">
+            <div class="grid gap-8 lg:grid-cols-2">
+                <!-- Item Form -->
+                <div class="bg-gray-800 bg-opacity-50 p-6 rounded-lg border border-gray-700">
+                    <h2 class="text-xl font-semibold mb-4">Item Details</h2>
+                    
+                    <form id="item-form" class="space-y-4">
+                        <!-- Item Type -->
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Item Type *</label>
+                            <select id="item-type" onchange="updateFormFields()" 
+                                    class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white">
+                                <option value="">Select type...</option>
+                                <option value="phoenix_skin">Phoenix Skin</option>
+                                <option value="tree_sapling">Tree Sapling</option>
+                            </select>
+                        </div>
+
+                        <!-- Item ID -->
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Item ID * <span class="text-gray-400 text-xs">(no spaces, lowercase with underscores)</span></label>
+                            <input type="text" id="item-id" placeholder="e.g., golden_phoenix or mystical_willow" 
+                                   oninput="generatePreview()"
+                                   class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white">
+                        </div>
+
+                        <!-- Item Name -->
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Display Name *</label>
+                            <input type="text" id="item-name" placeholder="e.g., Golden Phoenix or Mystical Willow" 
+                                   class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white">
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Description *</label>
+                            <textarea id="item-description" rows="3" 
+                                      placeholder="Describe the item's appearance and theme..."
+                                      class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"></textarea>
+                        </div>
+
+                        <!-- Cost -->
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Cost (Coins) *</label>
+                            <input type="number" id="item-cost" min="1" placeholder="1500" 
+                                   class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white">
+                        </div>
+
+                        <!-- Tree-specific fields -->
+                        <div id="tree-fields" class="hidden space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Growth Time (Hours) *</label>
+                                <input type="number" id="growth-hours" min="1" placeholder="24" 
+                                       class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white">
+                            </div>
+
+                            <!-- Tree Stages -->
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Growth Stages *</label>
+                                <div id="stages-container" class="space-y-2">
+                                    <!-- Stages will be dynamically added here -->
+                                </div>
+                                <button type="button" onclick="addStage()" 
+                                        class="mt-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-sm">
+                                    Add Stage
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-4 pt-4">
+                            <button type="button" onclick="generatePreview()" 
+                                    class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded">
+                                Generate Preview
+                            </button>
+                            <button type="button" onclick="createItem()" 
+                                    class="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded">
+                                Create Item
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Preview & Instructions -->
+                <div class="bg-gray-800 bg-opacity-50 p-6 rounded-lg border border-gray-700">
+                    <h2 class="text-xl font-semibold mb-4">Image Instructions</h2>
+                    <div id="preview-content" class="text-gray-400 text-sm">
+                        Fill out the form and click "Generate Preview" to see image organization instructions.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage Tab -->
+        <div id="manage-content" class="tab-content hidden">
+            <div class="bg-gray-800 bg-opacity-50 p-6 rounded-lg border border-gray-700">
+                <h2 class="text-xl font-semibold mb-4">Existing Shop Items</h2>
+                <div id="existing-items" class="space-y-4">
+                    <div class="text-gray-400">Loading existing items...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="mt-8 hidden">
+            <div class="bg-gray-800 bg-opacity-50 p-6 rounded-lg border border-gray-700">
+                <h2 class="text-xl font-semibold mb-4">Results</h2>
+                <div id="results-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let existingItems = [];
+        let currentStageCount = 0;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadExistingItems();
+            initializeDefaultStages();
+        });
+
+        function showTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'text-blue-400');
+                btn.classList.add('border-transparent', 'text-gray-400');
+            });
+            document.getElementById(`${tabName}-tab`).classList.remove('border-transparent', 'text-gray-400');
+            document.getElementById(`${tabName}-tab`).classList.add('border-blue-500', 'text-blue-400');
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`${tabName}-content`).classList.remove('hidden');
+
+            if (tabName === 'manage') {
+                loadExistingItems();
+            }
+        }
+
+        function updateFormFields() {
+            const itemType = document.getElementById('item-type').value;
+            const treeFields = document.getElementById('tree-fields');
+            
+            if (itemType === 'tree_sapling') {
+                treeFields.classList.remove('hidden');
+                if (currentStageCount === 0) {
+                    initializeDefaultStages();
+                }
+            } else {
+                treeFields.classList.add('hidden');
+            }
+            
+            generatePreview();
+        }
+
+        function initializeDefaultStages() {
+            const defaultStages = [
+                { status: 'Sapling', hours: 0 },
+                { status: 'Young Tree', hours: 6 },
+                { status: 'Growing', hours: 12 },
+                { status: 'Flourishing', hours: 18 },
+                { status: 'Mature', hours: 24 }
+            ];
+
+            const container = document.getElementById('stages-container');
+            container.innerHTML = '';
+            currentStageCount = 0;
+
+            defaultStages.forEach(stage => {
+                addStage(stage.status, stage.hours);
+            });
+        }
+
+        function addStage(status = '', hours = '') {
+            const container = document.getElementById('stages-container');
+            const stageIndex = currentStageCount++;
+            
+            const stageDiv = document.createElement('div');
+            stageDiv.className = 'flex gap-2 items-center';
+            stageDiv.innerHTML = `
+                <input type="text" placeholder="Stage name" value="${status}"
+                       class="stage-input flex-1 px-3 py-2 rounded text-white text-sm" 
+                       data-stage-index="${stageIndex}" data-field="status">
+                <input type="number" placeholder="Hours" value="${hours}" min="0"
+                       class="stage-input w-20 px-3 py-2 rounded text-white text-sm" 
+                       data-stage-index="${stageIndex}" data-field="hours">
+                <button type="button" onclick="removeStage(this)" 
+                        class="bg-red-600 hover:bg-red-500 text-white px-2 py-1 rounded text-sm">
+                    ×
+                </button>
+            `;
+            
+            container.appendChild(stageDiv);
+        }
+
+        function removeStage(button) {
+            button.parentElement.remove();
+        }
+
+        async function generatePreview() {
+            const itemType = document.getElementById('item-type').value;
+            const itemId = document.getElementById('item-id').value;
+            const itemName = document.getElementById('item-name').value;
+
+            if (!itemType || !itemId) {
+                document.getElementById('preview-content').innerHTML = 
+                    '<p class="text-gray-400">Please select item type and enter item ID to generate preview.</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'preview',
+                        itemType,
+                        itemId,
+                        itemName
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to generate preview');
+                }
+
+                const result = await response.json();
+                displayPreview(result.paths);
+
+            } catch (error) {
+                console.error('Preview generation failed:', error);
+                document.getElementById('preview-content').innerHTML = 
+                    `<p class="text-red-400">Failed to generate preview: ${error.message}</p>`;
+            }
+        }
+
+        function displayPreview(paths) {
+            const previewDiv = document.getElementById('preview-content');
+            
+            let html = `
+                <div class="space-y-4">
+                    <div class="bg-blue-900 bg-opacity-30 border border-blue-700 p-3 rounded">
+                        <h4 class="font-semibold text-blue-400 mb-2">📁 File Organization Instructions</h4>
+                        <pre class="text-xs text-gray-300 whitespace-pre-wrap">${paths.instructions}</pre>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold mb-2">📸 Required Images:</h4>
+                        <div class="space-y-1 max-h-64 overflow-y-auto">
+            `;
+
+            paths.images.forEach(image => {
+                html += `
+                    <div class="flex justify-between items-center py-1 px-2 bg-gray-700 bg-opacity-50 rounded text-xs">
+                        <span class="text-gray-300">${image.filename}</span>
+                        <span class="text-gray-400">${image.description}</span>
+                    </div>
+                `;
+            });
+
+            if (paths.witheredImage) {
+                html += `
+                    <div class="flex justify-between items-center py-1 px-2 bg-gray-700 bg-opacity-50 rounded text-xs">
+                        <span class="text-gray-300">withered.png</span>
+                        <span class="text-gray-400">Tree withered state</span>
+                    </div>
+                `;
+            }
+
+            html += `
+                        </div>
+                    </div>
+                    
+                    <div class="bg-yellow-900 bg-opacity-30 border border-yellow-700 p-3 rounded">
+                        <h4 class="font-semibold text-yellow-400 mb-2">⚠️ Important Notes</h4>
+                        <ul class="text-xs text-gray-300 space-y-1">
+                            <li>• Upload images to your repository following the exact folder structure</li>
+                            <li>• Use the exact filenames shown above</li>
+                            <li>• After uploading images, create the item to save to database</li>
+                            <li>• Item will appear in shop once both database entry and images exist</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            previewDiv.innerHTML = html;
+        }
+
+        async function createItem() {
+            const itemData = {
+                id: document.getElementById('item-id').value.trim(),
+                name: document.getElementById('item-name').value.trim(),
+                description: document.getElementById('item-description').value.trim(),
+                cost: parseInt(document.getElementById('item-cost').value),
+                type: document.getElementById('item-type').value
+            };
+
+            // Validate basic fields
+            if (!itemData.id || !itemData.name || !itemData.description || !itemData.cost || !itemData.type) {
+                showResults('Please fill in all required fields.', 'error');
+                return;
+            }
+
+            // Add tree-specific data
+            if (itemData.type === 'tree_sapling') {
+                itemData.growthHours = parseInt(document.getElementById('growth-hours').value);
+                
+                // Collect stages
+                const stages = [];
+                document.querySelectorAll('[data-stage-index]').forEach(input => {
+                    const index = parseInt(input.dataset.stageIndex);
+                    const field = input.dataset.field;
+                    
+                    if (!stages[index]) stages[index] = {};
+                    stages[index][field] = field === 'hours' ? parseInt(input.value) : input.value;
+                });
+                
+                // Filter out incomplete stages
+                itemData.stages = stages.filter(stage => stage.status && typeof stage.hours === 'number');
+                
+                if (!itemData.growthHours || itemData.stages.length === 0) {
+                    showResults('Please fill in growth hours and at least one complete stage.', 'error');
+                    return;
+                }
+            }
+
+            try {
+                const response = await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'create',
+                        itemData
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'Failed to create item');
+                }
+
+                showResults(`
+                    <div class="text-green-400">
+                        <h3 class="font-semibold mb-2">✅ Item Created Successfully!</h3>
+                        <p class="mb-4">${result.message}</p>
+                        <div class="bg-green-900 bg-opacity-30 border border-green-700 p-3 rounded">
+                            <h4 class="font-semibold mb-2">Next Steps:</h4>
+                            <ol class="text-sm space-y-1">
+                                <li>1. Upload the required images to your repository</li>
+                                <li>2. Deploy your changes</li>
+                                <li>3. The new item will appear in the shop</li>
+                            </ol>
+                        </div>
+                    </div>
+                `, 'success');
+
+                // Clear form
+                document.getElementById('item-form').reset();
+                currentStageCount = 0;
+                document.getElementById('stages-container').innerHTML = '';
+                document.getElementById('tree-fields').classList.add('hidden');
+                document.getElementById('preview-content').innerHTML = 
+                    '<p class="text-gray-400">Fill out the form and click "Generate Preview" to see image organization instructions.</p>';
+
+            } catch (error) {
+                console.error('Item creation failed:', error);
+                showResults(error.message, 'error');
+            }
+        }
+
+        async function loadExistingItems() {
+            try {
+                const response = await fetch('/api/admin');
+                if (!response.ok) throw new Error('Failed to load items');
+
+                const data = await response.json();
+                existingItems = data.items;
+                displayExistingItems(existingItems);
+
+            } catch (error) {
+                console.error('Failed to load existing items:', error);
+                document.getElementById('existing-items').innerHTML = 
+                    `<div class="text-red-400">Failed to load items: ${error.message}</div>`;
+            }
+        }
+
+        function displayExistingItems(items) {
+            const container = document.getElementById('existing-items');
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div class="text-gray-400">No shop items found.</div>';
+                return;
+            }
+
+            const itemsByType = items.reduce((acc, item) => {
+                if (!acc[item.type]) acc[item.type] = [];
+                acc[item.type].push(item);
+                return acc;
+            }, {});
+
+            let html = '';
+            Object.entries(itemsByType).forEach(([type, typeItems]) => {
+                html += `
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-3 capitalize">${type.replace('_', ' ')}s</h3>
+                        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                `;
+
+                typeItems.forEach(item => {
+                    html += `
+                        <div class="bg-gray-700 p-4 rounded border">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-semibold">${item.name}</h4>
+                                <button onclick="deleteItem('${item.id}')" 
+                                        class="text-red-400 hover:text-red-300 text-sm">
+                                    Delete
+                                </button>
+                            </div>
+                            <p class="text-gray-300 text-sm mb-2">${item.description}</p>
+                            <div class="text-xs text-gray-400">
+                                <div>ID: ${item.id}</div>
+                                <div>Cost: ${item.cost.toLocaleString()} coins</div>
+                                ${item.growth_hours ? `<div>Growth: ${item.growth_hours}h</div>` : ''}
+                                <div>Status: ${item.is_active ? 'Active' : 'Inactive'}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div></div>';
+            });
+
+            container.innerHTML = html;
+        }
+
+        async function deleteItem(itemId) {
+            if (!confirm(`Are you sure you want to delete item "${itemId}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'delete',
+                        itemId
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'Failed to delete item');
+                }
+
+                showResults(`Item "${itemId}" deleted successfully.`, 'success');
+                loadExistingItems(); // Refresh the list
+
+            } catch (error) {
+                console.error('Delete failed:', error);
+                showResults(`Failed to delete item: ${error.message}`, 'error');
+            }
+        }
+
+        function showResults(message, type) {
+            const resultsDiv = document.getElementById('results');
+            const resultsContent = document.getElementById('results-content');
+            
+            const bgColor = type === 'success' ? 'bg-green-900 bg-opacity-30 border-green-700' : 'bg-red-900 bg-opacity-30 border-red-700';
+            const textColor = type === 'success' ? 'text-green-400' : 'text-red-400';
+            
+            resultsContent.innerHTML = `
+                <div class="${bgColor} border p-4 rounded">
+                    <div class="${textColor}">${message}</div>
+                </div>
+            `;
+            
+            resultsDiv.classList.remove('hidden');
+            
+            // Scroll to results
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
