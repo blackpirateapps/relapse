@@ -34,34 +34,46 @@ document.addEventListener('DOMContentLoaded', () => {
         loginError: document.getElementById('login-error'),
     };
 
+    // Initialize app with error handling
     initializeApp(data => {
-        state = data;
-        updateUI();
-        startTimer();
+        if (data) {
+            state = data;
+            updateUI();
+            startTimer();
+        } else {
+            console.error('Failed to initialize app - no data received');
+        }
     });
 
     function updateUI() {
-        const totalHours = state.lastRelapse ? 
-            (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
-        const currentRank = getRank(totalHours);
+        try {
+            if (!state.lastRelapse) return;
 
-        // Update rank display
-        elements.rankName.textContent = currentRank.name;
-        elements.rankStory.textContent = currentRank.storyline;
-        elements.phoenixDisplay.innerHTML = renderPhoenix(currentRank.level, state.equipped_upgrades);
+            const totalHours = (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60);
+            const currentRank = getRank(totalHours);
 
-        // Update stats
-        elements.longestStreak.textContent = formatStreak(state.longestStreak / 1000);
-        elements.rankLevel.textContent = `${currentRank.level + 1}`;
+            // Update rank display (with null checks)
+            if (elements.rankName) elements.rankName.textContent = currentRank.name;
+            if (elements.rankStory) elements.rankStory.textContent = currentRank.storyline;
+            if (elements.phoenixDisplay) elements.phoenixDisplay.innerHTML = renderPhoenix(currentRank.level, state.equipped_upgrades);
 
-        // Update progress to next rank
-        updateProgress(totalHours, currentRank);
+            // Update stats
+            if (elements.longestStreak) elements.longestStreak.textContent = formatStreak(state.longestStreak / 1000);
+            if (elements.rankLevel) elements.rankLevel.textContent = `${currentRank.level + 1}`;
 
-        // Update coins display
-        updateCoinsDisplay();
+            // Update progress to next rank
+            updateProgress(totalHours, currentRank);
+
+            // Update coins display
+            updateCoinsDisplay();
+        } catch (error) {
+            console.error('Error in updateUI:', error);
+        }
     }
 
     function updateProgress(totalHours, currentRank) {
+        if (!elements.progressText || !elements.progressBar) return;
+
         const nextRank = ranks[currentRank.level + 1];
         
         if (!nextRank) {
@@ -83,6 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateCoinsDisplay() {
+        if (!elements.currentCoins) return;
+
         const totalHours = state.lastRelapse ? 
             (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
         const streakCoins = Math.floor(10 * Math.pow(totalHours > 0 ? totalHours : 0, 1.2));
@@ -93,8 +107,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function animateNumber(element, targetValue) {
-        const currentValue = parseInt(element.textContent.replace(/[^d]/g, '')) || 0;
+        if (!element) return;
+
+        const currentValue = parseInt(element.textContent.replace(/[^d]/g, '')) || 0; // Fixed regex
         const difference = targetValue - currentValue;
+        
+        if (difference === 0) return;
+
         const steps = 20;
         const stepValue = difference / steps;
         const stepTime = 50;
@@ -138,6 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateTimerElement(element, value) {
+        if (!element) return;
+
         const formattedValue = String(value).padStart(2, '0');
         if (element.textContent !== formattedValue) {
             element.style.transform = 'scale(1.1)';
@@ -156,6 +177,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function attemptLogin() {
+        if (!elements.loginError || !elements.loginButton || !elements.passwordInput) return;
+
         elements.loginError.textContent = '';
         elements.loginButton.textContent = 'Entering...';
         elements.loginButton.disabled = true;
@@ -202,13 +225,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         </button>
                     </div>
                 `);
+            } else {
+                showModal('Error', 'Failed to process relapse. Please try again.');
             }
         } catch (error) {
+            console.error('Relapse error:', error);
             showModal('Error', 'Failed to process relapse. Please try again.');
         }
     }
 
-    // Event Listeners
+    // Event Listeners with null checks
     if (elements.loginButton) {
         elements.loginButton.addEventListener('click', attemptLogin);
     }
@@ -219,57 +245,61 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    elements.urgeButton.addEventListener('click', () => {
-        const tasks = [
-            "Take 10 deep breaths and focus on your goals.",
-            "Do 20 push-ups to redirect your energy.",
-            "Step outside for 5 minutes of fresh air.",
-            "Drink a full glass of cold water mindfully.",
-            "Write down 3 reasons why you started this journey.",
-            "Listen to your favorite motivational song.",
-            "Call or message a trusted friend.",
-            "Do a 2-minute meditation or mindfulness exercise."
-        ];
-        
-        const randomTask = tasks[Math.floor(Math.random() * tasks.length)];
-        
-        showModal('Moment of Strength', `
-            <div class="text-center">
-                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
+    if (elements.urgeButton) {
+        elements.urgeButton.addEventListener('click', () => {
+            const tasks = [
+                "Take 10 deep breaths and focus on your goals.",
+                "Do 20 push-ups to redirect your energy.",
+                "Step outside for 5 minutes of fresh air.",
+                "Drink a full glass of cold water mindfully.",
+                "Write down 3 reasons why you started this journey.",
+                "Listen to your favorite motivational song.",
+                "Call or message a trusted friend.",
+                "Do a 2-minute meditation or mindfulness exercise."
+            ];
+            
+            const randomTask = tasks[Math.floor(Math.random() * tasks.length)];
+            
+            showModal('Moment of Strength', `
+                <div class="text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">Channel Your Energy</h3>
+                    <div class="bg-blue-900 bg-opacity-30 border border-blue-500 rounded-lg p-4 mb-4">
+                        <p class="text-lg">${randomTask}</p>
+                    </div>
+                    <p class="text-gray-300 text-sm">You have the strength to overcome this moment.</p>
                 </div>
-                <h3 class="text-xl font-semibold mb-4">Channel Your Energy</h3>
-                <div class="bg-blue-900 bg-opacity-30 border border-blue-500 rounded-lg p-4 mb-4">
-                    <p class="text-lg">${randomTask}</p>
-                </div>
-                <p class="text-gray-300 text-sm">You have the strength to overcome this moment.</p>
-            </div>
-        `);
-    });
+            `);
+        });
+    }
 
-    elements.relapseButton.addEventListener('click', () => {
-        showModal('Confirm Journey Reset', `
-            <div class="text-center">
-                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center">
-                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
+    if (elements.relapseButton) {
+        elements.relapseButton.addEventListener('click', () => {
+            showModal('Confirm Journey Reset', `
+                <div class="text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">Are you sure?</h3>
+                    <p class="text-gray-300 mb-6">This will reset your current streak and archive your phoenix. This action cannot be undone.</p>
+                    <div class="flex gap-4 justify-center">
+                        <button onclick="closeModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors">
+                            Cancel
+                        </button>
+                        <button onclick="handleRelapse()" class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-2 rounded-lg transition-all">
+                            Reset Journey
+                        </button>
+                    </div>
                 </div>
-                <h3 class="text-xl font-semibold mb-4">Are you sure?</h3>
-                <p class="text-gray-300 mb-6">This will reset your current streak and archive your phoenix. This action cannot be undone.</p>
-                <div class="flex gap-4 justify-center">
-                    <button onclick="closeModal()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors">
-                        Cancel
-                    </button>
-                    <button onclick="handleRelapse()" class="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-2 rounded-lg transition-all">
-                        Reset Journey
-                    </button>
-                </div>
-            </div>
-        `, { showClose: false });
-    });
+            `, { showClose: false });
+        });
+    }
 
     // Make handleRelapse available globally for the modal
     window.handleRelapse = handleRelapse;
