@@ -1,7 +1,7 @@
 import { initializeApp, getRank, renderPhoenix, showModal, closeModal, updateCoinCount, ranks } from './shared.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Journey.js loaded - DOM ready');
+    console.log('Journey.js loaded');
     
     let state = {};
     let timerInterval;
@@ -36,33 +36,31 @@ document.addEventListener('DOMContentLoaded', () => {
         loginError: document.getElementById('login-error'),
     };
 
-    console.log('Elements found:', elements);
+    console.log('Found elements:', Object.keys(elements).filter(key => elements[key] !== null));
 
-    // Set up event listeners FIRST
+    // Set up event listeners IMMEDIATELY
     setupEventListeners();
 
-    // Then initialize the app
+    // Initialize app
     console.log('Calling initializeApp...');
     initializeApp(data => {
-        console.log('InitializeApp callback received:', data);
+        console.log('InitializeApp callback:', !!data);
         if (data) {
             state = data;
             updateUI();
             startTimer();
         }
-    }).catch(error => {
-        console.error('InitializeApp failed:', error);
     });
 
     function setupEventListeners() {
         console.log('Setting up event listeners...');
-
-        // Login button event listener
+        
+        // Login button
         if (elements.loginButton) {
             elements.loginButton.addEventListener('click', attemptLogin);
-            console.log('Login button listener attached');
+            console.log('✅ Login button listener added');
         } else {
-            console.log('Login button not found');
+            console.log('❌ Login button not found');
         }
         
         // Password input enter key
@@ -70,16 +68,18 @@ document.addEventListener('DOMContentLoaded', () => {
             elements.passwordInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') attemptLogin();
             });
-            console.log('Password input listener attached');
+            console.log('✅ Password input listener added');
         }
 
         // Action buttons
         if (elements.urgeButton) {
             elements.urgeButton.addEventListener('click', handleUrge);
+            console.log('✅ Urge button listener added');
         }
 
         if (elements.relapseButton) {
             elements.relapseButton.addEventListener('click', handleRelapseClick);
+            console.log('✅ Relapse button listener added');
         }
     }
 
@@ -90,14 +90,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const totalHours = (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60);
             const currentRank = getRank(totalHours);
 
-            // Update rank display with null checks
+            // Update rank display (with null checks)
             if (elements.rankName) elements.rankName.textContent = currentRank.name;
             if (elements.rankStory) elements.rankStory.textContent = currentRank.storyline;
             if (elements.phoenixDisplay) {
                 elements.phoenixDisplay.innerHTML = renderPhoenix(currentRank.level, state.equipped_upgrades || {});
             }
 
-            // Update stats with null checks
+            // Update stats
             if (elements.longestStreak) {
                 elements.longestStreak.textContent = formatStreak(state.longestStreak / 1000);
             }
@@ -122,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const nextRank = ranks[currentRank.level + 1];
             
             if (!nextRank) {
+                // Max level reached
                 elements.progressText.textContent = 'Maximum Level Achieved!';
                 elements.progressBar.style.width = '100%';
                 elements.progressBar.classList.add('animate-pulse');
@@ -149,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const streakCoins = Math.floor(10 * Math.pow(totalHours > 0 ? totalHours : 0, 1.2));
             const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
             
+            // Animate coin count
             animateNumber(elements.currentCoins, totalCoins);
         } catch (error) {
             console.error('Error in updateCoinsDisplay:', error);
@@ -159,6 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!element) return;
 
         try {
+            // Fixed regex: /[^d]/g instead of /[^d]/g
             const currentValue = parseInt(element.textContent.replace(/[^d]/g, '')) || 0;
             const difference = targetValue - currentValue;
             
@@ -181,6 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, stepTime);
         } catch (error) {
             console.error('Error in animateNumber:', error);
+            element.textContent = targetValue.toLocaleString();
         }
     }
 
@@ -198,11 +202,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
+                // Update timer displays with animation
                 updateTimerElement(elements.timerDays, days);
                 updateTimerElement(elements.timerHours, hours);
                 updateTimerElement(elements.timerMinutes, minutes);
                 updateTimerElement(elements.timerSeconds, seconds);
 
+                // Update coins and progress
                 updateCoinsDisplay();
                 updateProgress(diff / (1000 * 60 * 60), getRank(diff / (1000 * 60 * 60)));
             } catch (error) {
@@ -236,10 +242,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function attemptLogin() {
-        console.log('Attempt login called');
+        console.log('🔑 Login attempt started');
         
         if (!elements.loginButton || !elements.passwordInput || !elements.loginError) {
-            console.error('Login elements missing');
+            console.error('❌ Login elements missing');
             return;
         }
 
@@ -248,23 +254,24 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.loginButton.disabled = true;
 
         try {
-            console.log('Sending login request...');
+            console.log('📡 Sending login request to /api/login');
             const response = await fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password: elements.passwordInput.value }),
             });
 
-            console.log('Login response:', response.status);
+            console.log('📡 Login response status:', response.status);
 
             if (response.ok) {
-                console.log('Login successful, reloading...');
+                console.log('✅ Login successful, reloading page');
                 window.location.reload();
             } else {
+                console.log('❌ Login failed');
                 elements.loginError.textContent = 'Incorrect password.';
             }
         } catch (error) {
-            console.error('Login error:', error);
+            console.error('❌ Login error:', error);
             elements.loginError.textContent = 'Connection error. Please try again.';
         } finally {
             elements.loginButton.textContent = 'Enter Journey';
@@ -346,6 +353,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         </button>
                     </div>
                 `);
+            } else {
+                showModal('Error', 'Failed to process relapse. Please try again.');
             }
         } catch (error) {
             console.error('Relapse error:', error);
@@ -353,6 +362,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Make handleRelapse globally available for modal
+    // Make handleRelapse globally available
     window.handleRelapse = handleRelapse;
 });
