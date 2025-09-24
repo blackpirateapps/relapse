@@ -40,7 +40,7 @@ export async function initializeApp(callback) {
       if (typeof state.upgrades === 'string') state.upgrades = JSON.parse(state.upgrades || '{}');
       if (typeof state.equipped_upgrades === 'string') state.equipped_upgrades = JSON.parse(state.equipped_upgrades || '{}');
 
-      // Load shop data
+      // Load shop data from new API endpoint
       await loadShopData();
 
       createSidebar();
@@ -71,13 +71,30 @@ async function loadShopData() {
     const response = await fetch('/api/shop');
     if (response.ok) {
       const shopData = await response.json();
-      shopItems.length = 0; // Clear existing array
+      
+      // Clear existing arrays and objects
+      shopItems.length = 0;
+      Object.keys(treeTypes).forEach(key => delete treeTypes[key]);
+      
+      // Populate with new data from database
       shopItems.push(...shopData.shopItems);
       Object.assign(treeTypes, shopData.treeTypes);
+      
+      console.log('Loaded shop data:', { 
+        itemCount: shopItems.length, 
+        treeCount: Object.keys(treeTypes).length 
+      });
+    } else {
+      console.warn('Failed to load shop data from API');
     }
   } catch (error) {
     console.error('Failed to load shop data:', error);
   }
+}
+
+// Export function to reload shop data
+export async function reloadShopData() {
+  await loadShopData();
 }
 
 function createSidebar() {
@@ -125,6 +142,13 @@ function createSidebar() {
 
 export function getState() {
   return state;
+}
+
+export function updateState(newState) {
+  Object.assign(state, newState);
+  if (typeof state.upgrades === 'string') state.upgrades = JSON.parse(state.upgrades || '{}');
+  if (typeof state.equipped_upgrades === 'string') state.equipped_upgrades = JSON.parse(state.equipped_upgrades || '{}');
+  updateCoinCount();
 }
 
 export function updateCoinCount() {
@@ -209,7 +233,6 @@ export function closeModal() {
 }
 
 function initStarfield() {
-  // Starfield animation code
   const canvas = document.getElementById('starfield');
   if (!canvas) return;
 

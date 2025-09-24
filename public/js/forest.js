@@ -1,4 +1,4 @@
-import { initializeApp, showModal, closeModal, updateCoinCount, treeTypes } from './shared.js';
+import { initializeApp, showModal, closeModal, updateState, treeTypes, reloadShopData } from './shared.js';
 
 // API endpoints
 const STATE_API_URL = '/api/state';
@@ -8,6 +8,12 @@ let forestData = [];
 
 initializeApp(async (initState) => {
   forestData = initState.forest || [];
+  
+  // Wait for shop data to load, then render
+  if (Object.keys(treeTypes).length === 0) {
+    await reloadShopData();
+  }
+  
   renderForest();
   renderShop();
   updateStats();
@@ -29,7 +35,14 @@ async function fetchForestData() {
 
 function getTreeGrowthStage(tree) {
   const treeConfig = treeTypes[tree.treeType];
-  if (!treeConfig) return { statusText: 'Unknown', imageSrc: '', statusColor: 'text-gray-500' };
+  if (!treeConfig) {
+    console.warn(`Tree type ${tree.treeType} not found in treeTypes`);
+    return { 
+      statusText: 'Unknown Tree', 
+      imageSrc: '/img/placeholder.png', 
+      statusColor: 'text-gray-500' 
+    };
+  }
 
   if (tree.status === 'withered') {
     return {
@@ -113,6 +126,11 @@ function renderShop() {
   
   const treeTypesArray = Object.values(treeTypes);
   
+  if (treeTypesArray.length === 0) {
+    shopContainer.innerHTML = '<div class="text-center text-gray-400">Loading tree shop...</div>';
+    return;
+  }
+  
   shopContainer.innerHTML = treeTypesArray.map(tree => {
     // Create gallery of all stages
     const stageGallery = tree.stages.map((stage, index) => `
@@ -129,7 +147,7 @@ function renderShop() {
       <div class="bg-gray-800 p-6 rounded-lg border border-gray-700">
         <!-- Tree Header -->
         <div class="flex items-center gap-4 mb-4">
-          <img src="${tree.stages[0].image}" alt="${tree.name}" 
+          <img src="${tree.stages[0]?.image}" alt="${tree.name}" 
                class="w-16 h-16 object-cover rounded" 
                onerror="this.style.display='none'">
           <div>
@@ -183,7 +201,9 @@ window.buyTree = async function(treeId) {
 
     const result = await response.json();
     
-    // Update forest data from response
+    // Update state and forest data from response
+    updateState(result.userState);
+    
     if (result.forest) {
       forestData = result.forest;
     } else {
@@ -194,13 +214,12 @@ window.buyTree = async function(treeId) {
     renderShop();
     updateStats();
     updateTimers();
-    updateCoinCount();
     
     showModal('Tree Planted!', `
       <div class="text-center">
-        <img src="${tree.stages[0].image}" alt="${tree.name}" class="w-20 h-20 mx-auto mb-4 rounded">
+        <img src="${tree.stages[0]?.image}" alt="${tree.name}" class="w-20 h-20 mx-auto mb-4 rounded">
         <h3 class="text-lg font-semibold mb-2">${tree.name}</h3>
-        <p class="text-sm text-gray-300 mb-4">${tree.stages[0].status}</p>
+        <p class="text-sm text-gray-300 mb-4">${tree.stages[0]?.status}</p>
         <p class="text-sm text-gray-400">${tree.description}</p>
       </div>
       <p class="text-green-400 mt-4 text-center">${result.message}</p>

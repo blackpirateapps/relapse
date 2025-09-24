@@ -1,4 +1,4 @@
-import { initializeApp, shopItems, showModal, closeModal, getState, updateCoinCount } from './shared.js';
+import { initializeApp, shopItems, showModal, closeModal, getState, updateState } from './shared.js';
 
 let state = {};
 
@@ -22,26 +22,30 @@ function updateShopUI() {
   // Separate items by type for different sections in the shop
   const skinItems = shopItems.filter(item => item.type === 'phoenix_skin');
   const themeItems = shopItems.filter(item => item.type === 'theme');
+  const cosmeticItems = shopItems.filter(item => item.type === 'cosmetic');
 
-  const createSkinItemsHtml = (items) => {
-    if (items.length === 0) return '<p class="text-gray-400">No skins available at this time.</p>';
+  const createItemsHtml = (items, showEquipButton = true) => {
+    if (items.length === 0) return '<p class="text-gray-400">No items available at this time.</p>';
 
     return items.map(item => {
       const isOwned = state.upgrades && state.upgrades[item.id];
       const isEquipped = state.equipped_upgrades && state.equipped_upgrades[item.id];
       let actionButtons;
 
-      if (isOwned) {
+      if (isOwned && showEquipButton) {
         // If the user owns the item, show Equip/Unequip buttons
         if (isEquipped) {
-          actionButtons = `<button onclick="handleEquipItem(event)" data-item-id="${item.id}" data-equip="false" class="w-full bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded transition-colors">Unequip</button>`;
+          actionButtons = `<button onclick="handleEquipItem('${item.id}', false)" class="w-full bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded transition-colors">Unequip</button>`;
         } else {
-          actionButtons = `<button onclick="handleEquipItem(event)" data-item-id="${item.id}" data-equip="true" class="w-full bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded transition-colors">Equip</button>`;
+          actionButtons = `<button onclick="handleEquipItem('${item.id}', true)" class="w-full bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded transition-colors">Equip</button>`;
         }
+      } else if (isOwned) {
+        // If owned but no equip functionality
+        actionButtons = `<div class="w-full bg-green-700 text-white px-4 py-2 rounded text-center">Owned</div>`;
       } else {
         // If not owned, show the buy button
         const canAfford = state.coins >= item.cost;
-        actionButtons = `<button onclick="handleBuyItem(event)" data-item-id="${item.id}" ${!canAfford ? 'disabled' : ''} class="w-full ${canAfford ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-600 cursor-not-allowed'} text-white px-4 py-2 rounded transition-colors">Buy for ${item.cost.toLocaleString()} Coins</button>`;
+        actionButtons = `<button onclick="handleBuyItem('${item.id}')" ${!canAfford ? 'disabled' : ''} class="w-full ${canAfford ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-600 cursor-not-allowed'} text-white px-4 py-2 rounded transition-colors">Buy for ${item.cost.toLocaleString()} Coins</button>`;
       }
 
       return `
@@ -55,62 +59,42 @@ function updateShopUI() {
     }).join('');
   };
 
-  const createThemeItemsHtml = (items) => {
-    if (items.length === 0) return '<p class="text-gray-400">No themes available at this time.</p>';
-
-    return items.map(item => {
-      const isOwned = state.upgrades && state.upgrades[item.id];
-      const isEquipped = state.equipped_upgrades && state.equipped_upgrades[item.id];
-      let actionButtons;
-
-      if (isOwned) {
-        if (isEquipped) {
-          actionButtons = `<button onclick="handleEquipItem(event)" data-item-id="${item.id}" data-equip="false" class="w-full bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded transition-colors">Unequip</button>`;
-        } else {
-          actionButtons = `<button onclick="handleEquipItem(event)" data-item-id="${item.id}" data-equip="true" class="w-full bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded transition-colors">Equip</button>`;
-        }
-      } else {
-        const canAfford = state.coins >= item.cost;
-        actionButtons = `<button onclick="handleBuyItem(event)" data-item-id="${item.id}" ${!canAfford ? 'disabled' : ''} class="w-full ${canAfford ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-600 cursor-not-allowed'} text-white px-4 py-2 rounded transition-colors">Buy for ${item.cost.toLocaleString()} Coins</button>`;
-      }
-
-      return `
-        <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
-          <h3 class="text-lg font-semibold text-white mb-2">${item.name}</h3>
-          <p class="text-sm text-gray-400 mb-4">${item.description}</p>
-          ${actionButtons}
-        </div>
-      `;
-    }).join('');
-  };
-
   shopContainer.innerHTML = `
     <!-- Phoenix Skins Section -->
     <div class="mb-8">
       <h2 class="text-2xl font-bold text-white mb-4">Phoenix Skins</h2>
       <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        ${createSkinItemsHtml(skinItems)}
+        ${createItemsHtml(skinItems, true)}
       </div>
     </div>
 
     <!-- Themes Section -->
-    <div>
+    <div class="mb-8">
       <h2 class="text-2xl font-bold text-white mb-4">Themes</h2>
       <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        ${createThemeItemsHtml(themeItems)}
+        ${createItemsHtml(themeItems, true)}
       </div>
     </div>
+
+    <!-- Cosmetics Section -->
+    ${cosmeticItems.length > 0 ? `
+    <div>
+      <h2 class="text-2xl font-bold text-white mb-4">Cosmetics</h2>
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        ${createItemsHtml(cosmeticItems, false)}
+      </div>
+    </div>
+    ` : ''}
   `;
 }
 
 // Handles buying items
-window.handleBuyItem = async function(e) {
-  const button = e.target;
-  const itemId = button.dataset.itemId;
+window.handleBuyItem = async function(itemId) {
   const item = shopItems.find(i => i.id === itemId);
-
   if (!item) return;
 
+  const button = event.target;
+  const originalText = button.textContent;
   button.disabled = true;
   button.textContent = 'Purchasing...';
 
@@ -129,15 +113,13 @@ window.handleBuyItem = async function(e) {
     const result = await response.json();
     
     // Update state with new data
-    Object.assign(state, result.userState);
-    if (typeof state.upgrades === 'string') state.upgrades = JSON.parse(state.upgrades || '{}');
-    if (typeof state.equipped_upgrades === 'string') state.equipped_upgrades = JSON.parse(state.equipped_upgrades || '{}');
+    updateState(result.userState);
 
     updateShopUI();
-    updateCoinCount();
 
     showModal('Purchase Successful!', `
       <div class="text-center">
+        <img src="${item.previewImage || '/img/placeholder.png'}" alt="${item.name}" class="w-20 h-20 mx-auto mb-4 rounded" onerror="this.style.display='none'">
         <h3 class="text-lg font-semibold mb-2">${item.name}</h3>
         <p class="text-sm text-gray-300 mb-4">${item.description}</p>
         <p class="text-green-400">${result.message}</p>
@@ -153,15 +135,15 @@ window.handleBuyItem = async function(e) {
     `);
   } finally {
     button.disabled = false;
-    button.textContent = `Buy for ${item.cost.toLocaleString()} Coins`;
+    button.textContent = originalText;
   }
 };
 
 // Handles equipping and unequipping items
-window.handleEquipItem = async function(e) {
-  const button = e.target;
-  const itemId = button.dataset.itemId;
-  const equip = button.dataset.equip === 'true';
+window.handleEquipItem = async function(itemId, equip) {
+  const item = shopItems.find(i => i.id === itemId);
+  const button = event.target;
+  const originalText = button.textContent;
 
   button.disabled = true;
   button.textContent = equip ? 'Equipping...' : 'Unequipping...';
@@ -181,8 +163,7 @@ window.handleEquipItem = async function(e) {
     const result = await response.json();
     
     // Update state with new data
-    Object.assign(state, result.userState);
-    if (typeof state.equipped_upgrades === 'string') state.equipped_upgrades = JSON.parse(state.equipped_upgrades || '{}');
+    updateState(result.userState);
 
     updateShopUI();
 
@@ -195,6 +176,6 @@ window.handleEquipItem = async function(e) {
     `);
   } finally {
     button.disabled = false;
-    button.textContent = equip ? 'Equip' : 'Unequip';
+    button.textContent = originalText;
   }
 };

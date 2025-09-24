@@ -2,54 +2,6 @@ import db from './db.js';
 import { checkAuth } from './auth.js';
 import { ranks } from './ranks.js';
 
-// INTEGRATED: Complete shop items list including trees
-const shopItems = [
-  { id: 'bluePhoenix', name: 'Blue Phoenix', cost: 1500, type: 'phoenix_skin' },
-  { id: 'greenPhoenix', name: 'Verdant Phoenix', cost: 4000, type: 'phoenix_skin' },
-  { id: 'volcanicLair', name: 'Volcanic Lair', cost: 10000, type: 'theme' },
-  { id: 'celestialSky', name: 'Celestial Sky', cost: 50000, type: 'theme' },
-  
-  // Tree saplings for the forest shop
-  { id: 'tree_of_tranquility', name: 'Tree of Tranquility', cost: 200, type: 'tree_sapling', growthHours: 24 },
-  { id: 'ancient_oak', name: 'Ancient Oak', cost: 500, type: 'tree_sapling', growthHours: 48 }
-];
-
-// Tree configurations for forest shop
-const treeTypes = {
-  tree_of_tranquility: {
-    id: 'tree_of_tranquility',
-    name: 'Tree of Tranquility',
-    cost: 200,
-    description: 'A symbol of peace. Grows to maturity in 1 day, changing every 6 hours, if you do not relapse.',
-    growthHours: 24,
-    stages: [
-      { status: 'Sapling', hours: 0, image: '/img/trees/tree_of_tranquility/stage_1.png' },
-      { status: 'Sprout', hours: 6, image: '/img/trees/tree_of_tranquility/stage_2.png' },
-      { status: 'Young Tree', hours: 12, image: '/img/trees/tree_of_tranquility/stage_3.png' },
-      { status: 'Flourishing', hours: 18, image: '/img/trees/tree_of_tranquility/stage_4.png' },
-      { status: 'Mature', hours: 24, image: '/img/trees/tree_of_tranquility/stage_5.png' },
-    ],
-    witheredImage: '/img/trees/tree_of_tranquility/withered.png'
-  },
-  ancient_oak: {
-    id: 'ancient_oak',
-    name: 'Ancient Oak',
-    cost: 500,
-    description: 'A majestic oak that stands the test of time. Takes 2 days to reach full maturity, evolving through 7 distinct stages.',
-    growthHours: 48,
-    stages: [
-      { status: 'Acorn', hours: 0, image: '/img/trees/ancient_oak/stage_1.png' },
-      { status: 'Seedling', hours: 8, image: '/img/trees/ancient_oak/stage_2.png' },
-      { status: 'Sapling', hours: 16, image: '/img/trees/ancient_oak/stage_3.png' },
-      { status: 'Young Oak', hours: 24, image: '/img/trees/ancient_oak/stage_4.png' },
-      { status: 'Growing Oak', hours: 32, image: '/img/trees/ancient_oak/stage_5.png' },
-      { status: 'Mighty Oak', hours: 40, image: '/img/trees/ancient_oak/stage_6.png' },
-      { status: 'Ancient Oak', hours: 48, image: '/img/trees/ancient_oak/stage_7.png' },
-    ],
-    witheredImage: '/img/trees/ancient_oak/withered.png'
-  }
-};
-
 // Helper to parse JSON from the request body
 async function parseJsonBody(req) {
   return new Promise((resolve, reject) => {
@@ -62,6 +14,83 @@ async function parseJsonBody(req) {
 
 function getRank(totalHours) {
   return ranks.slice().reverse().find(r => totalHours >= r.hours) || ranks[0];
+}
+
+// Load shop items from database
+async function loadShopItems() {
+  try {
+    const itemsResult = await db.execute("SELECT * FROM shop_items WHERE is_active = true ORDER BY sort_order, id;");
+    const imagesResult = await db.execute("SELECT * FROM shop_item_images ORDER BY item_id, sort_order;");
+    
+    const shopItems = [];
+    const treeTypes = {};
+    
+    // Group images by item_id
+    const imagesByItem = {};
+    for (const image of imagesResult.rows) {
+      if (!imagesByItem[image.item_id]) {
+        imagesByItem[image.item_id] = [];
+      }
+      imagesByItem[image.item_id].push(image);
+    }
+    
+    // Build shop items and tree types
+    for (const item of itemsResult.rows) {
+      const itemImages = imagesByItem[item.id] || [];
+      
+      if (item.type === 'tree_sapling') {
+        // Build tree type object
+        const stages = itemImages
+          .filter(img => img.image_type === 'growth_stage')
+          .sort((a, b) => a.sort_order - b.sort_order)
+          .map(img => ({
+            status: img.stage_name,
+            hours: img.stage_hours,
+            image: img.image_url
+          }));
+          
+        treeTypes[item.id] = {
+          id: item.id,
+          name: item.name,
+          cost: item.cost,
+          description: item.description,
+          growthHours: item.growth_hours,
+          stages,
+          witheredImage: item.withered_image
+        };
+      }
+      
+      // Build shop item object
+      const shopItem = {
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        cost: item.cost,
+        type: item.type,
+        previewImage: item.preview_image
+      };
+      
+      // Add images array for phoenix skins
+      if (item.type === 'phoenix_skin') {
+        shopItem.images = itemImages
+          .filter(img => img.image_type === 'progression')
+          .sort((a, b) => a.sort_order - b.sort_order)
+          .map(img => img.image_url);
+      }
+      
+      // Add growth hours for trees
+      if (item.type === 'tree_sapling') {
+        shopItem.growthHours = item.growth_hours;
+      }
+      
+      shopItems.push(shopItem);
+    }
+    
+    return { shopItems, treeTypes };
+  } catch (error) {
+    console.error('Failed to load shop items:', error);
+    return { shopItems: [], treeTypes: {} };
+  }
 }
 
 // Main handler function - handles both GET and POST requests
@@ -106,6 +135,9 @@ async function handleGetShop(req, res) {
 
     const totalCoins = state.coinsAtLastRelapse + streakCoins + unclaimedLevelReward;
 
+    // Load shop data from database
+    const { shopItems, treeTypes } = await loadShopItems();
+
     // Return shop data with user state
     res.status(200).json({
       shopItems,
@@ -148,10 +180,17 @@ async function handleShopAction(req, res) {
 // Handle item purchases
 async function handlePurchase(itemId, res) {
   try {
-    const item = shopItems.find(i => i.id === itemId);
-    if (!item) {
+    // Get item from database
+    const itemResult = await db.execute({
+      sql: "SELECT * FROM shop_items WHERE id = ? AND is_active = true;",
+      args: [itemId]
+    });
+    
+    if (itemResult.rows.length === 0) {
       return res.status(404).json({ message: 'Item not found.' });
     }
+    
+    const item = itemResult.rows[0];
 
     const { rows } = await db.execute("SELECT * FROM user_state WHERE id = 1;");
     if (rows.length === 0) {
@@ -192,7 +231,7 @@ async function handlePurchase(itemId, res) {
       });
 
       const purchaseDate = new Date();
-      const matureDate = new Date(purchaseDate.getTime() + item.growthHours * 60 * 60 * 1000);
+      const matureDate = new Date(purchaseDate.getTime() + item.growth_hours * 60 * 60 * 1000);
 
       await db.execute({
         sql: "INSERT INTO forest (treeType, status, purchaseDate, matureDate) VALUES (?, 'growing', ?, ?);",
@@ -222,11 +261,11 @@ async function handlePurchase(itemId, res) {
 
       // Auto-equip phoenix skins (unequip others)
       if (item.type === 'phoenix_skin') {
-        shopItems.forEach(shopItem => {
-          if (shopItem.type === 'phoenix_skin') {
-            equippedUpgrades[shopItem.id] = false;
-          }
-        });
+        // Get all phoenix skins to unequip them
+        const skinResult = await db.execute("SELECT id FROM shop_items WHERE type = 'phoenix_skin';");
+        for (const skin of skinResult.rows) {
+          equippedUpgrades[skin.id] = false;
+        }
       }
 
       equippedUpgrades[itemId] = true;
@@ -267,16 +306,20 @@ async function handleEquipment(itemId, equip, res) {
       return res.status(400).json({ message: 'Item not owned.' });
     }
 
-    const item = shopItems.find(i => i.id === itemId);
+    // Get item details from database
+    const itemResult = await db.execute({
+      sql: "SELECT * FROM shop_items WHERE id = ?;",
+      args: [itemId]
+    });
+    const item = itemResult.rows[0];
     
     if (equip) {
       // Equipping - handle phoenix skin mutual exclusion
       if (item && item.type === 'phoenix_skin') {
-        shopItems.forEach(shopItem => {
-          if (shopItem.type === 'phoenix_skin') {
-            equippedUpgrades[shopItem.id] = false;
-          }
-        });
+        const skinResult = await db.execute("SELECT id FROM shop_items WHERE type = 'phoenix_skin';");
+        for (const skin of skinResult.rows) {
+          equippedUpgrades[skin.id] = false;
+        }
       }
       equippedUpgrades[itemId] = true;
     } else {
@@ -302,6 +345,3 @@ async function handleEquipment(itemId, equip, res) {
     res.status(500).json({ message: 'Failed to update equipment.' });
   }
 }
-
-// Export shop items and tree types for frontend use
-export { shopItems, treeTypes };
