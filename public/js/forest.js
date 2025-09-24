@@ -3,6 +3,28 @@ import { initializeApp, showModal, closeModal, updateCoinCount } from './shared.
 // The API now points to your new, separate Vercel deployment.
 const FOREST_API_URL = 'https://api-relapse.vercel.app/api/forest';
 
+// --- Tree Configuration ---
+// This structure makes it easy to add more trees in the future.
+const treeTypes = {
+    tree_of_tranquility: {
+        id: 'tree_of_tranquility',
+        name: 'Tree of Tranquility',
+        cost: 200,
+        description: 'A symbol of peace. Grows to maturity in 1 day, changing every 6 hours, if you do not relapse.',
+        growthHours: 24,
+        stages: [
+            { status: 'Sapling', hours: 0, image: '/img/trees/tree_of_tranquility/stage_1.png' },
+            { status: 'Sprout', hours: 6, image: '/img/trees/tree_of_tranquility/stage_2.png' },
+            { status: 'Young Tree', hours: 12, image: '/img/trees/tree_of_tranquility/stage_3.png' },
+            { status: 'Flourishing', hours: 18, image: '/img/trees/tree_of_tranquility/stage_4.png' },
+            { status: 'Mature', hours: 24, image: '/img/trees/tree_of_tranquility/stage_5.png' },
+        ],
+        witheredImage: '/img/trees/tree_of_tranquility/withered.png'
+    }
+};
+// --- End Configuration ---
+
+
 let state = {};
 let forestData = [];
 
@@ -36,6 +58,41 @@ async function fetchForestData() {
     }
 }
 
+
+// Determines the current visual stage of a growing tree
+function getTreeGrowthStage(tree) {
+    const treeConfig = treeTypes[tree.treeType] || treeTypes.tree_of_tranquility; // Default to tranquility tree
+    
+    if (tree.status === 'withered') {
+        return { statusText: 'Withered', imageSrc: treeConfig.witheredImage, statusColor: 'text-red-400' };
+    }
+    
+    const matureDate = new Date(tree.matureDate);
+    if (tree.status === 'matured' || Date.now() >= matureDate) {
+        const matureStage = treeConfig.stages[treeConfig.stages.length - 1];
+        return { statusText: matureStage.status, imageSrc: matureStage.image, statusColor: 'text-green-400' };
+    }
+
+    const purchaseDate = new Date(tree.purchaseDate);
+    const hoursSincePlanted = (Date.now() - purchaseDate.getTime()) / (1000 * 60 * 60);
+
+    // Find the current stage by checking hours in reverse
+    for (let i = treeConfig.stages.length - 1; i >= 0; i--) {
+        if (hoursSincePlanted >= treeConfig.stages[i].hours) {
+            return { 
+                statusText: treeConfig.stages[i].status, 
+                imageSrc: treeConfig.stages[i].image, 
+                statusColor: 'text-yellow-400' 
+            };
+        }
+    }
+    
+    // Fallback to the first stage
+    const firstStage = treeConfig.stages[0];
+    return { statusText: firstStage.status, imageSrc: firstStage.image, statusColor: 'text-yellow-400' };
+}
+
+
 // Renders the trees onto the page
 function renderForest() {
     const forestContainer = document.getElementById('forest-container');
@@ -47,37 +104,19 @@ function renderForest() {
     }
 
     forestContainer.innerHTML = forestData.map(tree => {
-        const now = new Date();
-        const matureDate = new Date(tree.matureDate);
-        let imageSrc = '/img/trees/withered.png'; // Changed to .png
-        let statusText = 'Withered';
-        let statusColor = 'text-red-400';
+        const stage = getTreeGrowthStage(tree);
         let timerHtml = '';
 
-        if (tree.status === 'growing') {
-            if (now < matureDate) {
-                imageSrc = '/img/trees/growing.png'; // Changed to .png
-                statusText = 'Growing';
-                statusColor = 'text-yellow-400';
-                timerHtml = `<div class="tree-timer text-xs text-cyan-300" data-mature-date="${tree.matureDate}"></div>`;
-            } else {
-                 // If the server hasn't updated it yet, we can assume it's mature
-                imageSrc = '/img/trees/matured.png'; // Changed to .png
-                statusText = 'Matured';
-                statusColor = 'text-green-400';
-            }
-        } else if (tree.status === 'matured') {
-            imageSrc = '/img/trees/matured.png'; // Changed to .png
-            statusText = 'Matured';
-            statusColor = 'text-green-400';
+        if (tree.status === 'growing' && Date.now() < new Date(tree.matureDate).getTime()) {
+            timerHtml = `<div class="tree-timer text-xs text-cyan-300" data-mature-date="${tree.matureDate}"></div>`;
         }
 
         return `
             <div class="card p-4 flex flex-col items-center text-center">
                 <div class="w-24 h-24 mb-2">
-                    <img src="${imageSrc}" alt="${statusText} tree">
+                    <img src="${stage.imageSrc}" alt="${stage.statusText} tree">
                 </div>
-                <p class="font-bold ${statusColor}">${statusText}</p>
+                <p class="font-bold ${stage.statusColor}">${stage.statusText}</p>
                 ${timerHtml}
             </div>
         `;
@@ -90,13 +129,13 @@ function renderShop() {
     const shopContainer = document.getElementById('shop-container');
     if (!shopContainer) return;
 
-    const sapling = { id: 'sapling_of_patience', name: 'Sapling of Patience', cost: 200, description: 'Grows into a mature tree in 3 days if you do not relapse.' };
+    const sapling = treeTypes.tree_of_tranquility;
 
     shopContainer.innerHTML = `
          <div class="card p-6 flex flex-col text-center">
             <h3 class="font-serif-display text-xl text-white">${sapling.name}</h3>
             <div class="w-24 h-24 my-4 mx-auto">
-                <img src="/img/trees/growing.png" alt="Sapling">
+                <img src="${sapling.stages[0].image}" alt="Sapling">
             </div>
             <p class="text-gray-400 text-sm flex-grow">${sapling.description}</p>
             <div class="mt-4">
@@ -106,11 +145,11 @@ function renderShop() {
             </div>
         </div>
     `;
-    document.getElementById('buy-sapling-btn').addEventListener('click', handleBuySapling);
+    document.getElementById('buy-sapling-btn').addEventListener('click', () => handleBuySapling(sapling.id));
 }
 
 // Handles the purchase of a new sapling by calling the external API
-async function handleBuySapling() {
+async function handleBuySapling(treeId) {
     const button = document.getElementById('buy-sapling-btn');
     button.disabled = true;
     button.textContent = 'Purchasing...';
@@ -118,6 +157,8 @@ async function handleBuySapling() {
     try {
         const response = await fetch(FOREST_API_URL, {
             method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ treeId: treeId, growthHours: treeTypes[treeId].growthHours }),
             credentials: 'include' // Important for sending the cookie
         });
 
@@ -130,7 +171,7 @@ async function handleBuySapling() {
         forestData = result; // Update local data with response from API
         renderForest();
         updateStats();
-        updateCoinCount(); // This function from shared.js should re-fetch state to get the new coin balance
+        updateCoinCount(); 
         showModal('Success!', '<p>You have planted a new sapling in your forest. Nurture it well!</p>');
 
     } catch (error) {
@@ -138,7 +179,7 @@ async function handleBuySapling() {
         showModal('Purchase Failed', `<p>${error.message}</p>`);
     } finally {
         button.disabled = false;
-        button.textContent = 'Buy for 200 Coins';
+        button.textContent = `Buy for ${treeTypes[treeId].cost.toLocaleString()} Coins`;
     }
 }
 
@@ -159,16 +200,16 @@ function updateTimers() {
     if (timerInterval) clearInterval(timerInterval);
 
     timerInterval = setInterval(() => {
+        // Periodically re-render the forest to update growth stages
+        renderForest(); 
+        
         document.querySelectorAll('.tree-timer').forEach(timerEl => {
             const matureDate = new Date(timerEl.dataset.matureDate);
             const remaining = matureDate.getTime() - Date.now();
             if (remaining > 0) {
                 timerEl.textContent = formatRemainingTime(remaining);
             } else {
-                timerEl.textContent = 'Matured!';
-                timerEl.closest('.card').querySelector('img').src = '/img/trees/matured.png'; // Changed to .png
-                timerEl.closest('.card').querySelector('.font-bold').textContent = 'Matured';
-                timerEl.closest('.card').querySelector('.font-bold').className = 'font-bold text-green-400';
+                timerEl.textContent = ''; // Timer is removed when re-rendered as mature
             }
         });
     }, 1000);
@@ -180,6 +221,8 @@ function formatRemainingTime(ms) {
     const h = Math.floor((totalSeconds % 86400) / 3600);
     const m = Math.floor((totalSeconds % 3600) / 60);
     const s = Math.floor(totalSeconds % 60);
-    return `${d}d ${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+    // Only show days if it's more than 0
+    const dayPart = d > 0 ? `${d}d ` : '';
+    return `${dayPart}${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
 }
 
