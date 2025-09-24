@@ -1,62 +1,27 @@
 // --- DATA ---
 export const ranks = [
-    // Note: There are 16 ranks, so level ranges from 0 to 15.
-    { name: "Ashen Egg I", id: "egg-1", hours: 0, storyline: "A silent promise, dormant and resilient.", reward: 0, image: '/img/default/egg-1.webp' },
-    { name: "Ashen Egg II", id: "egg-2", hours: 6, storyline: "A faint warmth begins to emanate from within.", reward: 50, image: '/img/default/egg-2.webp' },
-    { name: "Ashen Egg III", id: "egg-3", hours: 12, storyline: "Small cracks appear, signs of life stirring inside.", reward: 100, image: '/img/default/egg-3.webp' },
-    { name: "Fledgling Hatchling", id: "hatchling-1", hours: 24, storyline: "The shell cracks. A new life, fragile yet determined.", reward: 250, image: '/img/default/hatchling-1.webp' },
-    { name: "Ember Glance", id: "hatchling-2", hours: 36, storyline: "Its eyes, like tiny embers, begin to focus.", reward: 150, image: '/img/default/hatchling-2.webp' },
-    { name: "First Steps", id: "hatchling-3", hours: 48, storyline: "Wobbly but resolute, it takes its first steps.", reward: 200, image: '/img/default/hatchling-3.webp' },
-    { name: "Ember Chick", id: "chick-1", hours: 72, storyline: "Small embers begin to glow in its downy feathers.", reward: 500, image: '/img/default/chick-1.webp' },
-    { name: "Warmth of Will", id: "chick-2", hours: 120, storyline: "The chick learns to control its inner warmth.", reward: 300, image: '/img/default/chick-2.webp' },
-    { name: "Flame Youngling", id: "youngling-1", hours: 168, storyline: "The fire is now a steady, growing flame.", reward: 1000, image: '/img/default/youngling-1.webp' },
-    { name: "Spark of Defiance", id: "youngling-2", hours: 240, storyline: "It actively extinguishes small temptations.", reward: 750, image: '/img/default/youngling-2.webp' },
-    { name: "Sunfire Phoenix", id: "sunfire-1", hours: 336, storyline: "Radiating a brilliant heat, a beacon of willpower.", reward: 2000, image: '/img/default/sunfire-1.webp' },
-    { name: "Blinding Light", id: "sunfire-2", hours: 500, storyline: "Its light pushes back the shadows of doubt.", reward: 1500, image: '/img/default/sunfire-2.webp' },
-    { name: "Blaze Guardian", id: "guardian-1", hours: 720, storyline: "No longer just a creature, but a guardian of its flame.", reward: 4000, image: '/img/default/guardian-1.webp' },
-    { name: "Vigilant Stance", id: "guardian-2", hours: 1440, storyline: "A fortress of resolve against old habits.", reward: 3000, image: '/img/default/guardian-2.webp' },
-    { name: "Solar Drake", id: "drake", hours: 2160, storyline: "Its power rivals that of a small star.", reward: 8000, image: '/img/default/drake.webp' },
-    { name: "Celestial Phoenix", id: "celestial-phoenix", hours: 4320, storyline: "A cosmic force of pure, transcendent will.", reward: 15000, image: '/img/default/celestial-phoenix.webp' }
+    { name: "Ashen Egg I", id: "egg-1", hours: 0, storyline: "A silent promise, dormant and resilient.", reward: 0, color: '#94a3b8', image: '/img/egg-1.webp' },
+    { name: "Ashen Egg II", id: "egg-2", hours: 6, storyline: "A faint warmth begins to emanate from within.", reward: 50, color: '#a1a1aa', image: '/img/egg-2.webp' },
+    { name: "Ashen Egg III", id: "egg-3", hours: 12, storyline: "Small cracks appear, signs of life stirring inside.", reward: 100, color: '#d4d4d8', image: '/img/egg-3.webp' },
+    { name: "Fledgling Hatchling", id: "hatchling-1", hours: 24, storyline: "The shell cracks. A new life, fragile yet determined.", reward: 250, color: '#f87171', image: '/img/hatchling-1.webp' },
+    { name: "Ember Glance", id: "hatchling-2", hours: 36, storyline: "Its eyes, like tiny embers, begin to focus.", reward: 150, color: '#fb923c', image: '/img/hatchling-2.webp' },
+    { name: "First Steps", id: "hatchling-3", hours: 48, storyline: "Wobbly but resolute, it takes its first steps.", reward: 200, color: '#fbbf24', image: '/img/hatchling-3.webp' },
+    { name: "Ember Chick", id: "chick-1", hours: 72, storyline: "Small embers begin to glow in its downy feathers.", reward: 500, color: '#facc15', image: '/img/chick-1.webp' },
+    { name: "Warmth of Will", id: "chick-2", hours: 120, storyline: "The chick learns to control its inner warmth.", reward: 300, color: '#a3e635', image: '/img/chick-2.webp' },
+    { name: "Flame Youngling", id: "youngling-1", hours: 168, storyline: "The fire is now a steady, growing flame.", reward: 1000, color: '#4ade80', image: '/img/youngling-1.webp' },
+    { name: "Spark of Defiance", id: "youngling-2", hours: 240, storyline: "It actively extinguishes small temptations.", reward: 750, color: '#34d399', image: '/img/youngling-2.webp' },
+    { name: "Sunfire Phoenix", id: "sunfire-1", hours: 336, storyline: "Radiating a brilliant heat, a beacon of willpower.", reward: 2000, color: '#2dd4bf', image: '/img/sunfire-1.webp' },
+    { name: "Blinding Light", id: "sunfire-2", hours: 500, storyline: "Its light pushes back the shadows of doubt.", reward: 1500, color: '#67e8f9', image: '/img/sunfire-2.webp' },
+    { name: "Blaze Guardian", id: "guardian-1", hours: 720, storyline: "No longer just a creature, but a guardian of its flame.", reward: 4000, color: '#a78bfa', image: '/img/guardian-1.webp' },
+    { name: "Vigilant Stance", id: "guardian-2", hours: 1440, storyline: "A fortress of resolve against old habits.", reward: 3000, color: '#c084fc', image: '/img/guardian-2.webp' },
+    { name: "Solar Drake", id: "drake", hours: 2160, storyline: "Its power rivals that of a small star.", reward: 8000, color: '#f472b6', image: '/img/drake.webp' },
+    { name: "Celestial Phoenix", id: "celestial-phoenix", hours: 4320, storyline: "A cosmic force of pure, transcendent will.", reward: 15000, color: '#f9a8d4', image: '/img/celestial-phoenix.webp' }
 ];
 
 export const shopItems = [
-    // --- PHOENIX SKINS (NEW) ---
-    {
-        id: 'bluePhoenix',
-        name: 'Blue Phoenix',
-        cost: 1500, // << PRICE UPDATED
-        description: 'A mystical phoenix born of celestial ice, its flames burn with a cool, determined light.',
-        type: 'phoenix_skin',
-        previewImage: '/img/skins/blue/celestial-phoenix.webp',
-        images: [
-            '/img/skins/blue/egg-1.webp', '/img/skins/blue/egg-2.webp', '/img/skins/blue/egg-3.webp',
-            '/img/skins/blue/hatchling-1.webp', '/img/skins/blue/hatchling-2.webp', '/img/skins/blue/hatchling-3.webp',
-            '/img/skins/blue/chick-1.webp', '/img/skins/blue/chick-2.webp',
-            '/img/skins/blue/youngling-1.webp', '/img/skins/blue/youngling-2.webp',
-            '/img/skins/blue/sunfire-1.webp', '/img/skins/blue/sunfire-2.webp',
-            '/img/skins/blue/guardian-1.webp', '/img/skins/blue/guardian-2.webp',
-            '/img/skins/blue/drake.webp', '/img/skins/blue/celestial-phoenix.webp'
-        ]
-    },
-    {
-        id: 'greenPhoenix',
-        name: 'Verdant Phoenix',
-        cost: 4000,
-        description: 'A phoenix intertwined with the essence of a life-giving forest, symbolizing growth and renewal.',
-        type: 'phoenix_skin',
-        previewImage: '/img/skins/green/celestial-phoenix.webp',
-        images: [
-            '/img/skins/green/egg-1.webp', '/img/skins/green/egg-2.webp', '/img/skins/green/egg-3.webp',
-            '/img/skins/green/hatchling-1.webp', '/img/skins/green/hatchling-2.webp', '/img/skins/green/hatchling-3.webp',
-            '/img/skins/green/chick-1.webp', '/img/skins/green/chick-2.webp',
-            '/img/skins/green/youngling-1.webp', '/img/skins/green/youngling-2.webp',
-            '/img/skins/green/sunfire-1.webp', '/img/skins/green/sunfire-2.webp',
-            '/img/skins/green/guardian-1.webp', '/img/skins/green/guardian-2.webp',
-            '/img/skins/green/drake.webp', '/img/skins/green/celestial-phoenix.webp'
-        ]
-    },
-
-    // --- THEMES (EXISTING) ---
+    // This now only contains non-tree items. The forest shop is managed in forest.js
+    { id: 'aura', name: 'Aura of Resolve', cost: 500, description: 'A soft, glowing aura for your phoenix.', type: 'cosmetic' },
+    { id: 'celestialFlames', name: 'Celestial Flames', cost: 1200, description: 'Changes phoenix visuals to a cool blue.', type: 'cosmetic' },
     { id: 'volcanicLair', name: 'Volcanic Lair', cost: 10000, description: 'A dark, fiery background theme.', type: 'theme' },
     { id: 'celestialSky', name: 'Celestial Sky', cost: 50000, description: 'A beautiful, star-filled background theme.', type: 'theme' }
 ];
@@ -106,6 +71,7 @@ function createSidebar() {
     const navItems = [
         { id: 'journey', name: 'Journey', href: '/', icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>` },
         { id: 'progression', name: 'Progression', href: '/progression.html', icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>` },
+        { id: 'forest', name: 'Forest', href: '/forest.html', icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>` },
         { id: 'aviary', name: 'The Aviary', href: '/aviary.html', icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>` },
         { id: 'shop', name: 'The Shop', href: '/shop.html', icon: `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>` },
     ];
@@ -118,12 +84,14 @@ function createSidebar() {
             <span class="text-2xl font-serif-display">Phoenix</span>
         </a>
         <nav>
-            ${navItems.map(item => `
-                <a href="${item.href}" class="sidebar-nav-item flex items-center py-2.5 px-4 rounded transition duration-200 ${(currentPath === item.href || (currentPath === '/' && item.id === 'journey')) ? 'active' : ''}">
+            ${navItems.map(item => {
+                const isActive = item.href === '/' ? currentPath === '/' || currentPath === '/index.html' : currentPath.startsWith(item.href);
+                return `
+                <a href="${item.href}" class="sidebar-nav-item flex items-center py-2.5 px-4 rounded transition duration-200 ${isActive ? 'active' : ''}">
                     ${item.icon}
                     <span class="ml-4">${item.name}</span>
                 </a>
-            `).join('')}
+            `}).join('')}
         </nav>
     `;
 
@@ -137,19 +105,31 @@ function createSidebar() {
     }
 }
 
+
 export function getState() {
     return state;
 }
 
-export function updateCoinCount() {
+export async function updateCoinCount() {
     const coinCountDisplay = document.getElementById('coin-count');
     if (!coinCountDisplay) return;
 
-    const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
-    const streakCoins = calculateCoins(totalHours);
-    const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
-    state.coins = totalCoins;
-    coinCountDisplay.textContent = Math.floor(totalCoins).toLocaleString();
+    // Refetch the state to get the most up-to-date coin balance from the server
+    try {
+        const response = await fetch('/api/state');
+        if (response.ok) {
+            const freshState = await response.json();
+            state.coinsAtLastRelapse = freshState.coinsAtLastRelapse;
+
+            const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
+            const streakCoins = calculateCoins(totalHours);
+            const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
+            state.coins = totalCoins;
+            coinCountDisplay.textContent = Math.floor(totalCoins).toLocaleString();
+        }
+    } catch (error) {
+        console.error("Could not update coin count:", error);
+    }
 }
 
 export function calculateCoins(totalHours) {
@@ -164,24 +144,25 @@ export function getRank(totalHours) {
     return { ...ranks[0], level: 0 };
 }
 
-export function renderPhoenix(level, equipped_upgrades = {}) {
-    const defaultRank = ranks[level];
-    if (!defaultRank) return '';
-
-    let imageUrl = defaultRank.image;
-
-    const equippedSkinId = Object.keys(equipped_upgrades).find(id => equipped_upgrades[id] && shopItems.find(item => item.id === id && item.type === 'phoenix_skin'));
+export function renderPhoenix(level, upgrades = {}) {
+    const rank = ranks[level];
+    if (!rank) return '';
     
-    if (equippedSkinId) {
-        const skin = shopItems.find(item => item.id === equippedSkinId);
-        if (skin && skin.images && skin.images[level]) {
-            imageUrl = skin.images[level];
+    let imageSrc = rank.image;
+
+    // Check for equipped phoenix skins
+    for (const itemId in upgrades) {
+        if (upgrades[itemId]) {
+            const shopItem = shopItems.find(item => item.id === itemId && item.type === 'phoenix_skin');
+            if (shopItem && shopItem.images && shopItem.images[level]) {
+                imageSrc = shopItem.images[level];
+                break; // Use the first equipped skin found
+            }
         }
     }
     
-    return `<img src="${imageUrl}" alt="${defaultRank.name}" class="w-full h-full object-contain" onerror="this.onerror=null;this.src='${defaultRank.image}';">`;
+    return `<img src="${imageSrc}" alt="${rank.name}" class="w-full h-full object-contain">`;
 }
-
 
 export function showModal(title, content, options = {}) {
     const { showClose = true, size = 'max-w-lg' } = options;
@@ -216,13 +197,19 @@ export function initStarfield() {
     const ctx = canvas.getContext('2d');
     let w = canvas.width = window.innerWidth;
     let h = canvas.height = window.innerHeight;
-    window.onresize = () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; };
+    window.onresize = () => { 
+        if(canvas) {
+            w = canvas.width = window.innerWidth; 
+            h = canvas.height = window.innerHeight; 
+        }
+    };
     const stars = Array.from({ length: 100 }, () => ({
         x: Math.random() * w, y: Math.random() * h,
         radius: Math.random() * 1 + 1,
         vx: Math.floor(Math.random() * 50) - 25, vy: Math.floor(Math.random() * 50) - 25
     }));
     function tick() {
+        if(!ctx) return;
         ctx.clearRect(0, 0, w, h);
         ctx.globalCompositeOperation = "lighter";
         stars.forEach(s => {
