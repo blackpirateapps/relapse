@@ -13,8 +13,11 @@ export default function handler(req, res) {
     if (password === PASSWORD) {
         const cookie = serialize(COOKIE_NAME, 'true', {
             httpOnly: true,
-            secure: process.env.NODE_ENV !== 'development',
-            sameSite: 'strict',
+            // 'secure' is now mandatory for sameSite: 'none' to work.
+            // This is safe because Vercel always uses HTTPS.
+            secure: true, 
+            // 'sameSite: none' allows the cookie to be sent to your external API.
+            sameSite: 'none', 
             path: '/',
             maxAge: 60 * 60 * 24 * 30 // 30 days
         });
