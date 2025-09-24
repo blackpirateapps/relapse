@@ -19,14 +19,12 @@ export const ranks = [
 ];
 
 export const shopItems = [
-    // This now only contains non-tree items. The forest shop is managed in forest.js
     { id: 'aura', name: 'Aura of Resolve', cost: 500, description: 'A soft, glowing aura for your phoenix.', type: 'cosmetic' },
     { id: 'celestialFlames', name: 'Celestial Flames', cost: 1200, description: 'Changes phoenix visuals to a cool blue.', type: 'cosmetic' },
     { id: 'volcanicLair', name: 'Volcanic Lair', cost: 10000, description: 'A dark, fiery background theme.', type: 'theme' },
     { id: 'celestialSky', name: 'Celestial Sky', cost: 50000, description: 'A beautiful, star-filled background theme.', type: 'theme' }
 ];
 
-// --- CORE FUNCTIONS ---
 let state = {};
 
 export async function initializeApp(callback) {
@@ -110,25 +108,27 @@ export function getState() {
     return state;
 }
 
-export async function updateCoinCount() {
+// UPDATED: This function is now more efficient and calculates the coin gain rate.
+export function updateCoinCount() {
     const coinCountDisplay = document.getElementById('coin-count');
+    const coinRateDisplay = document.getElementById('coin-rate'); // Get the new element
+
     if (!coinCountDisplay) return;
 
-    // Refetch the state to get the most up-to-date coin balance from the server
-    try {
-        const response = await fetch('/api/state');
-        if (response.ok) {
-            const freshState = await response.json();
-            state.coinsAtLastRelapse = freshState.coinsAtLastRelapse;
+    // This calculation is now done entirely on the client-side for performance.
+    // The state is synced from the server on page load and after purchases.
+    const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
+    
+    const streakCoins = calculateCoins(totalHours);
+    const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
+    state.coins = totalCoins;
+    coinCountDisplay.textContent = Math.floor(totalCoins).toLocaleString();
 
-            const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
-            const streakCoins = calculateCoins(totalHours);
-            const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
-            state.coins = totalCoins;
-            coinCountDisplay.textContent = Math.floor(totalCoins).toLocaleString();
-        }
-    } catch (error) {
-        console.error("Could not update coin count:", error);
+    // --- NEW LOGIC for Coin Rate ---
+    if (coinRateDisplay) {
+        // The rate is the derivative of the coin formula: 12 * hours^0.2
+        const coinRatePerHour = totalHours > 0 ? 12 * Math.pow(totalHours, 0.2) : 0;
+        coinRateDisplay.textContent = `+${Math.floor(coinRatePerHour).toLocaleString()}/hr`;
     }
 }
 
@@ -226,4 +226,5 @@ export function initStarfield() {
     }
     tick();
 }
+
 
