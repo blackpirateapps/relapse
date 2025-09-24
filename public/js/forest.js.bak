@@ -1,8 +1,43 @@
-import { initializeApp, showModal, closeModal, updateCoinCount, treeTypes } from './shared.js';
+import { initializeApp, showModal, closeModal, updateCoinCount } from './shared.js';
 
-// API endpoints
+// INTEGRATED: API endpoints now point to the local project
 const STATE_API_URL = '/api/state';
-const SHOP_API_URL = '/api/shop';
+const BUY_API_URL = '/api/buy';
+
+const treeTypes = {
+  tree_of_tranquility: {
+    id: 'tree_of_tranquility',
+    name: 'Tree of Tranquility',
+    cost: 200,
+    description: 'A symbol of peace. Grows to maturity in 1 day, changing every 6 hours, if you do not relapse.',
+    growthHours: 24,
+    stages: [
+      { status: 'Sapling', hours: 0, image: '/img/trees/tree_of_tranquility/stage_1.png' },
+      { status: 'Sprout', hours: 6, image: '/img/trees/tree_of_tranquility/stage_2.png' },
+      { status: 'Young Tree', hours: 12, image: '/img/trees/tree_of_tranquility/stage_3.png' },
+      { status: 'Flourishing', hours: 18, image: '/img/trees/tree_of_tranquility/stage_4.png' },
+      { status: 'Mature', hours: 24, image: '/img/trees/tree_of_tranquility/stage_5.png' },
+    ],
+    witheredImage: '/img/trees/tree_of_tranquility/withered.png'
+  },
+  ancient_oak: {
+    id: 'ancient_oak',
+    name: 'Ancient Oak',
+    cost: 500,
+    description: 'A majestic oak that stands the test of time. Takes 2 days to reach full maturity, evolving through 7 distinct stages.',
+    growthHours: 48,
+    stages: [
+      { status: 'Acorn', hours: 0, image: '/img/trees/ancient_oak/stage_1.png' },
+      { status: 'Seedling', hours: 8, image: '/img/trees/ancient_oak/stage_2.png' },
+      { status: 'Sapling', hours: 16, image: '/img/trees/ancient_oak/stage_3.png' },
+      { status: 'Young Oak', hours: 24, image: '/img/trees/ancient_oak/stage_4.png' },
+      { status: 'Growing Oak', hours: 32, image: '/img/trees/ancient_oak/stage_5.png' },
+      { status: 'Mighty Oak', hours: 40, image: '/img/trees/ancient_oak/stage_6.png' },
+      { status: 'Ancient Oak', hours: 48, image: '/img/trees/ancient_oak/stage_7.png' },
+    ],
+    witheredImage: '/img/trees/ancient_oak/withered.png'
+  }
+};
 
 let forestData = [];
 
@@ -28,8 +63,7 @@ async function fetchForestData() {
 }
 
 function getTreeGrowthStage(tree) {
-  const treeConfig = treeTypes[tree.treeType];
-  if (!treeConfig) return { statusText: 'Unknown', imageSrc: '', statusColor: 'text-gray-500' };
+  const treeConfig = treeTypes[tree.treeType] || treeTypes.tree_of_tranquility;
 
   if (tree.status === 'withered') {
     return {
@@ -85,7 +119,7 @@ function renderForest() {
 
   forestGrid.innerHTML = forestData.map(tree => {
     const stage = getTreeGrowthStage(tree);
-    const treeConfig = treeTypes[tree.treeType];
+    const treeConfig = treeTypes[tree.treeType] || treeTypes.tree_of_tranquility;
 
     let timerHtml = '';
     if (tree.status === 'growing' && Date.now() < new Date(tree.matureDate).getTime()) {
@@ -97,7 +131,7 @@ function renderForest() {
         <img src="${stage.imageSrc}" alt="${stage.statusText}" 
              class="w-24 h-24 mx-auto object-cover rounded mb-2"
              onerror="this.style.display='none'">
-        <h3 class="font-semibold text-white text-sm">${treeConfig?.name || 'Unknown Tree'}</h3>
+        <h3 class="font-semibold text-white text-sm">${treeConfig.name}</h3>
         <p class="${stage.statusColor} text-xs">${stage.statusText}</p>
         ${timerHtml}
       </div>
@@ -145,9 +179,22 @@ function renderShop() {
         <!-- Growth Stages Gallery -->
         <div class="mb-4">
           <h4 class="text-sm font-semibold text-white mb-3">Growth Stages:</h4>
-          <div class="grid grid-cols-${Math.min(tree.stages.length, 4)} gap-2">
+          <div class="grid grid-cols-${Math.min(tree.stages.length, 4)} gap-2 mb-2">
             ${stageGallery}
           </div>
+          ${tree.stages.length > 4 ? `
+            <div class="grid grid-cols-${tree.stages.length - 4} gap-2 justify-center">
+              ${tree.stages.slice(4).map((stage, index) => `
+                <div class="text-center">
+                  <img src="${stage.image}" alt="${stage.status}" 
+                       class="w-12 h-12 object-cover rounded mb-1 border border-gray-600"
+                       onerror="this.style.display='none'">
+                  <p class="text-xs text-gray-400">${stage.status}</p>
+                  <p class="text-xs text-gray-500">${stage.hours}h</p>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
         </div>
 
         <!-- Buy Button -->
@@ -170,26 +217,18 @@ window.buyTree = async function(treeId) {
   button.textContent = 'Purchasing...';
   
   try {
-    const response = await fetch(SHOP_API_URL, {
+    const response = await fetch(BUY_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'buy', itemId: treeId })
+      body: JSON.stringify({ itemId: treeId })
     });
     
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || 'Purchase failed');
     }
-
-    const result = await response.json();
     
-    // Update forest data from response
-    if (result.forest) {
-      forestData = result.forest;
-    } else {
-      await fetchForestData();
-    }
-    
+    await fetchForestData();
     renderForest();
     renderShop();
     updateStats();
@@ -202,8 +241,21 @@ window.buyTree = async function(treeId) {
         <h3 class="text-lg font-semibold mb-2">${tree.name}</h3>
         <p class="text-sm text-gray-300 mb-4">${tree.stages[0].status}</p>
         <p class="text-sm text-gray-400">${tree.description}</p>
+        
+        <!-- Show growth timeline in modal -->
+        <div class="mt-4 p-3 bg-gray-700 rounded">
+          <h4 class="text-sm font-semibold text-white mb-2">Growth Timeline:</h4>
+          <div class="grid grid-cols-${Math.min(tree.stages.length, 3)} gap-1 text-xs">
+            ${tree.stages.slice(0, 6).map(stage => `
+              <div class="text-center">
+                <img src="${stage.image}" class="w-8 h-8 mx-auto mb-1 rounded" onerror="this.style.display='none'">
+                <p class="text-gray-300">${stage.hours}h</p>
+              </div>
+            `).join('')}
+          </div>
+        </div>
       </div>
-      <p class="text-green-400 mt-4 text-center">${result.message}</p>
+      <p class="text-green-400 mt-4 text-center">You have planted a new sapling in your forest. Nurture it well!</p>
     `);
   } catch (error) {
     console.error(error);
