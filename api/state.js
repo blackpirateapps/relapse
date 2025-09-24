@@ -1,6 +1,6 @@
 import db, { initDb } from './db.js';
 import { checkAuth } from './auth.js';
-import { ranks } from './ranks.js'; // Import from the new shared file
+import { ranks } from './ranks.js';
 
 function getRank(totalHours) {
     for (let i = ranks.length - 1; i >= 0; i--) {
@@ -17,20 +17,26 @@ export default async function handler(req, res) {
     await initDb();
 
     try {
+        // INTEGRATED: Update status of any matured trees before fetching data
+        const nowISO = new Date().toISOString();
+        await db.execute({
+            sql: "UPDATE forest SET status = 'matured' WHERE status = 'growing' AND matureDate <= ?;",
+            args: [nowISO]
+        });
+
         const { rows } = await db.execute("SELECT * FROM user_state WHERE id = 1;");
         if (rows.length > 0) {
             let state = rows[0];
 
-            // --- Server-side Reward Calculation ---
+            // --- Server-side Reward Calculation (Existing functionality) ---
             const totalHours = (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60);
             const currentRank = getRank(totalHours);
             const lastClaimedLevel = state.lastClaimedLevel || 0;
             let totalReward = 0;
 
             if (currentRank.level > lastClaimedLevel) {
-                // User has leveled up. Calculate rewards for all missed levels.
                 for (let i = lastClaimedLevel + 1; i <= currentRank.level; i++) {
-                    totalReward += ranks[i].reward;
+                    if(ranks[i] && ranks[i].reward) totalReward += ranks[i].reward;
                 }
 
                 if (totalReward > 0) {
@@ -40,12 +46,14 @@ export default async function handler(req, res) {
                         args: [newCoinBalance, currentRank.level]
                     });
                     
-                    // Update the state object we're about to send to the user
                     state.coinsAtLastRelapse = newCoinBalance;
                     state.lastClaimedLevel = currentRank.level;
                 }
             }
-            // --- End Reward Logic ---
+            
+            // INTEGRATED: Fetch and attach forest data to the state response
+            const { rows: forestRows } = await db.execute("SELECT * FROM forest ORDER BY purchaseDate DESC;");
+            state.forest = forestRows;
 
             res.status(200).json(state);
         } else {

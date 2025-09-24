@@ -1,10 +1,9 @@
 import { initializeApp, showModal, closeModal, updateCoinCount } from './shared.js';
 
-// The API points to your new, separate Vercel deployment.
-const FOREST_API_URL = 'https://api-relapse.vercel.app/api/forest';
+// INTEGRATED: API endpoints now point to the local project
+const STATE_API_URL = '/api/state';
+const BUY_API_URL = '/api/buy';
 
-// --- Tree Configuration ---
-// This structure makes it easy to add more trees in the future.
 const treeTypes = {
     tree_of_tranquility: {
         id: 'tree_of_tranquility',
@@ -22,61 +21,42 @@ const treeTypes = {
         witheredImage: '/img/trees/tree_of_tranquility/withered.png'
     }
 };
-// --- End Configuration ---
 
-
-let state = {};
 let forestData = [];
 
-// This function is called when the page loads
 initializeApp(async (initState) => {
-    state = initState;
-    await fetchForestData();
+    // The initial state already contains the forest data from the updated /api/state
+    forestData = initState.forest || [];
     renderForest();
     renderShop();
     updateStats();
 });
 
-// Fetches tree data from your public external API
 async function fetchForestData() {
     try {
-        const loadingIndicator = document.getElementById('forest-loading'); // Assuming you might add this ID
-        if(loadingIndicator) loadingIndicator.classList.remove('hidden');
-
-        // No special headers are needed for a public API
-        const response = await fetch(FOREST_API_URL);
-
-        if (!response.ok) {
-            throw new Error(`Failed to fetch forest data: ${response.statusText}`);
-        }
-        forestData = await response.json();
-        if(loadingIndicator) loadingIndicator.classList.add('hidden');
+        const response = await fetch(STATE_API_URL);
+        if (!response.ok) throw new Error('Failed to fetch state');
+        const state = await response.json();
+        forestData = state.forest || [];
     } catch (error) {
         console.error(error);
         const forestGrid = document.getElementById('forest-grid');
-        if(forestGrid) forestGrid.innerHTML = `<p class="text-center text-red-400 col-span-full">Could not load your forest. Please try again later.</p>`;
+        if(forestGrid) forestGrid.innerHTML = `<p class="text-center text-red-400 col-span-full">Could not load your forest.</p>`;
     }
 }
 
-
-// Determines the current visual stage of a growing tree
 function getTreeGrowthStage(tree) {
-    const treeConfig = treeTypes[tree.treeType] || treeTypes.tree_of_tranquility; // Default to tranquility tree
-    
+    const treeConfig = treeTypes[tree.treeType] || treeTypes.tree_of_tranquility;
     if (tree.status === 'withered') {
         return { statusText: 'Withered', imageSrc: treeConfig.witheredImage, statusColor: 'text-red-500' };
     }
-    
     const matureDate = new Date(tree.matureDate);
     if (tree.status === 'matured' || Date.now() >= matureDate) {
         const matureStage = treeConfig.stages[treeConfig.stages.length - 1];
         return { statusText: matureStage.status, imageSrc: matureStage.image, statusColor: 'text-cyan-400' };
     }
-
     const purchaseDate = new Date(tree.purchaseDate);
     const hoursSincePlanted = (Date.now() - purchaseDate.getTime()) / (1000 * 60 * 60);
-
-    // Find the current stage by checking hours in reverse
     for (let i = treeConfig.stages.length - 1; i >= 0; i--) {
         if (hoursSincePlanted >= treeConfig.stages[i].hours) {
             return { 
@@ -86,16 +66,12 @@ function getTreeGrowthStage(tree) {
             };
         }
     }
-    
-    // Fallback to the first stage
     const firstStage = treeConfig.stages[0];
     return { statusText: firstStage.status, imageSrc: firstStage.image, statusColor: 'text-green-400' };
 }
 
-
-// Renders the trees onto the page
 function renderForest() {
-    const forestGrid = document.getElementById('forest-grid'); 
+    const forestGrid = document.getElementById('forest-grid');
     const emptyState = document.getElementById('empty-state');
     if (!forestGrid || !emptyState) return;
 
@@ -109,29 +85,23 @@ function renderForest() {
     forestGrid.innerHTML = forestData.map(tree => {
         const stage = getTreeGrowthStage(tree);
         let timerHtml = '';
-
         if (tree.status === 'growing' && Date.now() < new Date(tree.matureDate).getTime()) {
             timerHtml = `<div class="tree-timer text-xs text-cyan-300 mt-1" data-mature-date="${tree.matureDate}"></div>`;
         }
-
         return `
             <div class="tree-container">
                 <img src="${stage.imageSrc}" alt="${stage.statusText} tree" class="tree-img">
                 <p class="font-bold ${stage.statusColor} mt-2">${stage.statusText}</p>
                 ${timerHtml}
-            </div>
-        `;
+            </div>`;
     }).join('');
-    updateTimers(); // Call this once after rendering the forest
+    updateTimers();
 }
 
-// Renders the shop section
 function renderShop() {
     const shopContainer = document.getElementById('shop-container');
     if (!shopContainer) return;
-
     const sapling = treeTypes.tree_of_tranquility;
-
     shopContainer.innerHTML = `
          <div class="card p-6 flex flex-col text-center">
             <h3 class="font-serif-display text-xl text-white">${sapling.name}</h3>
@@ -144,41 +114,31 @@ function renderShop() {
                     Buy for ${sapling.cost.toLocaleString()} Coins
                 </button>
             </div>
-        </div>
-    `;
+        </div>`;
     document.getElementById('buy-sapling-btn').addEventListener('click', () => handleBuySapling(sapling.id));
 }
 
-// Handles the purchase of a new sapling by calling the public external API
 async function handleBuySapling(treeId) {
     const button = document.getElementById('buy-sapling-btn');
     button.disabled = true;
     button.textContent = 'Purchasing...';
 
     try {
-        const response = await fetch(FOREST_API_URL, {
+        const response = await fetch(BUY_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ treeId: treeId, growthHours: treeTypes[treeId].growthHours }),
+            body: JSON.stringify({ itemId: treeId }), // Use itemId to match buy.js
         });
 
-        const result = await response.json();
-
         if (!response.ok) {
+            const result = await response.json();
             throw new Error(result.message || 'Failed to purchase sapling.');
         }
         
-        forestData = result; 
+        await fetchForestData(); // Re-fetch the state to get the new tree list
         renderForest();
         updateStats();
-
-        // Manually update the coin count on the frontend for a responsive feel.
-        const coinCountDisplay = document.getElementById('coin-count');
-        if (coinCountDisplay) {
-            const currentCoins = parseInt(coinCountDisplay.textContent.replace(/,/g, '')) || 0;
-            const newCoins = currentCoins - treeTypes[treeId].cost;
-            coinCountDisplay.textContent = newCoins.toLocaleString();
-        }
+        updateCoinCount(); // Update coin display
 
         showModal('Success!', '<p>You have planted a new sapling in your forest. Nurture it well!</p>');
 
@@ -192,24 +152,19 @@ async function handleBuySapling(treeId) {
     }
 }
 
-// Updates the statistics panel
 function updateStats() {
     const growingCount = document.getElementById('growing-count');
     const maturedCount = document.getElementById('matured-count');
     const witheredCount = document.getElementById('withered-count');
-
     const now = new Date();
     if (growingCount) growingCount.textContent = forestData.filter(t => t.status === 'growing' && now < new Date(t.matureDate)).length;
     if (maturedCount) maturedCount.textContent = forestData.filter(t => t.status === 'matured' || (t.status === 'growing' && now >= new Date(t.matureDate))).length;
     if (witheredCount) witheredCount.textContent = forestData.filter(t => t.status === 'withered').length;
 }
 
-// --- Timer Logic ---
 let timerInterval;
 function updateTimers() {
     if (timerInterval) clearInterval(timerInterval);
-
-    // This interval now ONLY updates the timer text, it does not re-render the whole forest.
     timerInterval = setInterval(() => {
         let needsRender = false;
         document.querySelectorAll('.tree-timer').forEach(timerEl => {
@@ -218,13 +173,12 @@ function updateTimers() {
             if (remaining > 0) {
                 timerEl.textContent = formatRemainingTime(remaining);
             } else {
-                // If a timer runs out, set a flag to re-render the forest once.
                 needsRender = true;
             }
         });
 
         if(needsRender) {
-            renderForest(); // Re-render the forest to show the newly matured tree
+            renderForest();
             updateStats();
         }
     }, 1000);
@@ -236,7 +190,6 @@ function formatRemainingTime(ms) {
     const h = Math.floor((totalSeconds % 86400) / 3600);
     const m = Math.floor((totalSeconds % 3600) / 60);
     const s = Math.floor(totalSeconds % 60);
-    // Only show days if it's more than 0
     const dayPart = d > 0 ? `${d}d ` : '';
     return `${dayPart}${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
 }

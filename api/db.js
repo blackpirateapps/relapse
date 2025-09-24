@@ -29,15 +29,23 @@ export async function initDb() {
             upgrades_json TEXT NOT NULL
         );
     `);
+    // NEW: Create the forest table if it doesn't exist
+    await client.execute(`
+        CREATE TABLE IF NOT EXISTS forest (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            treeType TEXT NOT NULL,
+            status TEXT NOT NULL,
+            purchaseDate TEXT NOT NULL,
+            matureDate TEXT NOT NULL
+        );
+    `);
 
     // --- Schema Migration ---
-    // Safely add new columns to existing tables without errors.
     try {
         await client.execute(`ALTER TABLE user_state ADD COLUMN lastClaimedLevel INTEGER NOT NULL DEFAULT 0;`);
     } catch (e) { /* Ignore errors if column already exists */ }
     
     try {
-        // Add the new column for equipped items
         await client.execute(`ALTER TABLE user_state ADD COLUMN equipped_upgrades TEXT;`);
     } catch (e) { /* Ignore errors if column already exists */ }
 
@@ -47,9 +55,9 @@ export async function initDb() {
         await client.execute({
             sql: "INSERT INTO user_state (id, lastRelapse, longestStreak, relapseCount, coinsAtLastRelapse, upgrades, lastClaimedLevel, equipped_upgrades) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
             args: [ 1, new Date().toISOString(), 0, 0, 0,
-                JSON.stringify({}), // Start with no items owned
+                JSON.stringify({}),
                 0,
-                JSON.stringify({})  // Start with no items equipped
+                JSON.stringify({})
             ],
         });
     }

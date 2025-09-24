@@ -35,7 +35,6 @@ export default async function handler(req, res) {
         const endDate = new Date();
         const currentStreakMs = endDate.getTime() - lastRelapseDate.getTime();
         
-        // --- Archive the Phoenix ---
         if (currentStreakMs > 0) {
             const totalHours = currentStreakMs / (1000 * 60 * 60);
             const finalRank = getRank(totalHours);
@@ -55,12 +54,13 @@ export default async function handler(req, res) {
                 ]
             });
         }
-        // --- End Archiving ---
+        
+        // INTEGRATED: Handle Forest Logic on relapse
+        await db.execute("UPDATE forest SET status = 'withered' WHERE status = 'growing';");
 
         const newLongestStreak = Math.max(state.longestStreak, currentStreakMs);
         const newRelapseCount = state.relapseCount + 1;
         
-        // Reset state for the new streak
         await db.execute({
             sql: `UPDATE user_state 
                   SET lastRelapse = ?, longestStreak = ?, relapseCount = ?, coinsAtLastRelapse = 0, lastClaimedLevel = 0 
@@ -76,3 +76,4 @@ export default async function handler(req, res) {
         res.status(500).json({ message: 'Failed to process relapse.' });
     }
 }
+
