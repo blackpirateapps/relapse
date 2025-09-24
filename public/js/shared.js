@@ -19,12 +19,48 @@ export const ranks = [
 ];
 
 export const shopItems = [
+    // FIXED: Added Phoenix Skins back to the main shop list
+    {
+        id: 'bluePhoenix',
+        name: 'Blue Phoenix',
+        cost: 1500,
+        description: 'A mystical phoenix born of celestial ice, its flames burn with a cool, determined light.',
+        type: 'phoenix_skin',
+        previewImage: '/img/skins/blue/celestial-phoenix.webp',
+        images: [
+            '/img/skins/blue/egg-1.webp', '/img/skins/blue/egg-2.webp', '/img/skins/blue/egg-3.webp',
+            '/img/skins/blue/hatchling-1.webp', '/img/skins/blue/hatchling-2.webp', '/img/skins/blue/hatchling-3.webp',
+            '/img/skins/blue/chick-1.webp', '/img/skins/blue/chick-2.webp',
+            '/img/skins/blue/youngling-1.webp', '/img/skins/blue/youngling-2.webp',
+            '/img/skins/blue/sunfire-1.webp', '/img/skins/blue/sunfire-2.webp',
+            '/img/skins/blue/guardian-1.webp', '/img/skins/blue/guardian-2.webp',
+            '/img/skins/blue/drake.webp', '/img/skins/blue/celestial-phoenix.webp'
+        ]
+    },
+    {
+        id: 'greenPhoenix',
+        name: 'Verdant Phoenix',
+        cost: 4000,
+        description: 'A phoenix intertwined with the essence of a life-giving forest, symbolizing growth and renewal.',
+        type: 'phoenix_skin',
+        previewImage: '/img/skins/green/celestial-phoenix.webp',
+        images: [
+            '/img/skins/green/egg-1.webp', '/img/skins/green/egg-2.webp', '/img/skins/green/egg-3.webp',
+            '/img/skins/green/hatchling-1.webp', '/img/skins/green/hatchling-2.webp', '/img/skins/green/hatchling-3.webp',
+            '/img/skins/green/chick-1.webp', '/img/skins/green/chick-2.webp',
+            '/img/skins/green/youngling-1.webp', '/img/skins/green/youngling-2.webp',
+            '/img/skins/green/sunfire-1.webp', '/img/skins/green/sunfire-2.webp',
+            '/img/skins/green/guardian-1.webp', '/img/skins/green/guardian-2.webp',
+            '/img/skins/green/drake.webp', '/img/skins/green/celestial-phoenix.webp'
+        ]
+    },
+    // Existing Items
     { id: 'aura', name: 'Aura of Resolve', cost: 500, description: 'A soft, glowing aura for your phoenix.', type: 'cosmetic' },
-    { id: 'celestialFlames', name: 'Celestial Flames', cost: 1200, description: 'Changes phoenix visuals to a cool blue.', type: 'cosmetic' },
     { id: 'volcanicLair', name: 'Volcanic Lair', cost: 10000, description: 'A dark, fiery background theme.', type: 'theme' },
     { id: 'celestialSky', name: 'Celestial Sky', cost: 50000, description: 'A beautiful, star-filled background theme.', type: 'theme' }
 ];
 
+// --- CORE FUNCTIONS ---
 let state = {};
 
 export async function initializeApp(callback) {
@@ -108,15 +144,12 @@ export function getState() {
     return state;
 }
 
-// UPDATED: This function is now more efficient and calculates the coin gain rate.
 export function updateCoinCount() {
     const coinCountDisplay = document.getElementById('coin-count');
-    const coinRateDisplay = document.getElementById('coin-rate'); // Get the new element
+    const coinRateDisplay = document.getElementById('coin-rate');
 
     if (!coinCountDisplay) return;
 
-    // This calculation is now done entirely on the client-side for performance.
-    // The state is synced from the server on page load and after purchases.
     const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
     
     const streakCoins = calculateCoins(totalHours);
@@ -124,9 +157,7 @@ export function updateCoinCount() {
     state.coins = totalCoins;
     coinCountDisplay.textContent = Math.floor(totalCoins).toLocaleString();
 
-    // --- NEW LOGIC for Coin Rate ---
     if (coinRateDisplay) {
-        // The rate is the derivative of the coin formula: 12 * hours^0.2
         const coinRatePerHour = totalHours > 0 ? 12 * Math.pow(totalHours, 0.2) : 0;
         coinRateDisplay.textContent = `+${Math.floor(coinRatePerHour).toLocaleString()}/hr`;
     }
@@ -144,19 +175,19 @@ export function getRank(totalHours) {
     return { ...ranks[0], level: 0 };
 }
 
-export function renderPhoenix(level, upgrades = {}) {
+export function renderPhoenix(level, equipped_upgrades = {}) {
     const rank = ranks[level];
     if (!rank) return '';
     
     let imageSrc = rank.image;
 
-    // Check for equipped phoenix skins
-    for (const itemId in upgrades) {
-        if (upgrades[itemId]) {
+    // Check for equipped phoenix skins from the updated shopItems list
+    for (const itemId in equipped_upgrades) {
+        if (equipped_upgrades[itemId]) {
             const shopItem = shopItems.find(item => item.id === itemId && item.type === 'phoenix_skin');
             if (shopItem && shopItem.images && shopItem.images[level]) {
                 imageSrc = shopItem.images[level];
-                break; // Use the first equipped skin found
+                break; 
             }
         }
     }
@@ -226,5 +257,4 @@ export function initStarfield() {
     }
     tick();
 }
-
 
