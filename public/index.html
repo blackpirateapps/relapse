@@ -1,340 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phoenix - Your Journey Continues</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .bg-gradient-cosmic {
-            background: linear-gradient(135deg, #0c0f23 0%, #1a0b2e 30%, #16213e 60%, #0f3460 100%);
-        }
-        
-        .bg-pattern {
-            background-image: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3), transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.15), transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.15), transparent 50%);
-        }
-        
-        .phoenix-glow {
-            box-shadow: 
-                0 0 50px rgba(251, 146, 60, 0.3),
-                0 0 100px rgba(251, 146, 60, 0.2),
-                inset 0 0 50px rgba(251, 146, 60, 0.1);
-            border: 2px solid rgba(251, 146, 60, 0.3);
-            background: radial-gradient(circle, rgba(251, 146, 60, 0.1) 0%, transparent 70%);
-        }
-        
-        .timer-digit {
-            background: linear-gradient(145deg, #1f2937, #111827);
-            box-shadow: 
-                inset 5px 5px 10px #0d1117,
-                inset -5px -5px 10px #2d3748;
-        }
-        
-        .floating-card {
-            backdrop-filter: blur(10px);
-            background: rgba(17, 24, 39, 0.8);
-            border: 1px solid rgba(75, 85, 99, 0.3);
-        }
-        
-        .pulse-ring {
-            animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
-        }
-        
-        @keyframes pulse-ring {
-            0% {
-                transform: scale(0.33);
-                opacity: 1;
-            }
-            80%, 100% {
-                transform: scale(2);
-                opacity: 0;
-            }
-        }
-        
-        .streak-bar {
-            background: linear-gradient(90deg, #ef4444 0%, #f59e0b 25%, #10b981 50%, #3b82f6 75%, #8b5cf6 100%);
-        }
-        
-        .grid-pattern {
-            background-image: 
-                linear-gradient(rgba(75, 85, 99, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(75, 85, 99, 0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-        
-        .button-glow:hover {
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
-            transform: translateY(-1px);
-            transition: all 0.3s ease;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-2px);
-            transition: all 0.3s ease;
-        }
-        
-        .progress-ring {
-            transform: rotate(-90deg);
-        }
-        
-        #starfield {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Phoenix - Your Journey Continues</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: Inter, sans-serif; }
+    .bg-gradient-cosmic {
+      background: linear-gradient(135deg, #0c0f23 0%, #1a0b2e 30%, #16213e 60%, #0f3460 100%);
+    }
+    .bg-pattern {
+      background-image:
+        radial-gradient(circle at 20% 80%, rgba(120,119,198,0.3), transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15), transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120,119,198,0.15), transparent 50%);
+    }
+    .phoenix-glow {
+      box-shadow:
+        0 0 50px rgba(251,146,60,0.3),
+        0 0 100px rgba(251,146,60,0.2),
+        inset 0 0 50px rgba(251,146,60,0.1);
+      border: 2px solid rgba(251,146,60,0.3);
+      background: radial-gradient(circle, rgba(251,146,60,0.1) 0%, transparent 70%);
+    }
+    .timer-digit {
+      background: linear-gradient(145deg, #1f2937, #111827);
+      box-shadow: inset 5px 5px 10px #0d1117, inset -5px -5px 10px #1a2230;
+    }
+  </style>
 </head>
-<body class="bg-gradient-cosmic text-white min-h-screen relative overflow-x-hidden">
-    <!-- Animated Starfield Background -->
-    <canvas id="starfield" class="fixed inset-0 -z-10"></canvas>
-    
-    <!-- Grid Pattern Overlay -->
-    <div class="fixed inset-0 grid-pattern opacity-30 -z-10"></div>
-    
-    <!-- Loading Spinner -->
-    <div id="loading-spinner" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-        <div class="text-center">
-            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-orange-400 border-opacity-75 mx-auto mb-4"></div>
-            <div class="text-orange-400 font-medium">Awakening Phoenix...</div>
+<body class="min-h-screen bg-gradient-cosmic bg-pattern text-gray-100">
+
+  <!-- Spinner -->
+  <div id="loading-spinner" class="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
+    <div class="animate-spin rounded-full h-24 w-24 border-t-4 border-orange-400"></div>
+  </div>
+
+  <!-- Login Screen -->
+  <div id="login-screen" class="hidden min-h-screen flex items-center justify-center p-6">
+    <div class="w-full max-w-md bg-gray-900 rounded-xl p-6 shadow-xl">
+      <h1 class="text-2xl font-semibold mb-4">Enter Journey</h1>
+      <div class="space-y-3">
+        <input id="password-input" type="password" placeholder="Password"
+               class="w-full px-4 py-3 rounded bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400"/>
+        <button id="login-button"
+                class="w-full py-3 rounded bg-orange-500 hover:bg-orange-600 transition">Enter Journey</button>
+        <p id="login-error" class="text-sm text-red-400"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Container -->
+  <div id="app-container" class="hidden">
+    <!-- Top bar -->
+    <header class="p-4 flex items-center justify-between">
+      <h2 class="text-xl font-semibold">Phoenix</h2>
+      <div class="flex items-center gap-4">
+        <span id="current-coins" class="px-3 py-1 rounded bg-gray-800 border border-gray-700">0</span>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="p-6 grid gap-6">
+      <!-- Phoenix and rank -->
+      <section class="bg-gray-900 rounded-xl p-6 phoenix-glow">
+        <div class="flex items-center justify-between">
+          <div>
+            <div id="rank-name" class="text-2xl font-semibold">Loading...</div>
+            <div id="rank-story" class="text-gray-300 mt-1">Please wait</div>
+          </div>
+          <div id="rank-level" class="text-4xl font-bold">1</div>
         </div>
-    </div>
+        <div id="phoenix-display" class="mt-6"></div>
+      </section>
 
-    <!-- Login Screen -->
-    <div id="login-screen" class="fixed inset-0 bg-gradient-cosmic flex items-center justify-center z-40 hidden">
-        <div class="floating-card rounded-2xl p-8 max-w-md w-full mx-4">
-            <div class="text-center mb-8">
-                <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
-                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd"></path>
-                    </svg>
-                </div>
-                <h1 class="text-2xl font-bold text-white mb-2">Phoenix Guardian</h1>
-                <p class="text-gray-400">Enter the sacred flame</p>
-            </div>
-            
-            <div class="space-y-4">
-                <input 
-                    type="password" 
-                    id="password-input" 
-                    placeholder="Enter your password"
-                    class="w-full bg-gray-800 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-400 focus:border-orange-400 focus:outline-none transition-colors"
-                >
-                <button 
-                    id="login-button"
-                    class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold py-3 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 button-glow"
-                >
-                    Enter Journey
-                </button>
-                <div id="login-error" class="text-red-400 text-sm text-center"></div>
-            </div>
+      <!-- Timer -->
+      <section class="bg-gray-900 rounded-xl p-6">
+        <div class="grid grid-cols-4 gap-4 text-center">
+          <div><div id="timer-days" class="timer-digit text-3xl font-mono rounded p-3">00</div><div class="text-xs mt-1">Days</div></div>
+          <div><div id="timer-hours" class="timer-digit text-3xl font-mono rounded p-3">00</div><div class="text-xs mt-1">Hours</div></div>
+          <div><div id="timer-minutes" class="timer-digit text-3xl font-mono rounded p-3">00</div><div class="text-xs mt-1">Minutes</div></div>
+          <div><div id="timer-seconds" class="timer-digit text-3xl font-mono rounded p-3">00</div><div class="text-xs mt-1">Seconds</div></div>
         </div>
-    </div>
+      </section>
 
-    <!-- Main App Container -->
-    <div id="app-container" class="flex min-h-screen hidden">
-        <!-- Main Content Area -->
-        <main class="flex-1 relative">
-            <!-- Hero Section -->
-            <div class="relative">
-                <!-- Phoenix Display Section -->
-                <div class="text-center py-8 lg:py-12">
-                    <div class="relative inline-block">
-                        <!-- Phoenix Container -->
-                        <div class="relative">
-                            <!-- Pulse Ring Animation -->
-                            <div class="absolute inset-0 rounded-full pulse-ring" style="background: rgba(251, 146, 60, 0.3);"></div>
-                            
-                            <!-- Phoenix Display -->
-                            <div id="phoenix-display" class="phoenix-glow rounded-full w-48 h-48 lg:w-64 lg:h-64 flex items-center justify-center relative z-10 mx-auto">
-                                <!-- Phoenix will be rendered here -->
-                            </div>
-                            
-                            <!-- Rank Badge -->
-                            <div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 floating-card rounded-full px-4 py-2">
-                                <div id="rank-name" class="text-sm font-semibold text-orange-400">Loading...</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Rank Story -->
-                    <div class="mt-8 max-w-md mx-auto">
-                        <p id="rank-story" class="text-gray-300 text-lg italic leading-relaxed">Your phoenix awaits...</p>
-                    </div>
-                </div>
-            </div>
+      <!-- Progress + actions -->
+      <section class="bg-gray-900 rounded-xl p-6">
+        <div id="progress-section">
+          <div class="h-3 bg-gray-800 rounded">
+            <div id="progress-bar" class="h-3 bg-orange-500 rounded" style="width: 0%;"></div>
+          </div>
+          <div id="progress-text" class="text-sm text-gray-300 mt-2">Preparing...</div>
+        </div>
+        <div class="mt-4 flex gap-3">
+          <button id="urge-button" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-700">Handle Urge</button>
+          <button id="relapse-button" class="px-4 py-2 bg-red-600 rounded hover:bg-red-700">Relapse</button>
+        </div>
+      </section>
 
-            <!-- Timer Section -->
-            <div class="px-4 lg:px-8 mb-8">
-                <div class="max-w-4xl mx-auto">
-                    <div class="floating-card rounded-2xl p-6 lg:p-8">
-                        <div class="text-center mb-6">
-                            <h2 class="text-2xl lg:text-3xl font-bold text-white mb-2">Current Streak</h2>
-                            <p class="text-gray-400">Your phoenix grows stronger with time</p>
-                        </div>
-                        
-                        <!-- Timer Display -->
-                        <div class="flex justify-center items-center gap-2 lg:gap-4 mb-6">
-                            <div class="timer-digit rounded-xl p-4 lg:p-6 text-center min-w-[80px] lg:min-w-[100px]">
-                                <div id="timer-days" class="text-2xl lg:text-4xl font-bold text-white">00</div>
-                                <div class="text-xs lg:text-sm text-gray-400 uppercase tracking-wider">Days</div>
-                            </div>
-                            <div class="text-gray-500 text-2xl">:</div>
-                            <div class="timer-digit rounded-xl p-4 lg:p-6 text-center min-w-[80px] lg:min-w-[100px]">
-                                <div id="timer-hours" class="text-2xl lg:text-4xl font-bold text-white">00</div>
-                                <div class="text-xs lg:text-sm text-gray-400 uppercase tracking-wider">Hours</div>
-                            </div>
-                            <div class="text-gray-500 text-2xl">:</div>
-                            <div class="timer-digit rounded-xl p-4 lg:p-6 text-center min-w-[80px] lg:min-w-[100px]">
-                                <div id="timer-minutes" class="text-2xl lg:text-4xl font-bold text-white">00</div>
-                                <div class="text-xs lg:text-sm text-gray-400 uppercase tracking-wider">Min</div>
-                            </div>
-                            <div class="text-gray-500 text-2xl">:</div>
-                            <div class="timer-digit rounded-xl p-4 lg:p-6 text-center min-w-[80px] lg:min-w-[100px]">
-                                <div id="timer-seconds" class="text-2xl lg:text-4xl font-bold text-white">00</div>
-                                <div class="text-xs lg:text-sm text-gray-400 uppercase tracking-wider">Sec</div>
-                            </div>
-                        </div>
+      <!-- Stats -->
+      <section class="bg-gray-900 rounded-xl p-6">
+        <div>Longest streak: <span id="longest-streak">0d 0h</span></div>
+      </section>
+    </main>
+  </div>
 
-                        <!-- Progress to Next Rank -->
-                        <div id="progress-section" class="mb-6">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-sm text-gray-400">Progress to next rank</span>
-                                <span id="progress-text" class="text-sm text-blue-400">--</span>
-                            </div>
-                            <div class="w-full bg-gray-700 rounded-full h-2">
-                                <div id="progress-bar" class="streak-bar h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <button 
-                                id="urge-button"
-                                class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 button-glow"
-                            >
-                                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                </svg>
-                                Overcome Urge
-                            </button>
-                            <button 
-                                id="relapse-button"
-                                class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300"
-                            >
-                                <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                </svg>
-                                Reset Journey
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stats Section -->
-            <div class="px-4 lg:px-8 mb-8">
-                <div class="max-w-4xl mx-auto">
-                    <h2 class="text-xl font-bold text-white mb-6 text-center">Journey Statistics</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <!-- Longest Streak -->
-                        <div class="floating-card rounded-xl p-6 text-center stat-card">
-                            <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <div class="text-2xl font-bold text-white mb-2" id="longest-streak">--</div>
-                            <div class="text-sm text-gray-400">Personal Best</div>
-                        </div>
-
-                        <!-- Current Coins -->
-                        <div class="floating-card rounded-xl p-6 text-center stat-card">
-                            <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                                </svg>
-                            </div>
-                            <div class="text-2xl font-bold text-yellow-400 mb-2" id="current-coins">0</div>
-                            <div class="text-sm text-gray-400">Phoenix Coins</div>
-                        </div>
-
-                        <!-- Rank Level -->
-                        <div class="floating-card rounded-xl p-6 text-center stat-card">
-                            <div class="w-12 h-12 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
-                                </svg>
-                            </div>
-                            <div class="text-2xl font-bold text-white mb-2" id="rank-level">0</div>
-                            <div class="text-sm text-gray-400">Phoenix Level</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="px-4 lg:px-8 pb-8">
-                <div class="max-w-4xl mx-auto">
-                    <h2 class="text-xl font-bold text-white mb-6 text-center">Quick Actions</h2>
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        <a href="/progression.html" class="floating-card rounded-xl p-4 text-center hover:bg-opacity-70 transition-all duration-300 stat-card">
-                            <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                                </svg>
-                            </div>
-                            <div class="text-sm font-medium text-white">Progress</div>
-                        </a>
-
-                        <a href="/forest.html" class="floating-card rounded-xl p-4 text-center hover:bg-opacity-70 transition-all duration-300 stat-card">
-                            <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
-                                </svg>
-                            </div>
-                            <div class="text-sm font-medium text-white">Forest</div>
-                        </a>
-
-                        <a href="/shop.html" class="floating-card rounded-xl p-4 text-center hover:bg-opacity-70 transition-all duration-300 stat-card">
-                            <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                                </svg>
-                            </div>
-                            <div class="text-sm font-medium text-white">Shop</div>
-                        </a>
-
-                        <a href="/aviary.html" class="floating-card rounded-xl p-4 text-center hover:bg-opacity-70 transition-all duration-300 stat-card">
-                            <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                                </svg>
-                            </div>
-                            <div class="text-sm font-medium text-white">Aviary</div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Modal Container -->
-    <div id="modal-container" class="hidden"></div>
-
-    <!-- Scripts -->
-    <script type="module" src="journey.js"></script>
+  <!-- App script as ES module -->
+  <script type="module" src="./journey.js"></script>
 </body>
 </html>
