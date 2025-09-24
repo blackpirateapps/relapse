@@ -25,7 +25,6 @@ const treeTypes = {
 let forestData = [];
 
 initializeApp(async (initState) => {
-    // The initial state already contains the forest data from the updated /api/state
     forestData = initState.forest || [];
     renderForest();
     renderShop();
@@ -102,12 +101,19 @@ function renderShop() {
     const shopContainer = document.getElementById('shop-container');
     if (!shopContainer) return;
     const sapling = treeTypes.tree_of_tranquility;
+
+    // NEW: HTML structure for the gallery
     shopContainer.innerHTML = `
          <div class="card p-6 flex flex-col text-center">
             <h3 class="font-serif-display text-xl text-white">${sapling.name}</h3>
-            <div class="w-24 h-24 my-4 mx-auto">
-                <img src="${sapling.stages[0].image}" alt="Sapling">
+            
+            <div class="relative w-full h-32 my-4 mx-auto">
+                <img id="gallery-image" src="${sapling.stages[0].image}" alt="Sapling" class="w-full h-full object-contain">
+                <button id="prev-btn" class="gallery-btn prev">&lt;</button>
+                <button id="next-btn" class="gallery-btn next">&gt;</button>
             </div>
+            <p id="gallery-status" class="text-gray-300 font-bold text-sm mb-2 h-5">${sapling.stages[0].status}</p>
+
             <p class="text-gray-400 text-sm flex-grow">${sapling.description}</p>
             <div class="mt-4">
                  <button id="buy-sapling-btn" class="w-full font-bold py-3 px-4 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors">
@@ -116,7 +122,35 @@ function renderShop() {
             </div>
         </div>`;
     document.getElementById('buy-sapling-btn').addEventListener('click', () => handleBuySapling(sapling.id));
+    // NEW: Set up the gallery functionality
+    setupShopGallery(sapling);
 }
+
+// NEW: Function to manage the interactive gallery
+function setupShopGallery(saplingConfig) {
+    let currentStageIndex = 0;
+    const galleryImage = document.getElementById('gallery-image');
+    const galleryStatus = document.getElementById('gallery-status');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    function updateGallery() {
+        const stage = saplingConfig.stages[currentStageIndex];
+        galleryImage.src = stage.image;
+        galleryStatus.textContent = `${stage.status} (at ${stage.hours} hours)`;
+    }
+
+    prevBtn.addEventListener('click', () => {
+        currentStageIndex = (currentStageIndex - 1 + saplingConfig.stages.length) % saplingConfig.stages.length;
+        updateGallery();
+    });
+
+    nextBtn.addEventListener('click', () => {
+        currentStageIndex = (currentStageIndex + 1) % saplingConfig.stages.length;
+        updateGallery();
+    });
+}
+
 
 async function handleBuySapling(treeId) {
     const button = document.getElementById('buy-sapling-btn');
@@ -127,7 +161,7 @@ async function handleBuySapling(treeId) {
         const response = await fetch(BUY_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ itemId: treeId }), // Use itemId to match buy.js
+            body: JSON.stringify({ itemId: treeId }),
         });
 
         if (!response.ok) {
@@ -135,10 +169,10 @@ async function handleBuySapling(treeId) {
             throw new Error(result.message || 'Failed to purchase sapling.');
         }
         
-        await fetchForestData(); // Re-fetch the state to get the new tree list
+        await fetchForestData(); 
         renderForest();
         updateStats();
-        updateCoinCount(); // Update coin display
+        updateCoinCount();
 
         showModal('Success!', '<p>You have planted a new sapling in your forest. Nurture it well!</p>');
 
@@ -178,8 +212,10 @@ function updateTimers() {
         });
 
         if(needsRender) {
-            renderForest();
-            updateStats();
+            fetchForestData().then(() => {
+                renderForest();
+                updateStats();
+            });
         }
     }, 1000);
 }
