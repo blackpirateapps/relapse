@@ -1,8 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { AppContext } from './App.jsx';
-import { postRelapse } from './api.js';
-import Modal from './components/Modal.jsx';
-import PhoenixImage from './components/PhoenixImage.jsx';
+import { AppContext } from '../App.jsx';
+import { postRelapse } from '../api.js';
+import Modal from '../components/Modal.jsx';
+import PhoenixImage from '../components/PhoenixImage.jsx';
 
 function HomePage() {
   const { state, setState, currentRank, refetchData } = useContext(AppContext);
