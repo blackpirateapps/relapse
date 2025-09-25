@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext } from 'react';
+import React, 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar.jsx';
 import Header from './components/Header.jsx';
@@ -10,14 +10,14 @@ import ShopPage from './pages/ShopPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import LoadingSpinner from './components/LoadingSpinner.jsx';
 import Starfield from './components/Starfield.jsx';
-import ForestBackground from './components/ForestBackground.jsx'; // Import new background
+import ForestBackground from './components/ForestBackground.jsx';
 
 import { ranks } from './data/ranks.js';
 import { fetchState, fetchShopData } from './api.js';
 
-export const AppContext = createContext();
+export const AppContext = React.createContext();
 
-// A new component to handle the main app layout and conditional background
+// This component handles the main layout and conditional background rendering
 const AppLayout = () => {
   const location = useLocation();
   const isForestPage = location.pathname === '/forest';
@@ -42,19 +42,38 @@ const AppLayout = () => {
 };
 
 function App() {
-  const [state, setState] = useState(null);
-  const [shopItems, setShopItems] = useState([]);
-  const [treeTypes, setTreeTypes] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [state, setState] = React.useState(null);
+  const [shopItems, setShopItems] = React.useState([]);
+  const [treeTypes, setTreeTypes] = React.useState({});
+  const [loading, setLoading] = React.useState(true);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
   const refetchData = async () => {
-    // ... (refetchData logic remains the same)
+    try {
+      setLoading(true);
+      const stateData = await fetchState();
+      const shopData = await fetchShopData();
+      if (stateData) {
+        stateData.upgrades = JSON.parse(stateData.upgrades || '{}');
+        stateData.equipped_upgrades = JSON.parse(stateData.equipped_upgrades || '{}');
+        setState(stateData);
+      }
+      if (shopData) {
+        setShopItems(shopData.shopItems || []);
+        setTreeTypes(shopData.treeTypes || {});
+      }
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error("Refetch failed:", error);
+      setIsAuthenticated(false);
+    } finally {
+      setLoading(false);
+    }
   };
   
-  useEffect(() => {
-    // ... (useEffect logic remains the same)
+  React.useEffect(() => {
+    refetchData();
   }, []);
 
   if (loading) {
@@ -62,7 +81,7 @@ function App() {
   }
 
   if (!isAuthenticated || !state) {
-    return <LoginPage setIsAuthenticated={setIsAuthenticated} />;
+    return <LoginPage setIsAuthenticated={setIsAuthenticated} refetchData={refetchData} />;
   }
   
   const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
