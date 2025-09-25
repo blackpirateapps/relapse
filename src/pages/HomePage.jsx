@@ -1,20 +1,26 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { AppContext } from '../App.jsx';
-import { postRelapse } from '../api.js';
-import Modal from '../components/Modal.jsx';
-import PhoenixImage from '../components/PhoenixImage.jsx';
+import { AppContext } from './App.jsx';
+import { postRelapse } from './api.js';
+import Modal from './components/Modal.jsx';
+import PhoenixImage from './components/PhoenixImage.jsx';
 
 function HomePage() {
-  const { state, setState, currentRank } = useContext(AppContext);
-  const [isUrgeModalOpen, setIsUrgeModalOpen] = useState(false);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [notification, setNotification] = useState(null); // State for success/error messages
+  const { state, setState, currentRank, refetchData } = useContext(AppContext);
+
+  // State is now managed by a single object for clarity
+  const [modalState, setModalState] = useState({
+    urge: false,
+    confirm: false,
+    notification: null, // Will hold { title, message }
+  });
+
   const [streak, setStreak] = useState('0d 00h 00m 00s');
 
   useEffect(() => {
     if (!state || !state.lastRelapse) return;
     const timer = setInterval(() => {
       const ms = Date.now() - new Date(state.lastRelapse).getTime();
+      if (ms < 0) return;
       const days = Math.floor(ms / (1000 * 60 * 60 * 24));
       const hours = Math.floor((ms % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
@@ -24,31 +30,27 @@ function HomePage() {
     return () => clearInterval(timer);
   }, [state]);
 
-  const handleUrge = () => {
-    setIsUrgeModalOpen(true);
+  const openModal = (modalName) => {
+    setModalState(prevState => ({ ...prevState, [modalName]: true }));
   };
 
-  const handleRelapseClick = () => {
-    setIsConfirmModalOpen(true);
+  const closeModal = (modalName) => {
+    setModalState(prevState => ({ ...prevState, [modalName]: false }));
   };
 
   const confirmRelapse = async () => {
-    setIsConfirmModalOpen(false);
     try {
-      const newState = await postRelapse();
-      newState.upgrades = JSON.parse(newState.upgrades || '{}');
-      newState.equipped_upgrades = JSON.parse(newState.equipped_upgrades || '{}');
-      setState(newState);
-      // Use the new notification modal instead of alert()
-      setNotification({ title: "A New Journey Begins", message: "Your streak has been reset. Rise from the ashes and begin again." });
+      await postRelapse();
+      await refetchData(); // Refetch all state from the server
+      setModalState({ urge: false, confirm: false, notification: { title: "A New Journey Begins", message: "Your streak has been reset. Rise from the ashes and begin again." } });
     } catch (error) {
       console.error("Relapse API error:", error);
-      setNotification({ title: "Error", message: "Failed to process relapse. Please check your connection and try again." });
+      setModalState({ urge: false, confirm: false, notification: { title: "Error", message: "Failed to process relapse. Please check your connection and try again." } });
     }
   };
 
-  if (!currentRank) {
-    return null;
+  if (!currentRank || !state) {
+    return null; // Or a loading component
   }
 
   return (
@@ -63,30 +65,29 @@ function HomePage() {
         <p className="text-gray-400 mt-2 max-w-md">{currentRank.storyline}</p>
         
         <div className="flex space-x-4 mt-8">
-          <button onClick={handleUrge} className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105">
+          <button onClick={() => openModal('urge')} className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105">
             I Feel an Urge
           </button>
-          <button onClick={handleRelapseClick} className="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105">
+          <button onClick={() => openModal('confirm')} className="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105">
             I Relapsed
           </button>
         </div>
       </div>
 
       {/* Urge Modal */}
-      <Modal isOpen={isUrgeModalOpen} onClose={() => setIsUrgeModalOpen(false)} title="Hold Strong">
+      <Modal isOpen={modalState.urge} onClose={() => closeModal('urge')} title="Hold Strong">
         <div className="text-center">
-          <p className="mb-4">This feeling is temporary. Remember why you started this journey.</p>
-          <p className="font-semibold">Your current streak is a testament to your strength. You've come so far. Don't let a fleeting moment undo your progress.</p>
-          <p className="mt-4 text-sm text-gray-400">Close this, take a few deep breaths, and focus on the Celestial Phoenix you are becoming.</p>
+          <p className="mb-4">This feeling is temporary. Your strength is permanent.</p>
+          <p className="font-semibold">Remember the Celestial Phoenix you are becoming.</p>
         </div>
       </Modal>
 
       {/* Confirmation Modal */}
-      <Modal isOpen={isConfirmModalOpen} onClose={() => setIsConfirmModalOpen(false)} title="Confirm Relapse">
+      <Modal isOpen={modalState.confirm} onClose={() => closeModal('confirm')} title="Confirm Relapse">
         <div className="text-center">
-          <p className="mb-6">Are you sure? This action cannot be undone and will reset your current progress.</p>
+          <p className="mb-6">Are you sure? This will reset your current progress.</p>
           <div className="flex justify-center space-x-4">
-            <button onClick={() => setIsConfirmModalOpen(false)} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg">
+            <button onClick={() => closeModal('confirm')} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg">
               No, I'm Strong
             </button>
             <button onClick={confirmRelapse} className="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-6 rounded-lg">
@@ -96,15 +97,15 @@ function HomePage() {
         </div>
       </Modal>
 
-      {/* Notification Modal (replaces alert) */}
+      {/* Notification Modal */}
       <Modal 
-        isOpen={!!notification} 
-        onClose={() => setNotification(null)} 
-        title={notification?.title || ''}
+        isOpen={!!modalState.notification} 
+        onClose={() => setModalState(prev => ({ ...prev, notification: null }))}
+        title={modalState.notification?.title || ''}
       >
         <div className="text-center">
-          <p>{notification?.message || ''}</p>
-          <button onClick={() => setNotification(null)} className="mt-6 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-lg">
+          <p>{modalState.notification?.message || ''}</p>
+          <button onClick={() => setModalState(prev => ({ ...prev, notification: null }))} className="mt-6 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-lg">
             Close
           </button>
         </div>
@@ -114,4 +115,3 @@ function HomePage() {
 }
 
 export default HomePage;
-
