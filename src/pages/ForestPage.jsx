@@ -30,9 +30,8 @@ function Tree({ tree, treeConfig }) {
         return () => clearInterval(interval);
     }, [tree]);
 
-    if (!treeConfig) return null; // Don't render if the tree type isn't defined
+    if (!treeConfig) return null;
 
-    // --- START: CORRECT IMAGE LOGIC ---
     let stage = { statusText: 'Unknown', imageSrc: '', statusColor: 'text-gray-500' };
 
     if (tree.status === 'withered') {
@@ -57,10 +56,10 @@ function Tree({ tree, treeConfig }) {
             statusColor: 'text-green-400'
         };
     }
-    // --- END: CORRECT IMAGE LOGIC ---
-
+    
+    // --- FIX: REMOVED "bg-gray-800" CLASS FROM THIS DIV ---
     return (
-        <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 text-center flex flex-col items-center">
+        <div className="p-4 rounded-lg border border-gray-700/50 text-center flex flex-col items-center transition-all hover:bg-white/5">
             <img 
                 src={stage.imageSrc || '/img/placeholder.png'} 
                 alt={stage.statusText} 
@@ -165,4 +164,3 @@ function ForestPage() {
 }
 
 export default ForestPage;
-
