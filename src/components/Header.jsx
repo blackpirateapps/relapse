@@ -8,7 +8,6 @@ function Header() {
     const [pageTitle, setPageTitle] = useState('Journey');
     
     useEffect(() => {
-        // Capitalize the first letter of the path for the title
         const path = location.pathname.replace('/', '');
         const title = path.charAt(0).toUpperCase() + path.slice(1) || 'Journey';
         setPageTitle(title);
@@ -17,7 +16,7 @@ function Header() {
     return (
         <header className="flex justify-between items-center mb-8">
             <div className="flex items-center">
-                {/* Hamburger Menu Button - Visible only on mobile (md:hidden) */}
+                {/* Hamburger Menu Button - Shows only on screens smaller than 'md' */}
                 <button 
                   onClick={() => setIsSidebarOpen(true)}
                   className="md:hidden mr-4 p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"

@@ -6,7 +6,7 @@ function Sidebar() {
     const { isSidebarOpen, setIsSidebarOpen } = useContext(AppContext);
     const location = useLocation();
 
-    // Close sidebar on navigation
+    // Close sidebar whenever the user navigates to a new page
     React.useEffect(() => {
         setIsSidebarOpen(false);
     }, [location, setIsSidebarOpen]);
@@ -24,7 +24,7 @@ function Sidebar() {
 
     return (
       <>
-        {/* Overlay for mobile */}
+        {/* Overlay for mobile - closes the menu when clicked */}
         {isSidebarOpen && (
             <div 
                 className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
@@ -32,6 +32,8 @@ function Sidebar() {
                 aria-hidden="true"
             ></div>
         )}
+
+        {/* The Sidebar panel */}
         <aside 
             className={`bg-black bg-opacity-20 text-gray-300 w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform transition-transform duration-300 ease-in-out z-40
                 md:relative md:translate-x-0 

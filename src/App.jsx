@@ -22,45 +22,42 @@ function App() {
   const [treeTypes, setTreeTypes] = useState({});
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State to manage sidebar visibility
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for mobile sidebar
 
-  useEffect(() => {
-    const initializeApp = async () => {
-      try {
-        const initialState = await fetchState();
-        if (initialState) {
-          initialState.upgrades = JSON.parse(initialState.upgrades || '{}');
-          initialState.equipped_upgrades = JSON.parse(initialState.equipped_upgrades || '{}');
-          setState(initialState);
-
-          const shopData = await fetchShopData();
-          setShopItems(shopData.shopItems || []);
-          setTreeTypes(shopData.treeTypes || {});
-          
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-        }
-      } catch (error) {
-        console.error("Initialization failed:", error);
-        setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
+  const refetchData = async () => {
+    try {
+      const stateData = await fetchState();
+      const shopData = await fetchShopData();
+      if (stateData) {
+        stateData.upgrades = JSON.parse(stateData.upgrades || '{}');
+        stateData.equipped_upgrades = JSON.parse(stateData.equipped_upgrades || '{}');
+        setState(stateData);
       }
-    };
-    initializeApp();
-  }, [isAuthenticated]);
+      if (shopData) {
+        setShopItems(shopData.shopItems || []);
+        setTreeTypes(shopData.treeTypes || {});
+      }
+    } catch (error) {
+      console.error("Refetch failed:", error);
+    }
+  };
+  
+  useEffect(() => {
+    refetchData();
+    setIsAuthenticated(true); // Assuming if this runs, we are authenticated
+    setLoading(false);
+  }, []);
 
   if (loading) {
     return <LoadingSpinner />;
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !state) {
     return <LoginPage setIsAuthenticated={setIsAuthenticated} />;
   }
   
   const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
-  const streakCoins = Math.floor(10 * Math.pow(totalHours, 1.2));
+  const streakCoins = Math.floor(10 * Math.pow(totalHours > 0 ? totalHours : 0, 1.2));
   const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
   const coinRatePerHour = totalHours > 0 ? 12 * Math.pow(totalHours, 0.2) : 0;
 
@@ -83,9 +80,9 @@ function App() {
     currentRank,
     getRank,
     ranks,
-    isSidebarOpen,      // Pass sidebar state to context
-    setIsSidebarOpen,   // Pass setter to context
-    refetchData: () => setIsAuthenticated(true) // A way to trigger a full refetch
+    isSidebarOpen,
+    setIsSidebarOpen,
+    refetchData
   };
 
   return (
