@@ -1,6 +1,5 @@
 import React, { useState, useEffect, createContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
 import Sidebar from './components/Sidebar.jsx';
 import Header from './components/Header.jsx';
 import HomePage from './pages/HomePage.jsx';
@@ -22,48 +21,34 @@ function App() {
   const [treeTypes, setTreeTypes] = useState({});
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [error, setError] = useState(null);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const stateData = await fetchState();
-      const shopData = await fetchShopData();
-
-      if (stateData) {
-        // Parse JSON strings from backend
-        stateData.upgrades = JSON.parse(stateData.upgrades || '{}');
-        stateData.equipped_upgrades = JSON.parse(stateData.equipped_upgrades || '{}');
-        setState(stateData);
-        setIsAuthenticated(true);
-      }
-      
-      if (shopData) {
-        setShopItems(shopData.shopItems || []);
-        setTreeTypes(shopData.treeTypes || {});
-      }
-
-    } catch (err) {
-      console.error("Initialization error:", err);
-      setIsAuthenticated(false);
-      setError("Could not connect to the server. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    fetchData();
-  }, [isAuthenticated]); // Refetch data on auth change
+    const initializeApp = async () => {
+      try {
+        const initialState = await fetchState();
+        if (initialState) {
+          // Parse JSON strings from DB into objects
+          initialState.upgrades = JSON.parse(initialState.upgrades || '{}');
+          initialState.equipped_upgrades = JSON.parse(initialState.equipped_upgrades || '{}');
+          setState(initialState);
 
-  const contextValue = {
-    state,
-    setState,
-    shopItems,
-    treeTypes,
-    ranks,
-    refetchData: fetchData,
-  };
+          const shopData = await fetchShopData();
+          setShopItems(shopData.shopItems || []);
+          setTreeTypes(shopData.treeTypes || {});
+          
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error("Initialization failed:", error);
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    initializeApp();
+  }, [isAuthenticated]);
 
   if (loading) {
     return <LoadingSpinner />;
@@ -73,13 +58,41 @@ function App() {
     return <LoginPage setIsAuthenticated={setIsAuthenticated} />;
   }
 
+  // --- CORRECTED COIN CALCULATION ---
+  const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
+  // Restored the original, correct formula from your JS files
+  const streakCoins = Math.floor(10 * Math.pow(totalHours, 1.2));
+  const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
+  const coinRatePerHour = totalHours > 0 ? 12 * Math.pow(totalHours, 0.2) : 0;
+
+  const getRank = (hours) => {
+    for (let i = ranks.length - 1; i >= 0; i--) {
+        if (hours >= ranks[i].hours) return { ...ranks[i], level: i };
+    }
+    return { ...ranks[0], level: 0 };
+  };
+
+  const currentRank = getRank(totalHours);
+
+  const contextValue = {
+    state,
+    setState,
+    shopItems,
+    treeTypes,
+    totalCoins,
+    coinRatePerHour,
+    currentRank,
+    getRank,
+    ranks
+  };
+
   return (
     <AppContext.Provider value={contextValue}>
       <Router>
-        <div className="relative min-h-screen md:flex">
+        <div className="relative min-h-screen md:flex bg-gray-900 text-gray-200">
           <Sidebar />
           <main className="flex-1 p-4 sm:p-6 md:p-10 overflow-y-auto h-screen">
-             <Header />
+            <Header />
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/progression" element={<ProgressionPage />} />
