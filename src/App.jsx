@@ -58,12 +58,14 @@ function App() {
         stateData.upgrades = JSON.parse(stateData.upgrades || '{}');
         stateData.equipped_upgrades = JSON.parse(stateData.equipped_upgrades || '{}');
         setState(stateData);
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
       }
       if (shopData) {
         setShopItems(shopData.shopItems || []);
         setTreeTypes(shopData.treeTypes || {});
       }
-      setIsAuthenticated(true);
     } catch (error) {
       console.error("Refetch failed:", error);
       setIsAuthenticated(false);
@@ -84,7 +86,8 @@ function App() {
     return <LoginPage setIsAuthenticated={setIsAuthenticated} refetchData={refetchData} />;
   }
   
-  const totalHours = state.last relapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
+  // --- SYNTAX FIX: Corrected "state.last relapse" to "state.lastRelapse" ---
+  const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
   const streakCoins = Math.floor(10 * Math.pow(totalHours > 0 ? totalHours : 0, 1.2));
   const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
   const coinRatePerHour = totalHours > 0 ? 12 * Math.pow(totalHours, 0.2) : 0;
