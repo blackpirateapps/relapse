@@ -1,19 +1,20 @@
 {
-  "name": "phoenix-journey-app",
+  "name": "phoenix-react-app",
   "version": "1.0.0",
   "private": true,
-  "description": "A gamified app to track and discourage relapse.",
-  "main": "index.js",
-  "scripts": {
-    "dev": "vercel dev",
-    "deploy": "vercel --prod"
-  },
   "dependencies": {
-    "@libsql/client": "latest",
-    "cookie": "latest"
+    "react": "latest",
+    "react-dom": "latest",
+    "react-router-dom": "latest"
   },
   "devDependencies": {
-    "vercel": "latest"
+    "vite": "latest",
+    "@vitejs/plugin-react": "latest"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
   }
 }
 
