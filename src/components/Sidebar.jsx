@@ -1,9 +1,15 @@
 import React, { useContext } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { AppContext } from '../App.jsx';
 
 function Sidebar() {
-    const { state } = useContext(AppContext);
+    const { isSidebarOpen, setIsSidebarOpen } = useContext(AppContext);
+    const location = useLocation();
+
+    // Close sidebar on navigation
+    React.useEffect(() => {
+        setIsSidebarOpen(false);
+    }, [location, setIsSidebarOpen]);
     
     const navItems = [
       { name: 'Journey', href: '/', icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg> },
@@ -17,7 +23,21 @@ function Sidebar() {
     const inactiveLink = "text-gray-300 hover:bg-gray-700 hover:text-white";
 
     return (
-        <aside className="bg-black bg-opacity-20 text-gray-300 w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-200 ease-in-out">
+      <>
+        {/* Overlay for mobile */}
+        {isSidebarOpen && (
+            <div 
+                className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+                onClick={() => setIsSidebarOpen(false)}
+                aria-hidden="true"
+            ></div>
+        )}
+        <aside 
+            className={`bg-black bg-opacity-20 text-gray-300 w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform transition-transform duration-300 ease-in-out z-40
+                md:relative md:translate-x-0 
+                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`
+            }
+        >
             <div className="px-4">
                 <h1 className="text-2xl font-bold text-white font-serif-display">Phoenix</h1>
             </div>
@@ -39,8 +59,8 @@ function Sidebar() {
                 </ul>
             </nav>
         </aside>
+      </>
     );
 }
 
 export default Sidebar;
-

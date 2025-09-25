@@ -22,6 +22,7 @@ function App() {
   const [treeTypes, setTreeTypes] = useState({});
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State to manage sidebar visibility
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -81,7 +82,10 @@ function App() {
     coinRatePerHour,
     currentRank,
     getRank,
-    ranks
+    ranks,
+    isSidebarOpen,      // Pass sidebar state to context
+    setIsSidebarOpen,   // Pass setter to context
+    refetchData: () => setIsAuthenticated(true) // A way to trigger a full refetch
   };
 
   return (
