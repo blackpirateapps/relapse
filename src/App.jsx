@@ -9,6 +9,7 @@ import AviaryPage from './pages/AviaryPage.jsx';
 import ShopPage from './pages/ShopPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import LoadingSpinner from './components/LoadingSpinner.jsx';
+import Starfield from './components/Starfield.jsx';
 
 import { ranks } from './data/ranks.js';
 import { fetchState, fetchShopData } from './api.js';
@@ -27,7 +28,6 @@ function App() {
       try {
         const initialState = await fetchState();
         if (initialState) {
-          // Parse JSON strings from DB into objects
           initialState.upgrades = JSON.parse(initialState.upgrades || '{}');
           initialState.equipped_upgrades = JSON.parse(initialState.equipped_upgrades || '{}');
           setState(initialState);
@@ -57,10 +57,8 @@ function App() {
   if (!isAuthenticated) {
     return <LoginPage setIsAuthenticated={setIsAuthenticated} />;
   }
-
-  // --- CORRECTED COIN CALCULATION ---
+  
   const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
-  // Restored the original, correct formula from your JS files
   const streakCoins = Math.floor(10 * Math.pow(totalHours, 1.2));
   const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
   const coinRatePerHour = totalHours > 0 ? 12 * Math.pow(totalHours, 0.2) : 0;
@@ -89,7 +87,8 @@ function App() {
   return (
     <AppContext.Provider value={contextValue}>
       <Router>
-        <div className="relative min-h-screen md:flex bg-gray-900 text-gray-200">
+        <div className="relative min-h-screen md:flex text-gray-200">
+          <Starfield />
           <Sidebar />
           <main className="flex-1 p-4 sm:p-6 md:p-10 overflow-y-auto h-screen">
             <Header />
@@ -109,4 +108,3 @@ function App() {
 }
 
 export default App;
-
