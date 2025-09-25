@@ -3,153 +3,164 @@ import { AppContext } from '../App.jsx';
 import { buyItem } from '../api.js';
 import Modal from '../components/Modal.jsx';
 
+// Helper function to format the countdown timer
 function formatRemainingTime(ms) {
-  const totalSeconds = Math.floor(ms / 1000);
-  const d = Math.floor(totalSeconds / 86400);
-  const h = Math.floor((totalSeconds % 86400) / 3600);
-  const m = Math.floor((totalSeconds % 3600) / 60);
-  const s = Math.floor(totalSeconds % 60);
-
-  const dayPart = d > 0 ? `${d}d ` : '';
-  return `${dayPart}${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+    if (ms <= 0) return "Matured!";
+    const totalSeconds = Math.floor(ms / 1000);
+    const d = Math.floor(totalSeconds / 86400);
+    const h = Math.floor((totalSeconds % 86400) / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = Math.floor(totalSeconds % 60);
+    const dayPart = d > 0 ? `${d}d ` : '';
+    return `${dayPart}${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
 }
 
-const TreeTimer = ({ matureDate }) => {
-    const [remaining, setRemaining] = useState(new Date(matureDate) - Date.now());
+// Reusable Tree component for the forest grid
+function Tree({ tree, treeConfig }) {
+    const [timer, setTimer] = useState('');
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            const newRemaining = new Date(matureDate) - Date.now();
-            if (newRemaining <= 0) {
-                clearInterval(interval);
-                // Optionally trigger a refetch here
-            }
-            setRemaining(newRemaining);
-        }, 1000);
+        let interval;
+        if (tree.status === 'growing') {
+            interval = setInterval(() => {
+                const remaining = new Date(tree.matureDate).getTime() - Date.now();
+                setTimer(formatRemainingTime(remaining));
+            }, 1000);
+        }
         return () => clearInterval(interval);
-    }, [matureDate]);
+    }, [tree]);
 
-    return remaining > 0 ? (
-        <div className="tree-timer text-xs text-yellow-400 mt-1">{formatRemainingTime(remaining)}</div>
-    ) : null;
-};
+    if (!treeConfig) return null; // Don't render if the tree type isn't defined
+
+    // --- START: CORRECT IMAGE LOGIC ---
+    let stage = { statusText: 'Unknown', imageSrc: '', statusColor: 'text-gray-500' };
+
+    if (tree.status === 'withered') {
+        stage = {
+            statusText: 'Withered',
+            imageSrc: treeConfig.witheredImage,
+            statusColor: 'text-red-500'
+        };
+    } else if (tree.status === 'matured' || new Date(tree.matureDate) <= new Date()) {
+        const matureStage = treeConfig.stages[treeConfig.stages.length - 1];
+        stage = {
+            statusText: 'Matured',
+            imageSrc: matureStage?.image,
+            statusColor: 'text-cyan-400'
+        };
+    } else { // It's growing
+        const hoursSincePlanted = (Date.now() - new Date(tree.purchaseDate).getTime()) / (1000 * 60 * 60);
+        const currentStage = treeConfig.stages.slice().reverse().find(s => hoursSincePlanted >= s.hours) || treeConfig.stages[0];
+        stage = {
+            statusText: currentStage.status,
+            imageSrc: currentStage.image,
+            statusColor: 'text-green-400'
+        };
+    }
+    // --- END: CORRECT IMAGE LOGIC ---
+
+    return (
+        <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 text-center flex flex-col items-center">
+            <img 
+                src={stage.imageSrc || '/img/placeholder.png'} 
+                alt={stage.statusText} 
+                className="w-24 h-24 mx-auto object-contain mb-2" 
+                onError={(e) => { e.target.style.display = 'none'; }}
+            />
+            <h3 className="font-semibold text-white text-sm">{treeConfig.name}</h3>
+            <p className={`${stage.statusColor} text-xs`}>{stage.statusText}</p>
+            {tree.status === 'growing' && timer && <div className="text-xs text-yellow-400 mt-1 font-mono">{timer}</div>}
+        </div>
+    );
+}
+
 
 function ForestPage() {
     const { state, treeTypes, refetchData } = useContext(AppContext);
-    const [modalContent, setModalContent] = useState(null);
+    const [modal, setModal] = useState({ isOpen: false, title: '', message: '' });
 
-    const forest = state.forest || [];
-    const treeTypesArray = Object.values(treeTypes);
-    const now = new Date();
-
+    const forest = state?.forest || [];
+    const saplings = Object.values(treeTypes);
+    
     const stats = {
-        growing: forest.filter(t => t.status === 'growing' && now < new Date(t.matureDate)).length,
-        matured: forest.filter(t => t.status === 'matured' || (t.status === 'growing' && now >= new Date(t.matureDate))).length,
-        withered: forest.filter(t => t.status === 'withered').length
+        growing: forest.filter(t => t.status === 'growing' && new Date(t.matureDate) > new Date()).length,
+        matured: forest.filter(t => t.status === 'matured' || new Date(t.matureDate) <= new Date()).length,
+        withered: forest.filter(t => t.status === 'withered').length,
     };
 
     const handleBuyTree = async (treeId) => {
-        const tree = treeTypes[treeId];
         try {
             const result = await buyItem(treeId);
-            refetchData();
-            setModalContent({
-                title: 'Tree Planted!',
-                message: result.message,
-                item: tree
-            });
+            if (result.success) {
+                await refetchData();
+                setModal({ isOpen: true, title: 'Success!', message: result.message });
+            } else {
+                setModal({ isOpen: true, title: 'Error', message: result.message });
+            }
         } catch (error) {
-            setModalContent({
-                title: 'Purchase Failed',
-                message: error.message,
-                isError: true
-            });
+            setModal({ isOpen: true, title: 'Error', message: error.message || 'Purchase failed.' });
         }
     };
-
-    const getTreeGrowthStage = (tree) => {
-      const treeConfig = treeTypes[tree.treeType];
-      if (!treeConfig) {
-        return { statusText: 'Unknown', imageSrc: '/img/placeholder.png', statusColor: 'text-gray-500' };
-      }
-
-      if (tree.status === 'withered') {
-        return { statusText: 'Withered', imageSrc: treeConfig.withered_image, statusColor: 'text-red-500' };
-      }
-      
-      const matureDate = new Date(tree.matureDate);
-      if (tree.status === 'matured' || Date.now() >= matureDate) {
-        const matureStage = treeConfig.stages[treeConfig.stages.length - 1];
-        return { statusText: matureStage.stage_name, imageSrc: matureStage.image_url, statusColor: 'text-cyan-400' };
-      }
-
-      const purchaseDate = new Date(tree.purchaseDate);
-      const hoursSincePlanted = (Date.now() - purchaseDate.getTime()) / (1000 * 60 * 60);
-
-      for (let i = treeConfig.stages.length - 1; i >= 0; i--) {
-        if (hoursSincePlanted >= treeConfig.stages[i].stage_hours) {
-          return { statusText: treeConfig.stages[i].stage_name, imageSrc: treeConfig.stages[i].image_url, statusColor: 'text-green-400' };
-        }
-      }
-
-      const firstStage = treeConfig.stages[0];
-      return { statusText: firstStage.stage_name, imageSrc: firstStage.image_url, statusColor: 'text-green-400' };
-    };
-
+    
     return (
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 flex flex-col">
-                <div className="card p-4 grid grid-cols-3 divide-x divide-gray-700 text-center mb-6">
-                    <div><p className="text-2xl font-bold text-green-400">{stats.growing}</p><p className="text-sm text-gray-400">Growing</p></div>
-                    <div><p className="text-2xl font-bold text-cyan-400">{stats.matured}</p><p className="text-sm text-gray-400">Matured</p></div>
-                    <div><p className="text-2xl font-bold text-red-500">{stats.withered}</p><p className="text-sm text-gray-400">Withered</p></div>
-                </div>
-                <div className="card p-6 md:p-8 flex-grow">
-                    {forest.length === 0 ? (
-                        <div className="text-center text-gray-400 mt-10"><p className="text-lg">Your Forest is empty.</p><p className="text-sm mt-2">Buy a sapling from the shop to begin.</p></div>
-                    ) : (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 justify-items-center">
-                            {forest.map(tree => {
-                                const stage = getTreeGrowthStage(tree);
-                                const treeConfig = treeTypes[tree.treeType];
-                                return (
-                                    <div key={tree.id} className="text-center">
-                                        <img src={stage.imageSrc} alt={stage.statusText} className="w-24 h-24 mx-auto object-cover rounded mb-2" />
-                                        <h3 className="font-semibold text-white text-sm">{treeConfig?.name || 'Unknown'}</h3>
-                                        <p className={`${stage.statusColor} text-xs`}>{stage.statusText}</p>
-                                        {tree.status === 'growing' && <TreeTimer matureDate={tree.matureDate} />}
-                                    </div>
-                                );
-                            })}
+        <>
+            <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-grow">
+                <div className="lg:col-span-2 flex flex-col">
+                    <div className="card p-4 grid grid-cols-3 divide-x divide-gray-700 text-center mb-6 flex-shrink-0">
+                        <div>
+                            <p className="text-2xl font-bold text-green-400">{stats.growing}</p>
+                            <p className="text-sm text-gray-400">Growing</p>
                         </div>
-                    )}
-                </div>
-            </div>
-
-            <aside>
-                <h2 className="text-2xl font-bold text-white mb-4">Sapling Shop</h2>
-                <div className="space-y-4">
-                    {treeTypesArray.map(tree => (
-                        <div key={tree.id} className="card p-4">
-                            <h3 className="text-lg font-semibold text-white">{tree.name}</h3>
-                            <p className="text-sm text-gray-300 mb-2">{tree.cost.toLocaleString()} Coins</p>
-                            <p className="text-xs text-gray-400 mb-4">{tree.description}</p>
-                            <button onClick={() => handleBuyTree(tree.id)} className="w-full bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded font-semibold transition-colors">
-                                Buy
-                            </button>
+                        <div>
+                            <p className="text-2xl font-bold text-cyan-400">{stats.matured}</p>
+                            <p className="text-sm text-gray-400">Matured</p>
                         </div>
-                    ))}
-                </div>
-            </aside>
-             {modalContent && (
-                <Modal title={modalContent.title} onClose={() => setModalContent(null)}>
-                    <div className="text-center">
-                        {modalContent.item && <img src={modalContent.item.preview_image} alt={modalContent.item.name} className="w-20 h-20 mx-auto mb-4 rounded"/>}
-                        <p className={modalContent.isError ? 'text-red-400' : 'text-green-400'}>{modalContent.message}</p>
+                        <div>
+                            <p className="text-2xl font-bold text-red-500">{stats.withered}</p>
+                            <p className="text-sm text-gray-400">Withered</p>
+                        </div>
                     </div>
-                </Modal>
-            )}
-        </section>
+                    <div className="card p-6 md:p-8 flex-grow">
+                        {forest.length === 0 ? (
+                            <div className="text-center text-gray-400 mt-10">
+                                <p className="text-lg">Your Forest is empty.</p>
+                                <p className="text-sm mt-2">Buy a sapling from the shop to begin.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 justify-items-center">
+                                {forest.map((tree) => (
+                                    <Tree key={tree.id} tree={tree} treeConfig={treeTypes[tree.treeType]} />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <aside>
+                    <h2 className="text-2xl font-bold text-white mb-4">Sapling Shop</h2>
+                    <div className="space-y-4">
+                        {saplings.map(tree => (
+                            <div key={tree.id} className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+                                <div className="flex items-center gap-4 mb-4">
+                                    <img src={tree.stages[0]?.image} alt={tree.name} className="w-16 h-16 object-contain rounded" />
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-white">{tree.name}</h3>
+                                        <p className="text-sm text-gray-300">{tree.cost.toLocaleString()} Coins</p>
+                                        <p className="text-xs text-gray-400 mt-1">{tree.growth_hours}h to mature</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => handleBuyTree(tree.id)} className="w-full bg-green-600 hover:bg-green-500 text-white px-4 py-3 rounded transition-colors font-semibold">
+                                    Buy for {tree.cost.toLocaleString()} Coins
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </aside>
+            </section>
+            <Modal isOpen={modal.isOpen} onClose={() => setModal({ isOpen: false, title: '', message: '' })} title={modal.title}>
+                <p>{modal.message}</p>
+            </Modal>
+        </>
     );
 }
 

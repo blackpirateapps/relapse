@@ -1,85 +1,112 @@
 import React, { useContext, useState } from 'react';
-import { AppContext } from '../App.jsx';
-import { buyItem, equipItem } from '../api.js';
-import Modal from '../components/Modal.jsx';
+import { AppContext } from '../App';
+import { buyItem, equipItem } from '../api';
+import Modal from '../components/Modal';
 
 function ShopPage() {
-    const { state, shopItems, refetchData } = useContext(AppContext);
-    const [modalContent, setModalContent] = useState(null);
-    const [loadingItemId, setLoadingItemId] = useState(null);
+    const { state, shopItems, totalCoins, refetchData } = useContext(AppContext);
+    const [modal, setModal] = useState({ isOpen: false, title: '', message: '' });
 
-    const handleBuy = async (item) => {
-        setLoadingItemId(item.id);
+    const handleBuy = async (itemId) => {
         try {
-            const result = await buyItem(item.id);
-            refetchData();
-            setModalContent({ title: 'Purchase Successful!', message: result.message, item });
+            const result = await buyItem(itemId);
+            setModal({ isOpen: true, title: result.success ? 'Success!' : 'Error', message: result.message });
+            if (result.success) {
+                await refetchData();
+            }
         } catch (error) {
-            setModalContent({ title: 'Purchase Failed', message: error.message, isError: true });
-        } finally {
-            setLoadingItemId(null);
+            setModal({ isOpen: true, title: 'Error', message: error.message || 'Purchase failed.' });
         }
     };
 
     const handleEquip = async (itemId, equip) => {
-        setLoadingItemId(itemId);
         try {
-            await equipItem(itemId, equip);
-            refetchData();
+            const result = await equipItem(itemId, equip);
+            setModal({ isOpen: true, title: result.success ? 'Success!' : 'Error', message: result.message });
+            if (result.success) {
+                await refetchData();
+            }
         } catch (error) {
-            setModalContent({ title: 'Error', message: error.message, isError: true });
-        } finally {
-            setLoadingItemId(null);
+            setModal({ isOpen: true, title: 'Error', message: error.message || 'Failed to equip item.' });
         }
     };
-
-    const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
-    const streakCoins = Math.floor(10 * Math.pow(totalHours, 1.2));
-    const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
 
     const renderActionButtons = (item) => {
         const isOwned = state.upgrades && state.upgrades[item.id];
         const isEquipped = state.equipped_upgrades && state.equipped_upgrades[item.id];
-        const isLoading = loadingItemId === item.id;
-        
-        if (isOwned) {
-            if (item.type !== 'phoenix_skin') {
-                return <div className="w-full bg-green-700 text-white px-4 py-2 rounded text-center">Owned</div>;
-            }
+
+        if (isOwned && item.type !== 'tree_sapling') {
             if (isEquipped) {
-                return <button onClick={() => handleEquip(item.id, false)} disabled={isLoading} className="w-full bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded transition-colors">{isLoading ? '...' : 'Unequip'}</button>;
+                return <button onClick={() => handleEquip(item.id, false)} className="w-full bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded transition-colors">Unequip</button>;
             }
-            return <button onClick={() => handleEquip(item.id, true)} disabled={isLoading} className="w-full bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded transition-colors">{isLoading ? '...' : 'Equip'}</button>;
+            return <button onClick={() => handleEquip(item.id, true)} className="w-full bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded transition-colors">Equip</button>;
+        }
+        
+        if (isOwned && item.type === 'tree_sapling') {
+             return <div className="w-full bg-green-700 text-white px-4 py-2 rounded text-center">Owned</div>;
         }
 
         const canAfford = totalCoins >= item.cost;
-        return <button onClick={() => handleBuy(item)} disabled={!canAfford || isLoading} className={`w-full ${canAfford ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-600 cursor-not-allowed'} text-white px-4 py-2 rounded transition-colors`}>{isLoading ? '...' : `Buy for ${item.cost.toLocaleString()}`}</button>;
+        return <button onClick={() => handleBuy(item.id)} disabled={!canAfford} className={`w-full ${canAfford ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-600 cursor-not-allowed'} text-white px-4 py-2 rounded transition-colors`}>Buy for {item.cost.toLocaleString()} Coins</button>;
+    };
+    
+    // --- START: CORRECT TREE GALLERY LOGIC ---
+    const renderTreeGallery = (item) => {
+        if (item.type !== 'tree_sapling' || !item.stages) return null;
+
+        return (
+            <div className="mt-4">
+                <h4 className="text-sm font-semibold text-white mb-2">Growth Stages:</h4>
+                <div className="grid grid-cols-5 gap-2">
+                    {item.stages.map((stage, index) => (
+                        <div key={index} className="text-center">
+                            <img src={stage.image} alt={stage.status} className="w-12 h-12 object-contain rounded bg-black/20 mx-auto" />
+                            <p className="text-xs text-gray-400 mt-1">{stage.hours}h</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    };
+    // --- END: CORRECT TREE GALLERY LOGIC ---
+
+    const renderShopSection = (title, type) => {
+        const items = shopItems.filter(item => item.type === type);
+        if (items.length === 0) return null;
+
+        return (
+            <div className="mb-12">
+                <h2 className="text-3xl font-bold text-white mb-6 font-serif-display">{title}</h2>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {items.map(item => (
+                        <div key={item.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 flex flex-col">
+                            <img src={item.preview_image || '/img/placeholder.png'} alt={item.name} className="w-full h-40 object-contain rounded mb-3" />
+                            <div className="flex-grow">
+                                <h3 className="text-lg font-semibold text-white mb-2">{item.name}</h3>
+                                <p className="text-sm text-gray-400 mb-4 flex-grow">{item.description}</p>
+                                {renderTreeGallery(item)}
+                            </div>
+                            <div className="mt-4">
+                                {renderActionButtons(item)}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
     };
 
-    const skinItems = shopItems.filter(item => item.type === 'phoenix_skin');
-
     return (
-        <section id="shop">
-            <h2 className="text-2xl font-bold text-white mb-4">Phoenix Skins</h2>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {skinItems.map(item => (
-                    <div key={item.id} className="card p-4">
-                        <img src={item.preview_image || '/img/placeholder.png'} alt={item.name} className="w-full h-32 object-cover rounded mb-3" />
-                        <h3 className="text-lg font-semibold text-white mb-2">{item.name}</h3>
-                        <p className="text-sm text-gray-400 mb-4 h-16 overflow-auto">{item.description}</p>
-                        {renderActionButtons(item)}
-                    </div>
-                ))}
-            </div>
-             {modalContent && (
-                <Modal title={modalContent.title} onClose={() => setModalContent(null)}>
-                    <div className="text-center">
-                        {modalContent.item && <img src={modalContent.item.preview_image} alt={modalContent.item.name} className="w-20 h-20 mx-auto mb-4 rounded"/>}
-                        <p className={modalContent.isError ? 'text-red-400' : 'text-green-400'}>{modalContent.message}</p>
-                    </div>
-                </Modal>
-            )}
-        </section>
+        <>
+            <section id="shop">
+                {renderShopSection('Phoenix Skins', 'phoenix_skin')}
+                {renderShopSection('Tree Saplings', 'tree_sapling')}
+                {/* Add other sections as needed */}
+            </section>
+            <Modal isOpen={modal.isOpen} onClose={() => setModal({ isOpen: false, title: '', message: '' })} title={modal.title}>
+                <p>{modal.message}</p>
+            </Modal>
+        </>
     );
 }
 

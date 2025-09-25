@@ -13,10 +13,11 @@ async function parseJsonBody(req) {
 }
 
 // Loads all active shop items and their images from the database
-async function loadShopItems() {
+// THIS FUNCTION IS NOW CORRECTED to build the detailed treeTypes object
+async function loadShopDataFromDb() {
     const itemsResult = await db.execute("SELECT * FROM shop_items WHERE is_active = true ORDER BY sort_order, id;");
     const imagesResult = await db.execute("SELECT * FROM shop_item_images ORDER BY item_id, sort_order;");
-
+    
     const imagesByItem = imagesResult.rows.reduce((acc, image) => {
         if (!acc[image.item_id]) acc[image.item_id] = [];
         acc[image.item_id].push(image);
@@ -25,17 +26,20 @@ async function loadShopItems() {
     
     const shopItems = itemsResult.rows.map(item => ({ ...item, images: imagesByItem[item.id] || [] }));
     
-    // Specifically format tree data for the forest page
+    // Specifically format tree data, including the 'stages' array for the frontend
     const treeTypes = shopItems
         .filter(i => i.type === 'tree_sapling')
         .reduce((acc, tree) => {
             acc[tree.id] = { 
                 ...tree, 
-                stages: tree.images.map(img => ({
-                    status: img.stage_name,
-                    hours: img.stage_hours,
-                    image: img.image_url
-                }))
+                witheredImage: tree.withered_image, // Pass the withered image URL
+                stages: tree.images
+                    .filter(img => img.image_type === 'growth_stage')
+                    .map(img => ({
+                        status: img.stage_name,
+                        hours: img.stage_hours,
+                        image: img.image_url
+                    }))
             };
             return acc;
         }, {});
@@ -50,7 +54,6 @@ export default async function handler(req, res) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  // --- FIX: RESTORED GET AND POST ROUTING ---
   if (req.method === 'GET') {
     return handleGetShop(req, res);
   } else if (req.method === 'POST') {
@@ -60,10 +63,10 @@ export default async function handler(req, res) {
   }
 }
 
-// Handles GET requests - This logic is now restored.
+// Handles GET requests
 async function handleGetShop(req, res) {
   try {
-    const { shopItems, treeTypes } = await loadShopItems();
+    const { shopItems, treeTypes } = await loadShopDataFromDb();
     res.status(200).json({ shopItems, treeTypes });
   } catch (error) {
     console.error('Shop GET Error:', error);
@@ -105,7 +108,6 @@ async function handlePurchase(itemId, res) {
     if (rows.length === 0) return res.status(404).json({ message: 'User state not found.' });
     const state = rows[0];
 
-    // --- Correct Coin Calculation Logic (from your file) ---
     const totalHours = (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60);
     const streakCoins = Math.floor(10 * Math.pow(totalHours > 0 ? totalHours : 0, 1.2));
     const currentRank = getRank(totalHours);
@@ -128,9 +130,7 @@ async function handlePurchase(itemId, res) {
     const finalCoinBalance = totalAvailableCoins - item.cost;
     const newCoinsAtLastRelapse = finalCoinBalance - streakCoins;
     const newLastClaimedLevel = currentRank.level;
-    // --- End Correct Coin Calculation ---
 
-    // Add item to user's inventory
     if (item.type === 'tree_sapling') {
       const purchaseDate = new Date();
       const matureDate = new Date(purchaseDate.getTime() + item.growth_hours * 60 * 60 * 1000);
@@ -145,13 +145,11 @@ async function handlePurchase(itemId, res) {
       await db.execute({ sql: "UPDATE user_state SET upgrades = ? WHERE id = 1", args: [JSON.stringify(upgrades)] });
     }
     
-    // Update permanent coin balance and claimed level
     await db.execute({
       sql: "UPDATE user_state SET coinsAtLastRelapse = ?, lastClaimedLevel = ? WHERE id = 1;",
       args: [newCoinsAtLastRelapse, newLastClaimedLevel]
     });
 
-    // Return the full, updated state to the client
     const { rows: updatedStateRows } = await db.execute("SELECT * FROM user_state WHERE id = 1;");
     const { rows: forestRows } = await db.execute("SELECT * FROM forest ORDER BY purchaseDate DESC;");
     
@@ -210,3 +208,4 @@ async function handleEquipment(itemId, equip, res) {
     return res.status(500).json({ message: 'Failed to update equipment.' });
   }
 }
+
