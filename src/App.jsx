@@ -1,4 +1,4 @@
-import React, 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar.jsx';
 import Header from './components/Header.jsx';
@@ -84,7 +84,7 @@ function App() {
     return <LoginPage setIsAuthenticated={setIsAuthenticated} refetchData={refetchData} />;
   }
   
-  const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
+  const totalHours = state.last relapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
   const streakCoins = Math.floor(10 * Math.pow(totalHours > 0 ? totalHours : 0, 1.2));
   const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
   const coinRatePerHour = totalHours > 0 ? 12 * Math.pow(totalHours, 0.2) : 0;
