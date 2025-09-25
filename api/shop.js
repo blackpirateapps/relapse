@@ -1,8 +1,8 @@
 import db from './db.js';
 import { checkAuth } from './auth.js';
-import { ranks } from './ranks.js';
+import { ranks, getRank } from './ranks.js'; // Import getRank
 
-// Helper to parse JSON from the request body
+// Helper to parse JSON from the request body (no changes)
 async function parseJsonBody(req) {
   return new Promise((resolve, reject) => {
     let body = '';
@@ -12,7 +12,7 @@ async function parseJsonBody(req) {
   });
 }
 
-// Load shop items from database
+// Load shop items from database (no changes)
 async function loadShopDataFromDb() {
     const itemsResult = await db.execute("SELECT * FROM shop_items WHERE is_active = true ORDER BY sort_order, id;");
     const imagesResult = await db.execute("SELECT * FROM shop_item_images ORDER BY item_id, sort_order;");
@@ -39,6 +39,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'GET') {
+        // GET logic remains the same
         try {
             const { shopItems, treeTypes } = await loadShopDataFromDb();
             res.status(200).json({ shopItems, treeTypes });
@@ -56,17 +57,43 @@ export default async function handler(req, res) {
                 const item = shopItems.find(i => i.id === itemId);
                 if (!item) return res.status(404).json({ message: 'Item not found.' });
 
+                // --- START: CORRECT COIN DEDUCTION LOGIC ---
+
+                // 1. Calculate all components of the user's total coins, just like the original logic.
                 const totalHours = (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60);
-                const streakCoins = Math.floor(10 * Math.pow(totalHours, 1.2));
-                const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
+                const currentRank = getRank(totalHours);
+                const lastClaimedLevel = state.lastClaimedLevel || 0;
+
+                // 2. Find any rewards that have been earned but not yet claimed.
+                let unclaimedRewards = 0;
+                if (currentRank.level > lastClaimedLevel) {
+                    for (let i = lastClaimedLevel + 1; i <= currentRank.level; i++) {
+                        if (ranks[i] && ranks[i].reward) {
+                            unclaimedRewards += ranks[i].reward;
+                        }
+                    }
+                }
                 
-                if (totalCoins < item.cost) return res.status(400).json({ message: 'Not enough coins.' });
+                // 3. Calculate dynamic streak coins.
+                const streakCoins = totalHours > 0 ? Math.floor(10 * Math.pow(totalHours, 1.2)) : 0;
                 
-                let newCoins = state.coinsAtLastRelapse - item.cost;
-                if (newCoins < 0) {
-                   newCoins = 0;
+                // 4. Calculate the true total purchasing power.
+                const totalAvailableCoins = (state.coinsAtLastRelapse || 0) + streakCoins + unclaimedRewards;
+
+                // 5. Check if the user can afford the item.
+                if (totalAvailableCoins < item.cost) {
+                    return res.status(400).json({ message: 'Not enough coins.' });
                 }
 
+                // 6. This is the crucial fix: Calculate the new base coin value.
+                // We add any unclaimed rewards to the permanent balance, then subtract the item's cost.
+                // This "claims" the rewards and spends them in a single, correct transaction.
+                const newCoinsAtLastRelapse = (state.coinsAtLastRelapse + unclaimedRewards) - item.cost;
+                const newLastClaimedLevel = currentRank.level;
+
+                // --- END: CORRECT COIN DEDUCTION LOGIC ---
+
+                // Add the purchased item to the appropriate table (forest or upgrades)
                 if (item.type === 'tree_sapling') {
                     await db.execute({
                         sql: "INSERT INTO forest (treeType, status, purchaseDate, matureDate) VALUES (?, 'growing', ?, ?)",
@@ -81,20 +108,22 @@ export default async function handler(req, res) {
                     });
                 }
                 
+                // Update the database with the new, correctly calculated base coin balance and the new claimed level.
                 await db.execute({
-                    sql: "UPDATE user_state SET coinsAtLastRelapse = ? WHERE id = 1",
-                    args: [newCoins]
+                    sql: "UPDATE user_state SET coinsAtLastRelapse = ?, lastClaimedLevel = ? WHERE id = 1",
+                    args: [newCoinsAtLastRelapse, newLastClaimedLevel]
                 });
 
+                // Fetch the fully updated state to send back to the client
                 const { rows: updatedStateRows } = await db.execute("SELECT * FROM user_state WHERE id = 1;");
                 const { rows: forestRows } = await db.execute("SELECT * FROM forest ORDER BY purchaseDate DESC;");
                 const updatedState = { ...updatedStateRows[0], forest: forestRows };
 
-
                 return res.status(200).json({ success: true, message: `${item.name} purchased!`, userState: updatedState });
 
             } else if (action === 'equip') {
-                let equippedUpgrades = JSON.parse(state.equipped_upgrades || '{}');
+                // Equip logic remains the same
+                 let equippedUpgrades = JSON.parse(state.equipped_upgrades || '{}');
                  if (equip) {
                     const { shopItems } = await loadShopDataFromDb();
                     const skins = shopItems.filter(i => i.type === 'phoenix_skin');
