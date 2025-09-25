@@ -1,13 +1,14 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { AppContext } from '/src/App.jsx';
-import { postRelapse } from '/src/api.js';
-import Modal from '/src/components/Modal.jsx';
-import PhoenixImage from '/src/components/PhoenixImage.jsx';
+import { AppContext } from '../App.jsx';
+import { postRelapse } from '../api.js';
+import Modal from '../components/Modal.jsx';
+import PhoenixImage from '../components/PhoenixImage.jsx';
 
 function HomePage() {
   const { state, setState, currentRank } = useContext(AppContext);
   const [isUrgeModalOpen, setIsUrgeModalOpen] = useState(false);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false); // New state for confirmation
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [notification, setNotification] = useState(null); // State for success/error messages
   const [streak, setStreak] = useState('0d 00h 00m 00s');
 
   useEffect(() => {
@@ -27,27 +28,27 @@ function HomePage() {
     setIsUrgeModalOpen(true);
   };
 
-  // This function now just opens the confirmation modal
   const handleRelapseClick = () => {
     setIsConfirmModalOpen(true);
   };
 
-  // This function contains the actual relapse logic
   const confirmRelapse = async () => {
-    setIsConfirmModalOpen(false); // Close the modal first
+    setIsConfirmModalOpen(false);
     try {
       const newState = await postRelapse();
       newState.upgrades = JSON.parse(newState.upgrades || '{}');
       newState.equipped_upgrades = JSON.parse(newState.equipped_upgrades || '{}');
       setState(newState);
-      alert("Your streak has been reset, but a new journey begins now. Rise again.");
+      // Use the new notification modal instead of alert()
+      setNotification({ title: "A New Journey Begins", message: "Your streak has been reset. Rise from the ashes and begin again." });
     } catch (error) {
-      alert("Failed to process relapse. Please try again.");
+      console.error("Relapse API error:", error);
+      setNotification({ title: "Error", message: "Failed to process relapse. Please check your connection and try again." });
     }
   };
 
   if (!currentRank) {
-    return null; // Or a loading indicator
+    return null;
   }
 
   return (
@@ -71,7 +72,7 @@ function HomePage() {
         </div>
       </div>
 
-      {/* Modal for "I Feel an Urge" */}
+      {/* Urge Modal */}
       <Modal isOpen={isUrgeModalOpen} onClose={() => setIsUrgeModalOpen(false)} title="Hold Strong">
         <div className="text-center">
           <p className="mb-4">This feeling is temporary. Remember why you started this journey.</p>
@@ -80,7 +81,7 @@ function HomePage() {
         </div>
       </Modal>
 
-      {/* New Modal for Relapse Confirmation */}
+      {/* Confirmation Modal */}
       <Modal isOpen={isConfirmModalOpen} onClose={() => setIsConfirmModalOpen(false)} title="Confirm Relapse">
         <div className="text-center">
           <p className="mb-6">Are you sure? This action cannot be undone and will reset your current progress.</p>
@@ -92,6 +93,20 @@ function HomePage() {
               Yes, I Relapsed
             </button>
           </div>
+        </div>
+      </Modal>
+
+      {/* Notification Modal (replaces alert) */}
+      <Modal 
+        isOpen={!!notification} 
+        onClose={() => setNotification(null)} 
+        title={notification?.title || ''}
+      >
+        <div className="text-center">
+          <p>{notification?.message || ''}</p>
+          <button onClick={() => setNotification(null)} className="mt-6 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-lg">
+            Close
+          </button>
         </div>
       </Modal>
     </>
