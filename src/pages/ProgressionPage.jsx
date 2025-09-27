@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { AppContext } from '../App.jsx';
+import PhoenixImage from '../components/PhoenixImage.jsx'; // Import the intelligent image component
 
 function ProgressionPage() {
     const { state, ranks, getRank } = useContext(AppContext);
@@ -8,7 +9,7 @@ function ProgressionPage() {
     const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
     const currentRank = getRank(totalHours);
 
-    // Pre-calculate the cumulative rewards at each level for the C/hr estimate
+    // Pre-calculate the cumulative rewards at each level for an accurate C/hr estimate
     const cumulativeRewards = ranks.map((rank, index) => {
         return ranks.slice(0, index + 1).reduce((sum, r) => sum + r.reward, 0);
     });
@@ -24,11 +25,12 @@ function ProgressionPage() {
                     if (isUnlocked) statusClass = 'bg-green-500';
                     if (isCurrent) statusClass = 'bg-yellow-400 animate-pulse';
                     
-                    // --- START: COINS PER HOUR CALCULATION ---
+                    // --- FIX: CORRECT COINS PER HOUR CALCULATION ---
+                    // This calculates the average coins earned per hour to reach this specific rank.
                     const totalRewardAtLevel = cumulativeRewards[index];
+                    // Handle the first rank (0 hours) to avoid division by zero.
                     const coinsPerHour = rank.hours > 0 ? totalRewardAtLevel / rank.hours : 0;
                     const formattedCph = Math.round(coinsPerHour);
-                    // --- END: COINS PER HOUR CALCULATION ---
 
                     return (
                        <div key={rank.id} className="mb-8 flex items-center">
@@ -36,14 +38,12 @@ function ProgressionPage() {
                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
                            </div>
                            <div className="card ml-4 p-4 w-full flex items-start space-x-4">
-                               {/* --- START: ADDED IMAGE --- */}
-                               <img 
-                                   src={rank.image} 
-                                   alt={rank.name} 
-                                   className="w-20 h-20 object-contain rounded-lg bg-black/20 shrink-0"
-                                   onError={(e) => { e.target.style.display='none'; }}
+                               {/* --- FIX: USE PhoenixImage COMPONENT TO SHOW EQUIPPED SKINS --- */}
+                               <PhoenixImage 
+                                   rankLevel={index}
+                                   equippedUpgrades={state.equipped_upgrades}
+                                   className="w-24 h-24 object-contain rounded-lg bg-black/20 shrink-0"
                                />
-                               {/* --- END: ADDED IMAGE --- */}
                                
                                <div className="flex-grow">
                                    <h3 className="text-lg font-semibold text-white">{rank.name}</h3>
@@ -51,13 +51,11 @@ function ProgressionPage() {
                                    <p className="text-base font-normal text-gray-300">{rank.storyline}</p>
                                    <div className="flex justify-between items-center mt-2">
                                        <p className="text-yellow-400 font-bold">+${rank.reward.toLocaleString()} Coins</p>
-                                       {/* --- START: ADDED COINS/HR DISPLAY --- */}
                                        {formattedCph > 0 && (
-                                           <p className="text-sm text-cyan-400 font-mono" title="Estimated average coins per hour to reach this level">
+                                           <p className="text-sm text-cyan-400 font-mono" title={`Average earned: ${formattedCph.toLocaleString()} coins per hour up to this point`}>
                                                ~{formattedCph.toLocaleString()} C/hr
                                            </p>
                                        )}
-                                       {/* --- END: ADDED COINS/HR DISPLAY --- */}
                                    </div>
                                </div>
                            </div>
