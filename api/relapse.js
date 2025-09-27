@@ -18,12 +18,10 @@ export default async function handler(req, res) {
         const endDate = new Date();
         const currentStreakMs = endDate.getTime() - new Date(state.lastRelapse).getTime();
         
+        // Archive the completed streak's history (no change here)
         if (currentStreakMs > 0) {
             const totalHours = currentStreakMs / (1000 * 60 * 60);
             const finalRank = getRank(totalHours);
-            
-            // --- START: FIX FOR DATABASE INSERT ---
-            // The phoenix name and rank name were missing, causing the database query to fail.
             const phoenixName = `Phoenix of ${endDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`;
 
             await db.execute({
@@ -31,17 +29,40 @@ export default async function handler(req, res) {
                       VALUES (?, ?, ?, ?, ?, ?, ?);`,
                 args: [
                     phoenixName,
-                    finalRank.name, // Added missing rank name
+                    finalRank.name,
                     finalRank.level,
                     currentStreakMs,
                     state.lastRelapse,
                     endDate.toISOString(),
-                    state.upgrades
+                    state.equipped_upgrades
                 ]
             });
-            // --- END: FIX FOR DATABASE INSERT ---
         }
         
+        // --- START: NEW COIN BANKING LOGIC ---
+
+        // 1. Calculate all coin components at the moment of relapse.
+        const totalHours = currentStreakMs > 0 ? currentStreakMs / (1000 * 60 * 60) : 0;
+        const currentRank = getRank(totalHours);
+        const lastClaimedLevel = state.lastClaimedLevel || 0;
+
+        let unclaimedLevelReward = 0;
+        if (currentRank.level > lastClaimedLevel) {
+            for (let i = lastClaimedLevel + 1; i <= currentRank.level; i++) {
+                if (ranks[i] && typeof ranks[i].reward === 'number') {
+                    unclaimedLevelReward += ranks[i].reward;
+                }
+            }
+        }
+
+        const streakCoins = Math.floor(10 * Math.pow(totalHours, 1.2));
+        
+        // 2. The new base coin balance is the sum of the old base, plus all streak and unclaimed rewards.
+        const newBaseCoins = state.coinsAtLastRelapse + streakCoins + unclaimedLevelReward;
+        const newLastClaimedLevel = currentRank.level;
+
+        // --- END: NEW COIN BANKING LOGIC ---
+
         // Wither any growing trees
         await db.execute("UPDATE forest SET status = 'withered' WHERE status = 'growing';");
 
@@ -49,16 +70,25 @@ export default async function handler(req, res) {
         const newLongestStreak = Math.max(state.longestStreak || 0, currentStreakMs);
         
         await db.execute({
-            sql: `UPDATE user_state SET lastRelapse = ?, longestStreak = ?, relapseCount = relapseCount + 1, coinsAtLastRelapse = 0, lastClaimedLevel = 0 WHERE id = 1;`,
-            args: [endDate.toISOString(), newLongestStreak]
+            sql: `UPDATE user_state 
+                  SET 
+                    lastRelapse = ?, 
+                    longestStreak = ?, 
+                    relapseCount = relapseCount + 1, 
+                    coinsAtLastRelapse = ?,  -- Use the new "banked" coin total
+                    lastClaimedLevel = ?     -- Reset to 0 for the new streak
+                  WHERE id = 1;`,
+            args: [
+                endDate.toISOString(), 
+                newLongestStreak,
+                newBaseCoins, // Set the new base coin value
+                0             // Reset claimed level for the new journey
+            ]
         });
 
-        // --- FIX: RETURN THE NEW STATE ---
-        // Instead of returning an empty response, fetch and return the new, reset state
-        // so the UI can update instantly without a full page reload.
+        // Fetch and return the new, reset state so the UI can update instantly
         const { rows: updatedState } = await db.execute("SELECT * FROM user_state WHERE id = 1;");
         res.status(200).json(updatedState[0]);
-        // --- END: FIX ---
 
     } catch (error) {
         console.error("Relapse API Error:", error);
