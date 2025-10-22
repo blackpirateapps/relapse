@@ -7,12 +7,14 @@ import Modal from '../components/Modal.jsx';
 function AsteroidShooterPage() {
   const { refetchData } = useContext(AppContext);
   const canvasRef = useRef(null);
+  const containerRef = useRef(null);
   
   // Game states: 'ready', 'playing', 'over'
   const [gameState, setGameState] = useState('ready');
   const [isLoading, setIsLoading] = useState(false);
   const [currentPlayId, setCurrentPlayId] = useState(null);
   const [score, setScore] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '' });
 
   // Refs for game variables
@@ -23,8 +25,10 @@ function AsteroidShooterPage() {
   const particles = useRef([]);
   const frameCount = useRef(0);
   const lastShootTime = useRef(0);
+  const lastFrameTime = useRef(0);
   const baseSpeed = useRef(2);
   const currentScore = useRef(0);
+  const isGameActive = useRef(false);
 
   // Game constants
   const SHIP_WIDTH = 50;
@@ -32,14 +36,16 @@ function AsteroidShooterPage() {
   const BULLET_SPEED = 8;
   const BULLET_WIDTH = 4;
   const BULLET_HEIGHT = 15;
-  const SHOOT_INTERVAL = 200; // ms between shots
+  const SHOOT_INTERVAL = 200;
   const ASTEROID_MIN_SIZE = 30;
   const ASTEROID_MAX_SIZE = 70;
-  const SPAWN_RATE = 60; // frames between spawns
-  const SPEED_INCREASE_RATE = 0.0005; // Speed increase per frame
+  const SPAWN_RATE = 60;
+  const SPEED_INCREASE_RATE = 0.0005;
 
   // --- Game Logic ---
-  const gameLoop = () => {
+  const gameLoop = (timestamp) => {
+    if (!isGameActive.current) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -47,6 +53,17 @@ function AsteroidShooterPage() {
     const width = canvas.width;
     const height = canvas.height;
 
+    // FPS limiting for performance
+    if (!lastFrameTime.current) lastFrameTime.current = timestamp;
+    const deltaTime = timestamp - lastFrameTime.current;
+    
+    // Aim for 60 FPS (16.67ms per frame)
+    if (deltaTime < 16) {
+      gameLoopId.current = requestAnimationFrame(gameLoop);
+      return;
+    }
+    
+    lastFrameTime.current = timestamp;
     frameCount.current++;
 
     // Clear canvas with space background
@@ -174,7 +191,6 @@ function AsteroidShooterPage() {
   };
 
   const drawSpaceship = (ctx, x, y, width, height) => {
-    // Ship body (triangle)
     ctx.fillStyle = '#00aaff';
     ctx.shadowBlur = 15;
     ctx.shadowColor = '#00aaff';
@@ -185,13 +201,11 @@ function AsteroidShooterPage() {
     ctx.closePath();
     ctx.fill();
 
-    // Cockpit
     ctx.fillStyle = '#00ffff';
     ctx.beginPath();
     ctx.arc(x + width / 2, y + height / 3, 8, 0, Math.PI * 2);
     ctx.fill();
 
-    // Wings glow
     ctx.strokeStyle = '#0088ff';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -201,7 +215,6 @@ function AsteroidShooterPage() {
     
     ctx.shadowBlur = 0;
 
-    // Engine flames
     const flameHeight = 15;
     ctx.fillStyle = '#ff6600';
     ctx.beginPath();
@@ -222,7 +235,6 @@ function AsteroidShooterPage() {
     ctx.translate(asteroid.x + asteroid.size / 2, asteroid.y + asteroid.size / 2);
     ctx.rotate(asteroid.rotation);
 
-    // Asteroid body
     ctx.fillStyle = '#8b7355';
     ctx.strokeStyle = '#654321';
     ctx.lineWidth = 2;
@@ -244,7 +256,6 @@ function AsteroidShooterPage() {
     ctx.fill();
     ctx.stroke();
 
-    // Craters
     ctx.fillStyle = '#5a4a3a';
     ctx.beginPath();
     ctx.arc(-asteroid.size / 6, -asteroid.size / 6, asteroid.size / 8, 0, Math.PI * 2);
@@ -280,20 +291,56 @@ function AsteroidShooterPage() {
     );
   };
 
-  const handleMouseMove = (e) => {
+  const handlePointerMove = (e) => {
     if (gameState !== 'playing') return;
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    shipX.current = Math.max(0, Math.min(e.clientX - rect.left - SHIP_WIDTH / 2, canvas.width - SHIP_WIDTH));
+    
+    let clientX;
+    if (e.type.startsWith('touch')) {
+      if (e.touches.length === 0) return;
+      clientX = e.touches[0].clientX;
+    } else {
+      clientX = e.clientX;
+    }
+    
+    shipX.current = Math.max(0, Math.min(clientX - rect.left - SHIP_WIDTH / 2, canvas.width - SHIP_WIDTH));
   };
 
-  const handleTouchMove = (e) => {
-    if (gameState !== 'playing') return;
-    e.preventDefault();
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const touch = e.touches[0];
-    shipX.current = Math.max(0, Math.min(touch.clientX - rect.left - SHIP_WIDTH / 2, canvas.width - SHIP_WIDTH));
+  // Fullscreen handling
+  const enterFullscreen = async () => {
+    const elem = containerRef.current;
+    try {
+      if (elem.requestFullscreen) {
+        await elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        await elem.webkitRequestFullscreen();
+      } else if (elem.mozRequestFullScreen) {
+        await elem.mozRequestFullScreen();
+      } else if (elem.msRequestFullscreen) {
+        await elem.msRequestFullscreen();
+      }
+      setIsFullscreen(true);
+    } catch (err) {
+      console.error('Error entering fullscreen:', err);
+    }
+  };
+
+  const exitFullscreen = async () => {
+    try {
+      if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        await document.webkitExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        await document.mozCancelFullScreen();
+      } else if (document.msExitFullscreen) {
+        await document.msExitFullscreen();
+      }
+      setIsFullscreen(false);
+    } catch (err) {
+      console.error('Error exiting fullscreen:', err);
+    }
   };
 
   const handleStartClick = async () => {
@@ -303,6 +350,7 @@ function AsteroidShooterPage() {
       if (result.success) {
         setCurrentPlayId(result.playId);
         await refetchData();
+        await enterFullscreen();
         startGameLoop();
       } else {
         setModal({ isOpen: true, title: 'Error', message: result.message || 'Failed to start game' });
@@ -322,14 +370,17 @@ function AsteroidShooterPage() {
     particles.current = [];
     frameCount.current = 0;
     lastShootTime.current = Date.now();
+    lastFrameTime.current = 0;
     baseSpeed.current = 2;
     currentScore.current = 0;
+    isGameActive.current = true;
     setScore(0);
     setGameState('playing');
     gameLoopId.current = requestAnimationFrame(gameLoop);
   };
 
   const handleGameOver = async () => {
+    isGameActive.current = false;
     if (gameLoopId.current) {
       cancelAnimationFrame(gameLoopId.current);
     }
@@ -341,6 +392,7 @@ function AsteroidShooterPage() {
     try {
       const result = await endGame(currentPlayId, currentScore.current);
       await refetchData();
+      await exitFullscreen();
       setModal({
         isOpen: true,
         title: 'Game Over!',
@@ -374,21 +426,80 @@ Coins Earned: ${result.coinsWon || 0}`
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
+    // Prevent touch scrolling on canvas
+    const preventTouch = (e) => {
+      if (e.target === canvas) {
+        e.preventDefault();
+      }
+    };
+
+    canvas.addEventListener('touchstart', preventTouch, { passive: false });
+    canvas.addEventListener('touchmove', preventTouch, { passive: false });
+    canvas.addEventListener('touchend', preventTouch, { passive: false });
+
+    // Handle fullscreen changes
+    const handleFullscreenChange = () => {
+      const isCurrentlyFullscreen = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+      );
+      setIsFullscreen(isCurrentlyFullscreen);
+      
+      if (!isCurrentlyFullscreen && gameState === 'playing') {
+        // User exited fullscreen during game
+        handleGameOver();
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
     return () => {
       window.removeEventListener('resize', resizeCanvas);
+      canvas.removeEventListener('touchstart', preventTouch);
+      canvas.removeEventListener('touchmove', preventTouch);
+      canvas.removeEventListener('touchend', preventTouch);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+      
+      isGameActive.current = false;
       if (gameLoopId.current) {
         cancelAnimationFrame(gameLoopId.current);
       }
     };
-  }, []);
+  }, [gameState]);
 
   return (
-    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', position: 'relative', background: '#000' }}>
+    <div 
+      ref={containerRef}
+      style={{ 
+        width: '100vw', 
+        height: '100vh', 
+        overflow: 'hidden', 
+        position: 'relative', 
+        background: '#000',
+        touchAction: 'none',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        MozUserSelect: 'none',
+        msUserSelect: 'none'
+      }}
+    >
       <canvas
         ref={canvasRef}
-        onMouseMove={handleMouseMove}
-        onTouchMove={handleTouchMove}
-        style={{ display: 'block', cursor: gameState === 'playing' ? 'none' : 'default' }}
+        onMouseMove={handlePointerMove}
+        onTouchMove={handlePointerMove}
+        style={{ 
+          display: 'block', 
+          cursor: gameState === 'playing' ? 'none' : 'default',
+          touchAction: 'none'
+        }}
       />
 
       {gameState === 'ready' && (
@@ -399,12 +510,22 @@ Coins Earned: ${result.coinsWon || 0}`
           transform: 'translate(-50%, -50%)',
           textAlign: 'center',
           color: 'white',
-          fontFamily: 'Arial, sans-serif'
+          fontFamily: 'Arial, sans-serif',
+          padding: '20px',
+          maxWidth: '90%'
         }}>
-          <h1 style={{ fontSize: '48px', marginBottom: '20px', textShadow: '0 0 20px #00aaff' }}>
+          <h1 style={{ 
+            fontSize: 'clamp(32px, 8vw, 48px)', 
+            marginBottom: '20px', 
+            textShadow: '0 0 20px #00aaff' 
+          }}>
             🚀 Asteroid Shooter
           </h1>
-          <p style={{ fontSize: '18px', marginBottom: '30px' }}>
+          <p style={{ 
+            fontSize: 'clamp(14px, 4vw, 18px)', 
+            marginBottom: '30px',
+            lineHeight: '1.6'
+          }}>
             Move your spaceship to destroy falling asteroids!<br/>
             Don't let them reach the bottom!
           </p>
@@ -413,14 +534,15 @@ Coins Earned: ${result.coinsWon || 0}`
             disabled={isLoading}
             style={{
               padding: '15px 40px',
-              fontSize: '24px',
+              fontSize: 'clamp(18px, 5vw, 24px)',
               background: 'linear-gradient(45deg, #00aaff, #0088cc)',
               color: 'white',
               border: 'none',
               borderRadius: '10px',
               cursor: 'pointer',
               boxShadow: '0 0 20px rgba(0, 170, 255, 0.5)',
-              transition: 'transform 0.2s'
+              transition: 'transform 0.2s',
+              touchAction: 'manipulation'
             }}
             onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
             onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
