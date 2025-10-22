@@ -47,6 +47,20 @@ export const equipItem = (itemId, equip) => apiRequest('shop', {
   body: JSON.stringify({ action: 'equip', itemId, equip }),
 });
 
+// --- NEW: Minigame API Calls ---
+export const startGame = (gameId) => apiRequest('minigame', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ action: 'start_game', gameId }),
+});
+
+export const endGame = (playId, score) => apiRequest('minigame', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ action: 'end_game', playId, score }),
+});
+// --- END: New Calls ---
+
 // Utility function to get rank, now client-side
 export function getRank(totalHours, ranks) {
   for (let i = ranks.length - 1; i >= 0; i--) {
