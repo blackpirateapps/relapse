@@ -26,18 +26,42 @@ export async function initDb() {
       id INTEGER PRIMARY KEY AUTOINCREMENT, item_id TEXT, image_url TEXT, image_type TEXT,
       stage_name TEXT, stage_hours INTEGER, sort_order INTEGER DEFAULT 0,
       FOREIGN KEY (item_id) REFERENCES shop_items (id) ON DELETE CASCADE
+    );`,
+    // --- ADDED Minigame Tables ---
+    `CREATE TABLE IF NOT EXISTS minigames (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      entry_cost INTEGER DEFAULT 0,
+      is_active BOOLEAN DEFAULT true
+    );`,
+    `CREATE TABLE IF NOT EXISTS minigame_plays (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER DEFAULT 1,
+      game_id TEXT NOT NULL,
+      started_at TEXT NOT NULL,
+      ended_at TEXT,
+      score INTEGER DEFAULT 0,
+      coins_spent INTEGER DEFAULT 0,
+      coins_won INTEGER DEFAULT 0,
+      FOREIGN KEY (game_id) REFERENCES minigames (id)
     );`
-  ]);
+  ], 'write');
 
-  try {
-    // Migrations can be added here in the future
-  } catch (e) { /* Ignore errors if columns already exist */ }
-
-  const { rows } = await client.execute("SELECT id FROM user_state WHERE id = 1;");
-  if (rows.length === 0) {
+  // Initialize user if not exists
+  const { rows: userRows } = await client.execute("SELECT id FROM user_state WHERE id = 1;");
+  if (userRows.length === 0) {
     await client.execute({
       sql: "INSERT INTO user_state (id, lastRelapse, longestStreak, relapseCount, coinsAtLastRelapse, upgrades, lastClaimedLevel, equipped_upgrades) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
       args: [1, new Date().toISOString(), 0, 0, 0, '{}', 0, '{}'],
+    });
+  }
+
+  // --- ADDED: Initialize Minigame Data ---
+  const { rows: gameRows } = await client.execute("SELECT id FROM minigames WHERE id = 'phoenix_flight';");
+  if (gameRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO minigames (id, name, entry_cost, is_active) VALUES (?, ?, ?, ?);",
+      args: ['phoenix_flight', 'Phoenix Flight', 20, true],
     });
   }
 }
