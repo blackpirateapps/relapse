@@ -9,8 +9,8 @@ function AsteroidShooterPage() {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   
-  // Game states: 'ready', 'playing', 'over'
-  const [gameState, setGameState] = useState('ready');
+  // Game states: 'initial', 'fullscreen-ready', 'playing', 'over'
+  const [gameState, setGameState] = useState('initial');
   const [isLoading, setIsLoading] = useState(false);
   const [currentPlayId, setCurrentPlayId] = useState(null);
   const [score, setScore] = useState(0);
@@ -53,11 +53,9 @@ function AsteroidShooterPage() {
     const width = canvas.width;
     const height = canvas.height;
 
-    // FPS limiting for performance
     if (!lastFrameTime.current) lastFrameTime.current = timestamp;
     const deltaTime = timestamp - lastFrameTime.current;
     
-    // Aim for 60 FPS (16.67ms per frame)
     if (deltaTime < 16) {
       gameLoopId.current = requestAnimationFrame(gameLoop);
       return;
@@ -66,14 +64,13 @@ function AsteroidShooterPage() {
     lastFrameTime.current = timestamp;
     frameCount.current++;
 
-    // Clear canvas with space background
+    // Clear canvas
     ctx.fillStyle = '#000510';
     ctx.fillRect(0, 0, width, height);
 
     // Draw stars
     drawStars(ctx, width, height);
 
-    // Increase difficulty over time
     baseSpeed.current += SPEED_INCREASE_RATE;
 
     // Auto shoot bullets
@@ -92,7 +89,6 @@ function AsteroidShooterPage() {
     bullets.current = bullets.current.filter(bullet => {
       bullet.y -= BULLET_SPEED;
       
-      // Draw bullet
       ctx.fillStyle = '#00ff00';
       ctx.shadowBlur = 10;
       ctx.shadowColor = '#00ff00';
@@ -121,7 +117,6 @@ function AsteroidShooterPage() {
       asteroid.y += asteroid.speed;
       asteroid.rotation += asteroid.rotationSpeed;
 
-      // Check collision with bullets
       let hit = false;
       bullets.current = bullets.current.filter(bullet => {
         if (checkCollision(bullet, asteroid)) {
@@ -136,15 +131,12 @@ function AsteroidShooterPage() {
 
       if (hit) return false;
 
-      // Check if asteroid hit the bottom (game over)
       if (asteroid.y + asteroid.size > height - SHIP_HEIGHT - 10) {
         gameOver = true;
         return false;
       }
 
-      // Draw asteroid
       drawAsteroid(ctx, asteroid);
-
       return asteroid.y < height;
     });
 
@@ -321,6 +313,12 @@ function AsteroidShooterPage() {
         await elem.msRequestFullscreen();
       }
       setIsFullscreen(true);
+      setGameState('fullscreen-ready');
+      
+      // Resize canvas when entering fullscreen
+      setTimeout(() => {
+        resizeCanvas();
+      }, 100);
     } catch (err) {
       console.error('Error entering fullscreen:', err);
     }
@@ -343,14 +341,26 @@ function AsteroidShooterPage() {
     }
   };
 
-  const handleStartClick = async () => {
+  const resizeCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  };
+
+  // Step 1: Enter fullscreen (from normal page)
+  const handleEnterFullscreen = async () => {
+    await enterFullscreen();
+  };
+
+  // Step 2: Start game (from fullscreen ready state)
+  const handleStartGame = async () => {
     setIsLoading(true);
     try {
       const result = await startGame('asteroid_shooter');
       if (result.success) {
         setCurrentPlayId(result.playId);
         await refetchData();
-        await enterFullscreen();
         startGameLoop();
       } else {
         setModal({ isOpen: true, title: 'Error', message: result.message || 'Failed to start game' });
@@ -409,7 +419,7 @@ Coins Earned: ${result.coinsWon || 0}`
 
   const handlePlayAgain = () => {
     setModal({ isOpen: false, title: '', message: '' });
-    setGameState('ready');
+    setGameState('initial');
     setScore(0);
     currentScore.current = 0;
   };
@@ -418,15 +428,10 @@ Coins Earned: ${result.coinsWon || 0}`
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Prevent touch scrolling on canvas
+    // Prevent touch scrolling
     const preventTouch = (e) => {
       if (e.target === canvas) {
         e.preventDefault();
@@ -448,8 +453,11 @@ Coins Earned: ${result.coinsWon || 0}`
       setIsFullscreen(isCurrentlyFullscreen);
       
       if (!isCurrentlyFullscreen && gameState === 'playing') {
-        // User exited fullscreen during game
         handleGameOver();
+      }
+      
+      if (!isCurrentlyFullscreen && gameState === 'fullscreen-ready') {
+        setGameState('initial');
       }
     };
 
@@ -479,8 +487,8 @@ Coins Earned: ${result.coinsWon || 0}`
     <div 
       ref={containerRef}
       style={{ 
-        width: '100vw', 
-        height: '100vh', 
+        width: isFullscreen ? '100vw' : '100%',
+        height: isFullscreen ? '100vh' : '80vh',
         overflow: 'hidden', 
         position: 'relative', 
         background: '#000',
@@ -497,12 +505,15 @@ Coins Earned: ${result.coinsWon || 0}`
         onTouchMove={handlePointerMove}
         style={{ 
           display: 'block', 
+          width: '100%',
+          height: '100%',
           cursor: gameState === 'playing' ? 'none' : 'default',
           touchAction: 'none'
         }}
       />
 
-      {gameState === 'ready' && (
+      {/* Initial state - Play button on normal page */}
+      {gameState === 'initial' && (
         <div style={{
           position: 'absolute',
           top: '50%',
@@ -530,8 +541,7 @@ Coins Earned: ${result.coinsWon || 0}`
             Don't let them reach the bottom!
           </p>
           <button
-            onClick={handleStartClick}
-            disabled={isLoading}
+            onClick={handleEnterFullscreen}
             style={{
               padding: '15px 40px',
               fontSize: 'clamp(18px, 5vw, 24px)',
@@ -547,8 +557,56 @@ Coins Earned: ${result.coinsWon || 0}`
             onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
             onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
           >
-            {isLoading ? 'Starting...' : 'Play (20 Coins)'}
+            Play Game
           </button>
+        </div>
+      )}
+
+      {/* Fullscreen ready state - Start button in fullscreen */}
+      {gameState === 'fullscreen-ready' && !isLoading && (
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          textAlign: 'center',
+          color: 'white',
+          fontFamily: 'Arial, sans-serif',
+          padding: '40px',
+          zIndex: 10
+        }}>
+          <h1 style={{ 
+            fontSize: '64px', 
+            marginBottom: '40px', 
+            textShadow: '0 0 30px #00aaff',
+            animation: 'pulse 2s infinite'
+          }}>
+            🚀 Ready to Play!
+          </h1>
+          <button
+            onClick={handleStartGame}
+            disabled={isLoading}
+            style={{
+              padding: '30px 80px',
+              fontSize: '36px',
+              background: 'linear-gradient(45deg, #00ff00, #00cc00)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '20px',
+              cursor: 'pointer',
+              boxShadow: '0 0 40px rgba(0, 255, 0, 0.6)',
+              transition: 'transform 0.2s',
+              touchAction: 'manipulation',
+              fontWeight: 'bold'
+            }}
+            onMouseEnter={(e) => e.target.style.transform = 'scale(1.1)'}
+            onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+          >
+            START GAME (20 Coins)
+          </button>
+          <p style={{ marginTop: '30px', fontSize: '18px', opacity: 0.7 }}>
+            Press ESC to exit fullscreen
+          </p>
         </div>
       )}
 
@@ -557,7 +615,8 @@ Coins Earned: ${result.coinsWon || 0}`
           position: 'absolute',
           top: '50%',
           left: '50%',
-          transform: 'translate(-50%, -50%)'
+          transform: 'translate(-50%, -50%)',
+          zIndex: 20
         }}>
           <LoadingSpinner />
         </div>
@@ -570,6 +629,13 @@ Coins Earned: ${result.coinsWon || 0}`
           onClose={handlePlayAgain}
         />
       )}
+
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.6; }
+        }
+      `}</style>
     </div>
   );
 }
