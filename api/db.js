@@ -8,7 +8,7 @@ const client = createClient({
 export async function initDb() {
   await client.batch([
     `CREATE TABLE IF NOT EXISTS user_state (
-      id INTEGER PRIMARY KEY, lastRelapse TEXT, longestStreak INTEGER, relapseCount INTEGER, 
+      id INTEGER PRIMARY KEY, lastRelapse TEXT, longestStreak INTEGER, relapseCount INTEGER,
       coinsAtLastRelapse REAL, upgrades TEXT, lastClaimedLevel INTEGER, equipped_upgrades TEXT
     );`,
     `CREATE TABLE IF NOT EXISTS phoenix_history (
@@ -27,7 +27,7 @@ export async function initDb() {
       stage_name TEXT, stage_hours INTEGER, sort_order INTEGER DEFAULT 0,
       FOREIGN KEY (item_id) REFERENCES shop_items (id) ON DELETE CASCADE
     );`,
-    // --- ADDED Minigame Tables ---
+    // --- Minigame Tables ---
     `CREATE TABLE IF NOT EXISTS minigames (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
@@ -56,12 +56,21 @@ export async function initDb() {
     });
   }
 
-  // --- ADDED: Initialize Minigame Data ---
-  const { rows: gameRows } = await client.execute("SELECT id FROM minigames WHERE id = 'phoenix_flight';");
-  if (gameRows.length === 0) {
+  // --- Initialize Minigame Data ---
+  const { rows: phoenixRows } = await client.execute("SELECT id FROM minigames WHERE id = 'phoenix_flight';");
+  if (phoenixRows.length === 0) {
     await client.execute({
       sql: "INSERT INTO minigames (id, name, entry_cost, is_active) VALUES (?, ?, ?, ?);",
       args: ['phoenix_flight', 'Phoenix Flight', 20, true],
+    });
+  }
+
+  // ADDED: Initialize Asteroid Shooter game
+  const { rows: asteroidRows } = await client.execute("SELECT id FROM minigames WHERE id = 'asteroid_shooter';");
+  if (asteroidRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO minigames (id, name, entry_cost, is_active) VALUES (?, ?, ?, ?);",
+      args: ['asteroid_shooter', 'Asteroid Shooter', 20, true],
     });
   }
 }
