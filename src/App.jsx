@@ -12,6 +12,7 @@ import LoginPage from './pages/LoginPage.jsx';
 import LoadingSpinner from './components/LoadingSpinner.jsx';
 import Starfield from './components/Starfield.jsx';
 import ForestBackground from './components/ForestBackground.jsx';
+import AsteroidShooterPage from './pages/AsteroidShooterPage.jsx';
 
 import { ranks } from './data/ranks.js';
 import { fetchState, fetchShopData } from './api.js';
@@ -37,6 +38,7 @@ const AppLayout = () => {
           <Route path="/shop" element={<ShopPage />} />
           <Route path="/phoenix-flight" element={<PhoenixFlightPage />} /> {/* Add the new route */}
           <Route path="*" element={<Navigate to="/" />} />
+          <Route path="/minigame/asteroid-shooter" element={<AsteroidShooterPage />} />
         </Routes>
       </main>
     </div>
