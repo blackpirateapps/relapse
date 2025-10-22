@@ -7,6 +7,7 @@ import ProgressionPage from './pages/ProgressionPage.jsx';
 import ForestPage from './pages/ForestPage.jsx';
 import AviaryPage from './pages/AviaryPage.jsx';
 import ShopPage from './pages/ShopPage.jsx';
+import PhoenixFlightPage from './pages/PhoenixFlightPage.jsx'; // Import the new game page
 import LoginPage from './pages/LoginPage.jsx';
 import LoadingSpinner from './components/LoadingSpinner.jsx';
 import Starfield from './components/Starfield.jsx';
@@ -34,6 +35,7 @@ const AppLayout = () => {
           <Route path="/forest" element={<ForestPage />} />
           <Route path="/aviary" element={<AviaryPage />} />
           <Route path="/shop" element={<ShopPage />} />
+          <Route path="/phoenix-flight" element={<PhoenixFlightPage />} /> {/* Add the new route */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
@@ -51,7 +53,6 @@ function App() {
 
   const refetchData = async () => {
     try {
-      setLoading(true);
       const stateData = await fetchState();
       const shopData = await fetchShopData();
       if (stateData) {
@@ -86,7 +87,6 @@ function App() {
     return <LoginPage setIsAuthenticated={setIsAuthenticated} refetchData={refetchData} />;
   }
   
-  // --- SYNTAX FIX: Corrected "state.last relapse" to "state.lastRelapse" ---
   const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
   const streakCoins = Math.floor(10 * Math.pow(totalHours > 0 ? totalHours : 0, 1.2));
   const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
