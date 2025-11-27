@@ -31,7 +31,7 @@ function AsteroidShooterPage() {
   const isGameActive = useRef(false);
   const dprRef = useRef(1);
 
-  // Game constants (in CSS pixels; drawing code uses DPR transform)
+  // Game constants
   const SHIP_WIDTH = 50;
   const SHIP_HEIGHT = 60;
   const BULLET_SPEED = 8;
@@ -43,7 +43,17 @@ function AsteroidShooterPage() {
   const SPAWN_RATE = 60;
   const SPEED_INCREASE_RATE = 0.0005;
 
-  // DPR-aware canvas resize: set backing store and scale context
+  // Helpers to draw static background (prevents black screen on menus)
+  const drawStars = (ctx, width, height) => {
+    ctx.fillStyle = '#ffffff';
+    for (let i = 0; i < 100; i++) {
+      const x = (i * 137.5) % width;
+      const y = (i * 197.3) % height;
+      const size = Math.random() * 2;
+      ctx.fillRect(x, y, size, size);
+    }
+  };
+
   const resizeCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -65,9 +75,16 @@ function AsteroidShooterPage() {
     // Scale drawing to CSS pixels
     const ctx = canvas.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // Draw background immediately if game is not running (fixes black screen in menus)
+    if (!isGameActive.current) {
+        ctx.fillStyle = '#000510';
+        ctx.fillRect(0, 0, cssWidth, cssHeight);
+        drawStars(ctx, cssWidth, cssHeight);
+    }
   };
 
-  // Main game loop (always update; no delta<16 early return)
+  // Main game loop
   const gameLoop = (timestamp) => {
     if (!isGameActive.current) return;
 
@@ -82,7 +99,7 @@ function AsteroidShooterPage() {
     const height = canvas.height / dpr;
 
     if (!lastFrameTime.current) lastFrameTime.current = timestamp;
-    const deltaMs = timestamp - lastFrameTime.current;
+    // const deltaMs = timestamp - lastFrameTime.current; // Unused but kept for ref
     lastFrameTime.current = timestamp;
     frameCount.current++;
 
@@ -96,7 +113,7 @@ function AsteroidShooterPage() {
     // Speed curve
     baseSpeed.current += SPEED_INCREASE_RATE;
 
-    // Auto shoot bullets using rAF timestamp for consistency
+    // Auto shoot bullets
     if (timestamp - lastShootTime.current > SHOOT_INTERVAL) {
       bullets.current.push({
         x: shipX.current + SHIP_WIDTH / 2 - BULLET_WIDTH / 2,
@@ -120,7 +137,7 @@ function AsteroidShooterPage() {
       return bullet.y > -bullet.height;
     });
 
-    // Spawn asteroids at fixed frame cadence
+    // Spawn asteroids
     if (frameCount.current % SPAWN_RATE === 0) {
       const size = Math.random() * (ASTEROID_MAX_SIZE - ASTEROID_MIN_SIZE) + ASTEROID_MIN_SIZE;
       asteroids.current.push({
@@ -133,7 +150,7 @@ function AsteroidShooterPage() {
       });
     }
 
-    // Update and draw asteroids; check collisions and bottom contact
+    // Update and draw asteroids
     let gameOver = false;
     asteroids.current = asteroids.current.filter(asteroid => {
       asteroid.y += asteroid.speed;
@@ -163,7 +180,7 @@ function AsteroidShooterPage() {
       return asteroid.y < height;
     });
 
-    // Update and draw explosion particles
+    // Update and draw particles
     particles.current = particles.current.filter(particle => {
       particle.x += particle.vx;
       particle.y += particle.vy;
@@ -193,16 +210,6 @@ function AsteroidShooterPage() {
     }
 
     gameLoopId.current = requestAnimationFrame(gameLoop);
-  };
-
-  const drawStars = (ctx, width, height) => {
-    ctx.fillStyle = '#ffffff';
-    for (let i = 0; i < 100; i++) {
-      const x = (i * 137.5) % width;
-      const y = (i * 197.3) % height;
-      const size = Math.random() * 2;
-      ctx.fillRect(x, y, size, size);
-    }
   };
 
   const drawSpaceship = (ctx, x, y, width, height) => {
@@ -338,7 +345,8 @@ function AsteroidShooterPage() {
       setIsFullscreen(true);
       setGameState('fullscreen-ready');
       // Resize immediately after entering fullscreen
-      resizeCanvas();
+      // Small timeout allows browser to settle layout before drawing initial background
+      setTimeout(resizeCanvas, 100);
     } catch (err) {
       console.error('Error entering fullscreen:', err);
     }
@@ -361,12 +369,10 @@ function AsteroidShooterPage() {
     }
   };
 
-  // Step 1: Enter fullscreen (from normal page)
   const handleEnterFullscreen = async () => {
     await enterFullscreen();
   };
 
-  // Step 2: Start game (from fullscreen ready state)
   const handleStartGame = async () => {
     setIsLoading(true);
     try {
@@ -386,21 +392,25 @@ function AsteroidShooterPage() {
   };
 
   const startGameLoop = () => {
+    resizeCanvas(); 
     const canvas = canvasRef.current;
-    resizeCanvas(); // ensure correct size/backing store before starting
-
+    
     shipX.current = (canvas.width / (dprRef.current || 1)) / 2 - SHIP_WIDTH / 2;
     bullets.current = [];
     asteroids.current = [];
     particles.current = [];
     frameCount.current = 0;
-    lastShootTime.current = 0; // use rAF timestamp, will fire quickly
+    lastShootTime.current = 0; 
     lastFrameTime.current = 0;
     baseSpeed.current = 2;
     currentScore.current = 0;
     isGameActive.current = true;
+    
     setScore(0);
     setGameState('playing');
+    
+    // Start the loop
+    if (gameLoopId.current) cancelAnimationFrame(gameLoopId.current);
     gameLoopId.current = requestAnimationFrame(gameLoop);
   };
 
@@ -421,8 +431,7 @@ function AsteroidShooterPage() {
       setModal({
         isOpen: true,
         title: 'Game Over!',
-        message: `Final Score: ${currentScore.current}
-Coins Earned: ${result.coinsWon || 0}`
+        message: `Final Score: ${currentScore.current}\nCoins Earned: ${result.coinsWon || 0}`
       });
     } catch (error) {
       setModal({ isOpen: true, title: 'Error', message: error.message || 'Failed to save score' });
@@ -439,15 +448,15 @@ Coins Earned: ${result.coinsWon || 0}`
     currentScore.current = 0;
   };
 
+  // EFFECT 1: Handle Event Listeners (Resize, Fullscreen change)
+  // We do NOT clean up the game loop here, because this effect runs whenever gameState changes.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    resizeCanvas();
     const onResize = () => resizeCanvas();
     window.addEventListener('resize', onResize);
 
-    // Prevent touch scrolling
     const preventTouch = (e) => {
       if (e.target === canvas) {
         e.preventDefault();
@@ -458,7 +467,6 @@ Coins Earned: ${result.coinsWon || 0}`
     canvas.addEventListener('touchmove', preventTouch, { passive: false });
     canvas.addEventListener('touchend', preventTouch, { passive: false });
 
-    // Handle fullscreen changes
     const handleFullscreenChange = () => {
       const isCurrentlyFullscreen = !!(
         document.fullscreenElement ||
@@ -467,16 +475,15 @@ Coins Earned: ${result.coinsWon || 0}`
         document.msFullscreenElement
       );
       setIsFullscreen(isCurrentlyFullscreen);
-
-      // Keep canvas backing store in sync with fullscreen transitions
       resizeCanvas();
 
-      if (!isCurrentlyFullscreen && gameState === 'playing') {
-        handleGameOver();
-      }
-
-      if (!isCurrentlyFullscreen && gameState === 'fullscreen-ready') {
-        setGameState('initial');
+      if (!isCurrentlyFullscreen) {
+        // If we exited fullscreen while playing, end game
+        if (isGameActive.current) {
+             handleGameOver();
+        } else if (gameState === 'fullscreen-ready') {
+             setGameState('initial');
+        }
       }
     };
 
@@ -484,6 +491,9 @@ Coins Earned: ${result.coinsWon || 0}`
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
     document.addEventListener('mozfullscreenchange', handleFullscreenChange);
     document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+    // Run resize once on mount/update to ensure background is drawn
+    resizeCanvas();
 
     return () => {
       window.removeEventListener('resize', onResize);
@@ -494,13 +504,18 @@ Coins Earned: ${result.coinsWon || 0}`
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
       document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
       document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+    };
+  }, [gameState]); // Dependencies are fine here now that we removed the destructive cleanup
 
+  // EFFECT 2: Component Unmount Cleanup ONLY
+  useEffect(() => {
+    return () => {
       isGameActive.current = false;
       if (gameLoopId.current) {
         cancelAnimationFrame(gameLoopId.current);
       }
     };
-  }, [gameState]);
+  }, []);
 
   return (
     <div
@@ -531,7 +546,7 @@ Coins Earned: ${result.coinsWon || 0}`
         }}
       />
 
-      {/* Initial state - Play button on normal page */}
+      {/* Initial state */}
       {gameState === 'initial' && (
         <div style={{
           position: 'absolute',
@@ -581,7 +596,7 @@ Coins Earned: ${result.coinsWon || 0}`
         </div>
       )}
 
-      {/* Fullscreen ready state - Start button in fullscreen */}
+      {/* Fullscreen ready state */}
       {gameState === 'fullscreen-ready' && !isLoading && (
         <div style={{
           position: 'absolute',
