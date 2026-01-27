@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
 import { AppContext } from '../App.jsx';
 import PhoenixImage from '../components/PhoenixImage.jsx'; // Import the intelligent image component
 
@@ -39,11 +40,13 @@ function ProgressionPage() {
                            </div>
                            <div className="card ml-4 p-4 w-full flex items-start space-x-4">
                                {/* --- FIX: USE PhoenixImage COMPONENT TO SHOW EQUIPPED SKINS --- */}
-                               <PhoenixImage 
-                                   rankLevel={index}
-                                   equippedUpgrades={state.equipped_upgrades}
-                                   className="w-24 h-24 object-contain rounded-lg bg-black/20 shrink-0"
-                               />
+                               <Link to={`/progression/levels?level=${index}`} aria-label="View level details">
+                                   <PhoenixImage 
+                                       rankLevel={index}
+                                       equippedUpgrades={state.equipped_upgrades}
+                                       className="w-24 h-24 object-contain rounded-lg bg-black/20 shrink-0 hover:scale-105 transition-transform"
+                                   />
+                               </Link>
                                
                                <div className="flex-grow">
                                    <h3 className="text-lg font-semibold text-white">{rank.name}</h3>
