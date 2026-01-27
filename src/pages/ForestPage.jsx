@@ -1,83 +1,17 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { AppContext } from '../App.jsx';
 import { buyItem } from '../api.js';
 import Modal from '../components/Modal.jsx';
-import { VirtuosoGrid } from 'react-virtuoso';
-
-// Helper function to format the countdown timer
-function formatRemainingTime(ms) {
-    if (ms <= 0) return "Matured!";
-    const totalSeconds = Math.floor(ms / 1000);
-    const d = Math.floor(totalSeconds / 86400);
-    const h = Math.floor((totalSeconds % 86400) / 3600);
-    const m = Math.floor((totalSeconds % 3600) / 60);
-    const s = Math.floor(totalSeconds % 60);
-    const dayPart = d > 0 ? `${d}d ` : '';
-    return `${dayPart}${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
-}
-
-// Reusable Tree component for the forest grid
-function Tree({ tree, treeConfig }) {
-    const [timer, setTimer] = useState('');
-
-    useEffect(() => {
-        let interval;
-        if (tree.status === 'growing') {
-            interval = setInterval(() => {
-                const remaining = new Date(tree.matureDate).getTime() - Date.now();
-                setTimer(formatRemainingTime(remaining));
-            }, 1000);
-        }
-        return () => clearInterval(interval);
-    }, [tree]);
-
-    if (!treeConfig) return null;
-
-    let stage = { statusText: 'Unknown', imageSrc: '', statusColor: 'text-gray-500' };
-
-    if (tree.status === 'withered') {
-        stage = {
-            statusText: 'Withered',
-            imageSrc: treeConfig.witheredImage,
-            statusColor: 'text-red-500'
-        };
-    } else if (tree.status === 'matured' || new Date(tree.matureDate) <= new Date()) {
-        const matureStage = treeConfig.stages[treeConfig.stages.length - 1];
-        stage = {
-            statusText: 'Matured',
-            imageSrc: matureStage?.image,
-            statusColor: 'text-cyan-400'
-        };
-    } else { // It's growing
-        const hoursSincePlanted = (Date.now() - new Date(tree.purchaseDate).getTime()) / (1000 * 60 * 60);
-        const currentStage = treeConfig.stages.slice().reverse().find(s => hoursSincePlanted >= s.hours) || treeConfig.stages[0];
-        stage = {
-            statusText: currentStage.status,
-            imageSrc: currentStage.image,
-            statusColor: 'text-green-400'
-        };
-    }
-    
-    // --- FIX: REMOVED "bg-gray-800" CLASS FROM THIS DIV ---
-    return (
-        <div className="p-4 rounded-lg border border-gray-700/50 text-center flex flex-col items-center transition-all hover:bg-white/5">
-            <img 
-                src={stage.imageSrc || '/img/placeholder.png'} 
-                alt={stage.statusText} 
-                className="w-24 h-24 mx-auto object-contain mb-2" 
-                onError={(e) => { e.target.style.display = 'none'; }}
-            />
-            <h3 className="font-semibold text-white text-sm">{treeConfig.name}</h3>
-            <p className={`${stage.statusColor} text-xs`}>{stage.statusText}</p>
-            {tree.status === 'growing' && timer && <div className="text-xs text-yellow-400 mt-1 font-mono">{timer}</div>}
-        </div>
-    );
-}
-
+import * as THREE from 'three';
 
 function ForestPage() {
     const { state, treeTypes, refetchData } = useContext(AppContext);
     const [modal, setModal] = useState({ isOpen: false, title: '', message: '' });
+    const sceneRef = useRef(null);
+    const rendererRef = useRef(null);
+    const cameraRef = useRef(null);
+    const forestGroupRef = useRef(null);
+    const animationRef = useRef(null);
 
     const forest = state?.forest || [];
     const saplings = Object.values(treeTypes);
@@ -102,6 +36,135 @@ function ForestPage() {
             setModal({ isOpen: true, title: 'Error', message: error.message || 'Purchase failed.' });
         }
     };
+
+    useEffect(() => {
+        if (!sceneRef.current || rendererRef.current) return;
+
+        const container = sceneRef.current;
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.Fog(0x0b0f12, 8, 40);
+
+        const camera = new THREE.PerspectiveCamera(55, container.clientWidth / container.clientHeight, 0.1, 200);
+        camera.position.set(0, 6, 12);
+        camera.lookAt(0, 2, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        container.appendChild(renderer.domElement);
+
+        const ambient = new THREE.AmbientLight(0x9bb3b8, 0.7);
+        scene.add(ambient);
+        const sun = new THREE.DirectionalLight(0xf6d7a7, 0.9);
+        sun.position.set(-8, 10, 6);
+        scene.add(sun);
+
+        const ground = new THREE.Mesh(
+            new THREE.CircleGeometry(18, 64),
+            new THREE.MeshPhongMaterial({ color: 0x0f2a1f, shininess: 10 })
+        );
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.1;
+        scene.add(ground);
+
+        const forestGroup = new THREE.Group();
+        scene.add(forestGroup);
+
+        sceneRef.current.__threeScene = scene;
+        rendererRef.current = renderer;
+        cameraRef.current = camera;
+        forestGroupRef.current = forestGroup;
+
+        const handleResize = () => {
+            if (!sceneRef.current || !rendererRef.current || !cameraRef.current) return;
+            const { clientWidth, clientHeight } = sceneRef.current;
+            cameraRef.current.aspect = clientWidth / clientHeight;
+            cameraRef.current.updateProjectionMatrix();
+            rendererRef.current.setSize(clientWidth, clientHeight);
+        };
+
+        const animate = () => {
+            animationRef.current = requestAnimationFrame(animate);
+            forestGroup.rotation.y += 0.0008;
+            renderer.render(scene, camera);
+        };
+        animate();
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            cancelAnimationFrame(animationRef.current);
+            window.removeEventListener('resize', handleResize);
+            renderer.dispose();
+            container.removeChild(renderer.domElement);
+            rendererRef.current = null;
+            cameraRef.current = null;
+            forestGroupRef.current = null;
+        };
+    }, []);
+
+    useEffect(() => {
+        const scene = sceneRef.current?.__threeScene;
+        const forestGroup = forestGroupRef.current;
+        if (!scene || !forestGroup) return;
+
+        while (forestGroup.children.length) {
+            const child = forestGroup.children.pop();
+            if (child.geometry) child.geometry.dispose();
+            if (child.material) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach((mat) => mat.dispose());
+                } else {
+                    child.material.dispose();
+                }
+            }
+        }
+
+        const hash = (value) => {
+            let h = 2166136261;
+            const str = String(value);
+            for (let i = 0; i < str.length; i++) {
+                h ^= str.charCodeAt(i);
+                h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
+            }
+            return Math.abs(h);
+        };
+
+        forest.forEach((tree, index) => {
+            const seed = hash(tree.id || `${tree.treeType}-${index}`);
+            const radius = 4 + (seed % 900) / 100;
+            const angle = (seed % 360) * (Math.PI / 180);
+            const x = Math.cos(angle) * radius;
+            const z = Math.sin(angle) * radius;
+
+            const status = tree.status;
+            const trunkColor = status === 'withered' ? 0x6b4b3e : 0x7a4a21;
+            const leafColor = status === 'matured' ? 0x3bbd84 : status === 'withered' ? 0x6f5f4b : 0x4aa96c;
+
+            const trunkHeight = 0.8 + (seed % 40) / 50;
+            const trunk = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.12, 0.18, trunkHeight, 6),
+                new THREE.MeshStandardMaterial({ color: trunkColor, roughness: 0.9 })
+            );
+            trunk.position.y = trunkHeight / 2;
+
+            const canopyHeight = 1.2 + (seed % 60) / 60;
+            const canopy = new THREE.Mesh(
+                new THREE.ConeGeometry(0.7 + (seed % 30) / 60, canopyHeight, 8),
+                new THREE.MeshStandardMaterial({ color: leafColor, roughness: 0.8 })
+            );
+            canopy.position.y = trunkHeight + canopyHeight / 2 - 0.1;
+
+            const treeGroup = new THREE.Group();
+            treeGroup.add(trunk);
+            treeGroup.add(canopy);
+            treeGroup.position.set(x, 0, z);
+
+            const growthScale = status === 'growing' ? 0.75 : status === 'withered' ? 0.6 : 1;
+            treeGroup.scale.setScalar(growthScale);
+
+            forestGroup.add(treeGroup);
+        });
+    }, [forest, treeTypes]);
     
     return (
         <>
@@ -128,15 +191,11 @@ function ForestPage() {
                                 <p className="text-sm mt-2">Buy a sapling from the shop to begin.</p>
                             </div>
                         ) : (
-                            <div className="h-[60vh]">
-                                <VirtuosoGrid
-                                    data={forest}
-                                    totalCount={forest.length}
-                                    itemContent={(index, tree) => (
-                                        <Tree key={tree.id} tree={tree} treeConfig={treeTypes[tree.treeType]} />
-                                    )}
-                                    listClassName="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 justify-items-center"
-                                />
+                            <div className="h-[60vh] rounded-2xl border border-gray-700/60 bg-gradient-to-b from-emerald-900/20 via-gray-900/60 to-black/70 overflow-hidden relative">
+                                <div ref={sceneRef} className="absolute inset-0" />
+                                <div className="relative z-10 p-4 text-xs text-gray-300">
+                                    <span className="bg-black/50 px-3 py-1 rounded-full">3D Forest View</span>
+                                </div>
                             </div>
                         )}
                     </div>
