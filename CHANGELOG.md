@@ -22,3 +22,7 @@
 - Switch Aviary and Forest lists to react-virtuoso virtualization.
 - Pin React/ReactDOM to 18.2 for compatibility.
 - Add AGENTS.md project guide.
+- Add Kawaii City Lights background theme with animated sky + sidebar reskin.
+- Darken the kawaii theme for a moody night aesthetic.
+- Increase rain density, add lightning, firecrackers, horizon trees, and a cat accent.
+- Add Starfield Drift background theme using the provided animation (HTML/CSS/JS) and preview art.
