@@ -63,7 +63,7 @@ function validateItemData(itemData) {
   if (!itemData.name) errors.push('Item name is required');
   if (!itemData.description) errors.push('Item description is required');
   if (!itemData.cost || typeof itemData.cost !== 'number' || itemData.cost <= 0) errors.push('Item cost must be a positive number');
-  if (!['phoenix_skin', 'tree_sapling', 'background_theme'].includes(itemData.type)) errors.push('Invalid item type');
+  if (!['phoenix_skin', 'tree_sapling', 'background_theme', 'forest_theme'].includes(itemData.type)) errors.push('Invalid item type');
   return errors;
 }
 

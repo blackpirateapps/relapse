@@ -17,6 +17,7 @@ import LevelShowcasePage from './pages/LevelShowcasePage.jsx';
 import FireBackground from './components/FireBackground.jsx';
 import PhoenixConstellationBackground from './components/PhoenixConstellationBackground.jsx';
 import SolarSystemBackground from './components/SolarSystemBackground.jsx';
+import DarkForestBackground from './components/DarkForestBackground.jsx';
 
 import { ranks } from './data/ranks.js';
 import { fetchState, fetchShopData } from './api.js';
@@ -33,9 +34,14 @@ const AppLayout = () => {
     phoenix_constellation_bg: PhoenixConstellationBackground,
     solar_system_bg: SolarSystemBackground
   };
+  const forestThemes = {
+    dark_forest_bg: DarkForestBackground
+  };
   const equippedThemeId = Object.keys(backgroundThemes).find((id) => state?.equipped_upgrades?.[id]);
+  const equippedForestThemeId = Object.keys(forestThemes).find((id) => state?.equipped_upgrades?.[id]);
   const activeThemeId = isForestPage ? null : (previewThemeId || equippedThemeId);
-  const Background = isForestPage ? ForestBackground : (activeThemeId ? backgroundThemes[activeThemeId] : Starfield);
+  const ForestBg = equippedForestThemeId ? forestThemes[equippedForestThemeId] : ForestBackground;
+  const Background = isForestPage ? ForestBg : (activeThemeId ? backgroundThemes[activeThemeId] : Starfield);
 
   return (
     <div className="relative min-h-screen md:flex text-gray-200">

@@ -125,6 +125,23 @@ export async function initDb() {
       ],
     });
   }
+
+  const { rows: darkForestRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'dark_forest_bg';");
+  if (darkForestRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO shop_items (id, name, description, cost, type, preview_image, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+      args: [
+        'dark_forest_bg',
+        'Nocturne Forest',
+        'A darker, misty forest with drifting shadows.',
+        20000,
+        'forest_theme',
+        '/img/bg-dark-forest.svg',
+        true,
+        95
+      ],
+    });
+  }
 }
 
 export default client;

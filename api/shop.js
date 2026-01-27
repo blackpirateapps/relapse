@@ -194,6 +194,13 @@ async function handleEquipment(itemId, equip, res) {
         equippedUpgrades[theme.id] = false;
       }
     }
+
+    if (equip && item && item.type === 'forest_theme') {
+      const forestResult = await db.execute("SELECT id FROM shop_items WHERE type = 'forest_theme';");
+      for (const theme of forestResult.rows) {
+        equippedUpgrades[theme.id] = false;
+      }
+    }
     
     equippedUpgrades[itemId] = equip;
 
