@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { claimUrgeTask, fetchUrgeTask, startUrgeTask } from '../api.js';
+import { claimUrgeTask, fetchUrgeTasks, startUrgeTask } from '../api.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 import { AppContext } from '../App.jsx';
 
@@ -14,7 +14,7 @@ const formatTime = (ms) => {
 function UrgeTasksPage() {
   const navigate = useNavigate();
   const { refetchData } = useContext(AppContext);
-  const [task, setTask] = useState(null);
+  const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [claiming, setClaiming] = useState(false);
@@ -25,8 +25,8 @@ function UrgeTasksPage() {
     setLoading(true);
     setError('');
     try {
-      const data = await fetchUrgeTask();
-      setTask(data);
+      const data = await fetchUrgeTasks();
+      setTasks(data);
     } catch (err) {
       setError(err.message || 'Failed to load task.');
     } finally {
@@ -39,25 +39,21 @@ function UrgeTasksPage() {
   }, []);
 
   useEffect(() => {
-    if (!task?.started_at || task?.claimed_at) return;
+    if (!tasks.some((t) => t.started_at && !t.claimed_at)) return;
     const interval = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(interval);
-  }, [task?.started_at, task?.claimed_at]);
+  }, [tasks]);
 
-  const endTime = useMemo(() => {
-    if (!task?.started_at) return null;
-    return new Date(task.started_at).getTime() + task.duration_minutes * 60 * 1000;
-  }, [task]);
-
-  const timeLeft = endTime ? Math.max(0, endTime - now) : 0;
-  const isComplete = task?.is_complete || (endTime ? now >= endTime : false);
-
-  const handleStart = async () => {
+  const handleStart = async (taskId) => {
     setStarting(true);
     setError('');
     try {
-      const data = await startUrgeTask();
-      setTask(data);
+      const data = await startUrgeTask(taskId);
+      if (taskId === 'pushup_45') {
+        navigate('/journey/urge/pushups');
+        return;
+      }
+      setTasks((prev) => prev.map((task) => task.id === taskId ? data : task));
       setNow(Date.now());
     } catch (err) {
       setError(err.message || 'Failed to start task.');
@@ -66,11 +62,11 @@ function UrgeTasksPage() {
     }
   };
 
-  const handleClaim = async () => {
+  const handleClaim = async (taskId) => {
     setClaiming(true);
     setError('');
     try {
-      await claimUrgeTask();
+      await claimUrgeTask(taskId);
       await refetchData();
       await loadTask();
     } catch (err) {
@@ -93,48 +89,63 @@ function UrgeTasksPage() {
 
         {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
 
-        {task && (
-          <div className="mt-6 p-4 rounded-xl border border-gray-700 bg-black/30">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold text-white">{task.name}</h2>
-                <p className="text-sm text-gray-400 mt-1">{task.description}</p>
-                <p className="text-sm text-gray-400 mt-2">
-                  Reward: <span className="text-yellow-400 font-semibold">+{task.reward_coins} Coins</span> and <span className="text-cyan-400 font-semibold">+{task.reward_hours} hour</span>
-                </p>
-              </div>
-              <span className="text-xs uppercase tracking-wide text-gray-500">30 min</span>
-            </div>
+        {tasks.map((task) => {
+          const endTime = task.started_at && task.duration_minutes > 0
+            ? new Date(task.started_at).getTime() + task.duration_minutes * 60 * 1000
+            : null;
+          const timeLeft = endTime ? Math.max(0, endTime - now) : 0;
+          const isComplete = task.is_complete || (endTime ? now >= endTime : false);
+          const rewardText = task.id === 'pushup_45'
+            ? 'Reward: +1 coin per 2 seconds, +4x time added'
+            : `Reward: +${task.reward_coins} Coins and +${task.reward_hours} hour`;
 
-            <div className="mt-4 flex items-center justify-between">
-              <div className="text-sm text-gray-300">
-                {task.started_at ? (
-                  task.claimed_at ? 'Reward claimed.' : (
-                    isComplete ? 'Timer complete. Collect your reward.' : `Time left: ${formatTime(timeLeft)}`
-                  )
-                ) : 'Not started yet.'}
+          return (
+            <div key={task.id} className="mt-6 p-4 rounded-xl border border-gray-700 bg-black/30">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-white">{task.name}</h2>
+                  <p className="text-sm text-gray-400 mt-1">{task.description}</p>
+                  <p className="text-sm text-gray-400 mt-2">
+                    {rewardText}
+                  </p>
+                </div>
+                {task.duration_minutes > 0 && (
+                  <span className="text-xs uppercase tracking-wide text-gray-500">{task.duration_minutes} min</span>
+                )}
               </div>
-              {!task.started_at && (
-                <button
-                  onClick={handleStart}
-                  disabled={starting}
-                  className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-semibold px-4 py-2 rounded-md disabled:bg-gray-600"
-                >
-                  {starting ? 'Starting...' : 'Start'}
-                </button>
-              )}
-              {task.started_at && !task.claimed_at && (
-                <button
-                  onClick={handleClaim}
-                  disabled={!isComplete || claiming}
-                  className={`px-4 py-2 rounded-md font-semibold ${isComplete ? 'bg-green-600 hover:bg-green-500 text-white' : 'bg-gray-700 text-gray-400 cursor-not-allowed'}`}
-                >
-                  {claiming ? 'Collecting...' : 'Collect reward'}
-                </button>
-              )}
+
+              <div className="mt-4 flex items-center justify-between">
+                <div className="text-sm text-gray-300">
+                  {task.started_at ? (
+                    task.claimed_at ? 'Reward claimed.' : (
+                      isComplete ? 'Task complete. Collect your reward.' : (
+                        endTime ? `Time left: ${formatTime(timeLeft)}` : 'Session in progress.'
+                      )
+                    )
+                  ) : 'Not started yet.'}
+                </div>
+                {!task.started_at && (
+                  <button
+                    onClick={() => handleStart(task.id)}
+                    disabled={starting}
+                    className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-semibold px-4 py-2 rounded-md disabled:bg-gray-600"
+                  >
+                    {starting ? 'Starting...' : 'Start'}
+                  </button>
+                )}
+                {task.started_at && !task.claimed_at && (
+                  <button
+                    onClick={() => handleClaim(task.id)}
+                    disabled={!isComplete || claiming}
+                    className={`px-4 py-2 rounded-md font-semibold ${isComplete ? 'bg-green-600 hover:bg-green-500 text-white' : 'bg-gray-700 text-gray-400 cursor-not-allowed'}`}
+                  >
+                    {claiming ? 'Collecting...' : 'Collect reward'}
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })}
       </div>
     </section>
   );

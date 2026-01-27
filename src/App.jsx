@@ -19,6 +19,7 @@ import PhoenixConstellationBackground from './components/PhoenixConstellationBac
 import SolarSystemBackground from './components/SolarSystemBackground.jsx';
 import DarkForestBackground from './components/DarkForestBackground.jsx';
 import UrgeTasksPage from './pages/UrgeTasksPage.jsx';
+import PushupSessionPage from './pages/PushupSessionPage.jsx';
 
 import { ranks } from './data/ranks.js';
 import { fetchState, fetchShopData } from './api.js';
@@ -80,6 +81,7 @@ const AppLayout = () => {
           <Route path="*" element={<Navigate to="/" />} />
           <Route path="/minigame/asteroid-shooter" element={<AsteroidShooterPage />} />
           <Route path="/journey/urge" element={<UrgeTasksPage />} />
+          <Route path="/journey/urge/pushups" element={<PushupSessionPage />} />
         </Routes>
       </main>
     </div>

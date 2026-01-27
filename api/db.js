@@ -54,9 +54,16 @@ export async function initDb() {
       reward_hours INTEGER NOT NULL,
       started_at TEXT,
       completed_at TEXT,
-      claimed_at TEXT
+      claimed_at TEXT,
+      last_session_seconds INTEGER
     );`
   ], 'write');
+
+  const { rows: taskColumns } = await client.execute("PRAGMA table_info(urge_tasks);");
+  const hasSessionSeconds = taskColumns.some((col) => col.name === 'last_session_seconds');
+  if (!hasSessionSeconds) {
+    await client.execute("ALTER TABLE urge_tasks ADD COLUMN last_session_seconds INTEGER;");
+  }
 
   // Initialize user if not exists
   const { rows: userRows } = await client.execute("SELECT id FROM user_state WHERE id = 1;");
@@ -165,6 +172,21 @@ export async function initDb() {
         30,
         200,
         1
+      ],
+    });
+  }
+
+  const { rows: pushupRows } = await client.execute("SELECT id FROM urge_tasks WHERE id = 'pushup_45';");
+  if (pushupRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO urge_tasks (id, name, description, duration_minutes, reward_coins, reward_hours) VALUES (?, ?, ?, ?, ?, ?);",
+      args: [
+        'pushup_45',
+        'Pushup 45 times',
+        'Pushup 45 times in a batch of 15.',
+        0,
+        0,
+        0
       ],
     });
   }

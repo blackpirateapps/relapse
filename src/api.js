@@ -62,16 +62,21 @@ export const endGame = (playId, score) => apiRequest('minigame', {
 // --- END: New Calls ---
 
 // --- Urge Task API Calls ---
-export const fetchUrgeTask = () => apiRequest('urge');
-export const startUrgeTask = () => apiRequest('urge', {
+export const fetchUrgeTasks = () => apiRequest('urge');
+export const startUrgeTask = (taskId) => apiRequest('urge', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ action: 'start' }),
+  body: JSON.stringify({ action: 'start', taskId }),
 });
-export const claimUrgeTask = () => apiRequest('urge', {
+export const endUrgeSession = (taskId) => apiRequest('urge', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ action: 'claim' }),
+  body: JSON.stringify({ action: 'end_session', taskId }),
+});
+export const claimUrgeTask = (taskId) => apiRequest('urge', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ action: 'claim', taskId }),
 });
 // --- END: Urge Task Calls ---
 
