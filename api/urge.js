@@ -80,6 +80,34 @@ export default async function handler(req, res) {
         return res.status(200).json({ success: true, totalSeconds: elapsedSeconds });
       }
 
+      if (action === 'cancel') {
+        const { rows } = await db.execute({ sql: "SELECT * FROM urge_tasks WHERE id = ?;", args: [taskKey] });
+        if (rows.length === 0) return res.status(404).json({ message: 'Task not found.' });
+        const task = rows[0];
+        if (!task.started_at || task.claimed_at) {
+          return res.status(200).json({ success: true, penalty: 0 });
+        }
+
+        const penalty = task.id === 'pushup_45' ? 200 : 0;
+        if (penalty > 0) {
+          const { rows: stateRows } = await db.execute("SELECT * FROM user_state WHERE id = 1;");
+          if (stateRows.length === 0) return res.status(404).json({ message: 'State not found.' });
+          const state = stateRows[0];
+          const newCoins = Math.max(0, (state.coinsAtLastRelapse || 0) - penalty);
+          await db.execute({
+            sql: "UPDATE user_state SET coinsAtLastRelapse = ? WHERE id = 1;",
+            args: [newCoins]
+          });
+        }
+
+        await db.execute({
+          sql: "UPDATE urge_tasks SET started_at = NULL, completed_at = NULL, claimed_at = NULL, last_session_seconds = NULL WHERE id = ?;",
+          args: [taskKey]
+        });
+
+        return res.status(200).json({ success: true, penalty });
+      }
+
       if (action === 'claim') {
         const { rows: taskRows } = await db.execute({ sql: "SELECT * FROM urge_tasks WHERE id = ?;", args: [taskKey] });
         if (taskRows.length === 0) return res.status(404).json({ message: 'Task not found.' });

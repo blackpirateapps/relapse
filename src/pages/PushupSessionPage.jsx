@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { endUrgeSession, startUrgeTask } from '../api.js';
+import { cancelUrgeTask, endUrgeSession, startUrgeTask } from '../api.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
+import Modal from '../components/Modal.jsx';
 
 const TASK_ID = 'pushup_45';
 
@@ -21,6 +22,8 @@ function PushupSessionPage() {
   const [extraRest, setExtraRest] = useState(0);
   const [sessionSeconds, setSessionSeconds] = useState(0);
   const [ending, setEnding] = useState(false);
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [hasEnded, setHasEnded] = useState(false);
 
   useEffect(() => {
     const start = async () => {
@@ -33,6 +36,27 @@ function PushupSessionPage() {
     };
     start();
   }, []);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (hasEnded) return;
+      navigator.sendBeacon?.('/api/urge', JSON.stringify({ action: 'cancel', taskId: TASK_ID }));
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasEnded]);
+
+  useEffect(() => {
+    return () => {
+      if (hasEnded) return;
+      fetch('/api/urge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'cancel', taskId: TASK_ID }),
+        keepalive: true
+      }).catch(() => {});
+    };
+  }, [hasEnded]);
 
   useEffect(() => {
     if (!['countdown', 'exercise', 'break', 'rest-extra', 'post', 'continue'].includes(phase)) return;
@@ -114,6 +138,17 @@ function PushupSessionPage() {
     setEnding(true);
     try {
       await endUrgeSession(TASK_ID);
+      setHasEnded(true);
+    } finally {
+      navigate('/journey/urge');
+    }
+  };
+
+  const cancelSession = async () => {
+    setEnding(true);
+    try {
+      await cancelUrgeTask(TASK_ID);
+      setHasEnded(true);
     } finally {
       navigate('/journey/urge');
     }
@@ -136,6 +171,12 @@ function PushupSessionPage() {
       <div className="card p-6 sm:p-8">
         <h1 className="text-2xl font-bold text-white">Pushup Session</h1>
         <p className="text-sm text-gray-400 mt-2">{header}</p>
+        <button
+          onClick={() => setShowEndConfirm(true)}
+          className="mt-4 text-sm text-red-400 hover:text-red-300"
+        >
+          End session now
+        </button>
 
         {phase === 'countdown' && (
           <div className="mt-8">
@@ -214,6 +255,20 @@ function PushupSessionPage() {
         )}
       </div>
       <div className="mt-6 text-sm text-gray-500">Session time: {formatTimer(sessionSeconds)}</div>
+
+      <Modal isOpen={showEndConfirm} onClose={() => setShowEndConfirm(false)} title="End Session">
+        <div className="text-center">
+          <p className="mb-6">If you end this now you will lose 200 coins.</p>
+          <div className="flex justify-center gap-3">
+            <button onClick={() => setShowEndConfirm(false)} className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg">
+              Keep going
+            </button>
+            <button onClick={cancelSession} className="bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-6 rounded-lg">
+              End now
+            </button>
+          </div>
+        </div>
+      </Modal>
     </section>
   );
 }

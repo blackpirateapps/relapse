@@ -95,6 +95,7 @@ function UrgeTasksPage() {
             : null;
           const timeLeft = endTime ? Math.max(0, endTime - now) : 0;
           const isComplete = task.is_complete || (endTime ? now >= endTime : false);
+          const canStart = !task.started_at || task.claimed_at;
           const rewardText = task.id === 'pushup_45'
             ? 'Reward: +1 coin per 2 seconds, +4x time added'
             : `Reward: +${task.reward_coins} Coins and +${task.reward_hours} hour`;
@@ -124,7 +125,7 @@ function UrgeTasksPage() {
                     )
                   ) : 'Not started yet.'}
                 </div>
-                {!task.started_at && (
+                {canStart && (
                   <button
                     onClick={() => handleStart(task.id)}
                     disabled={starting}

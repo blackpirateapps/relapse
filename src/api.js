@@ -73,6 +73,11 @@ export const endUrgeSession = (taskId) => apiRequest('urge', {
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ action: 'end_session', taskId }),
 });
+export const cancelUrgeTask = (taskId) => apiRequest('urge', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ action: 'cancel', taskId }),
+});
 export const claimUrgeTask = (taskId) => apiRequest('urge', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
