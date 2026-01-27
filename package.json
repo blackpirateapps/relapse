@@ -12,6 +12,7 @@
     "react": "latest",
     "react-dom": "latest",
     "react-router-dom": "latest",
+    "framer-motion": "latest",
     "@libsql/client": "latest",
     "cookie": "latest"
   },
@@ -21,4 +22,3 @@
     "vercel": "latest"
   }
 }
-
