@@ -145,12 +145,7 @@ async function handlePurchase(itemId, res) {
       await db.execute({ sql: "UPDATE user_state SET upgrades = ? WHERE id = 1", args: [JSON.stringify(upgrades)] });
     }
 
-    if (item.id === 'scarlet_phoenix_skin') {
-      await db.execute({
-        sql: "UPDATE shop_items SET cost = ? WHERE id = 'scarlet_phoenix_skin';",
-        args: [2000]
-      });
-    }
+    // Leave dynamic price as-is for relapse-rebuy skin
     
     await db.execute({
       sql: "UPDATE user_state SET coinsAtLastRelapse = ?, lastClaimedLevel = ? WHERE id = 1;",
