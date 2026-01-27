@@ -39,8 +39,10 @@ const AppLayout = () => {
   };
   const equippedThemeId = Object.keys(backgroundThemes).find((id) => state?.equipped_upgrades?.[id]);
   const equippedForestThemeId = Object.keys(forestThemes).find((id) => state?.equipped_upgrades?.[id]);
-  const activeThemeId = isForestPage ? null : (previewThemeId || equippedThemeId);
-  const ForestBg = equippedForestThemeId ? forestThemes[equippedForestThemeId] : ForestBackground;
+  const isPreviewForest = previewThemeId && forestThemes[previewThemeId];
+  const isPreviewGlobal = previewThemeId && backgroundThemes[previewThemeId];
+  const activeThemeId = isForestPage ? null : (isPreviewGlobal ? previewThemeId : equippedThemeId);
+  const ForestBg = isPreviewForest ? forestThemes[previewThemeId] : (equippedForestThemeId ? forestThemes[equippedForestThemeId] : ForestBackground);
   const Background = isForestPage ? ForestBg : (activeThemeId ? backgroundThemes[activeThemeId] : Starfield);
 
   return (

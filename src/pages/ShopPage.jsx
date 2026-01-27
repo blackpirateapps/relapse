@@ -35,8 +35,9 @@ function ShopPage() {
         const isOwned = state.upgrades && state.upgrades[item.id];
         const isEquipped = state.equipped_upgrades && state.equipped_upgrades[item.id];
         const isBackgroundTheme = item.type === 'background_theme';
+        const isForestTheme = item.type === 'forest_theme';
 
-        const previewButton = isBackgroundTheme ? (
+        const previewButton = (isBackgroundTheme || isForestTheme) ? (
             <button
                 onClick={() => setPreviewThemeId(item.id)}
                 className="w-full bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded transition-colors"
