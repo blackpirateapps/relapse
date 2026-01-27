@@ -91,6 +91,23 @@ export async function initDb() {
       ],
     });
   }
+
+  const { rows: constellationRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'phoenix_constellation_bg';");
+  if (constellationRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO shop_items (id, name, description, cost, type, preview_image, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+      args: [
+        'phoenix_constellation_bg',
+        'Phoenix Constellation',
+        'A celestial phoenix traced across the stars.',
+        50000,
+        'background_theme',
+        '/img/bg-phoenix-constellation.svg',
+        true,
+        91
+      ],
+    });
+  }
 }
 
 export default client;

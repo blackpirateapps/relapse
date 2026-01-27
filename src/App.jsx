@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import Sidebar from './components/Sidebar.jsx';
 import Header from './components/Header.jsx';
 import HomePage from './pages/HomePage.jsx';
@@ -15,6 +15,7 @@ import ForestBackground from './components/ForestBackground.jsx';
 import AsteroidShooterPage from './pages/AsteroidShooterPage.jsx';
 import LevelShowcasePage from './pages/LevelShowcasePage.jsx';
 import FireBackground from './components/FireBackground.jsx';
+import PhoenixConstellationBackground from './components/PhoenixConstellationBackground.jsx';
 
 import { ranks } from './data/ranks.js';
 import { fetchState, fetchShopData } from './api.js';
@@ -25,15 +26,37 @@ export const AppContext = React.createContext();
 const AppLayout = () => {
   const location = useLocation();
   const isForestPage = location.pathname === '/forest';
-  const { state } = React.useContext(AppContext);
-  const isFireThemeEquipped = state?.equipped_upgrades?.burning_fire_bg;
-  const Background = isForestPage ? ForestBackground : (isFireThemeEquipped ? FireBackground : Starfield);
+  const { state, previewThemeId, setPreviewThemeId } = React.useContext(AppContext);
+  const backgroundThemes = {
+    burning_fire_bg: FireBackground,
+    phoenix_constellation_bg: PhoenixConstellationBackground
+  };
+  const equippedThemeId = Object.keys(backgroundThemes).find((id) => state?.equipped_upgrades?.[id]);
+  const activeThemeId = isForestPage ? null : (previewThemeId || equippedThemeId);
+  const Background = isForestPage ? ForestBackground : (activeThemeId ? backgroundThemes[activeThemeId] : Starfield);
 
   return (
     <div className="relative min-h-screen md:flex text-gray-200">
       <Background />
+      {previewThemeId && (
+        <div className="fixed top-0 left-0 right-0 z-50">
+          <div className="mx-4 sm:mx-8 mt-4 rounded-xl border border-amber-400/40 bg-gradient-to-r from-amber-500/20 via-pink-500/10 to-cyan-500/20 backdrop-blur-md px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
+            <span className="text-amber-200">Preview mode enabled. This is a temporary background.</span>
+            <div className="flex items-center gap-2">
+              <Link to="/shop" className="px-3 py-1.5 rounded-md bg-yellow-500 text-gray-900 font-semibold hover:bg-yellow-400">Purchase</Link>
+              <button
+                type="button"
+                onClick={() => setPreviewThemeId(null)}
+                className="px-3 py-1.5 rounded-md bg-gray-800 text-gray-200 hover:bg-gray-700"
+              >
+                Exit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <Sidebar />
-      <main className="flex-1 p-4 sm:p-6 md:p-10 overflow-y-auto h-screen">
+      <main className={`flex-1 p-4 sm:p-6 md:p-10 overflow-y-auto h-screen ${previewThemeId ? 'pt-20' : ''}`}>
         <Header />
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -58,6 +81,7 @@ function App() {
   const [loading, setLoading] = React.useState(true);
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const [previewThemeId, setPreviewThemeId] = React.useState(null);
 
   const refetchData = async () => {
     try {
@@ -121,7 +145,9 @@ function App() {
     ranks,
     isSidebarOpen,
     setIsSidebarOpen,
-    refetchData
+    refetchData,
+    previewThemeId,
+    setPreviewThemeId
   };
 
   return (

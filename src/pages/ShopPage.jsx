@@ -4,7 +4,7 @@ import { buyItem, equipItem } from '../api';
 import Modal from '../components/Modal';
 
 function ShopPage() {
-    const { state, shopItems, totalCoins, refetchData } = useContext(AppContext);
+    const { state, shopItems, totalCoins, refetchData, setPreviewThemeId } = useContext(AppContext);
     const [modal, setModal] = useState({ isOpen: false, title: '', message: '' });
 
     const handleBuy = async (itemId) => {
@@ -34,12 +34,25 @@ function ShopPage() {
     const renderActionButtons = (item) => {
         const isOwned = state.upgrades && state.upgrades[item.id];
         const isEquipped = state.equipped_upgrades && state.equipped_upgrades[item.id];
+        const isBackgroundTheme = item.type === 'background_theme';
+
+        const previewButton = isBackgroundTheme ? (
+            <button
+                onClick={() => setPreviewThemeId(item.id)}
+                className="w-full bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded transition-colors"
+            >
+                Preview
+            </button>
+        ) : null;
 
         if (isOwned && item.type !== 'tree_sapling') {
-            if (isEquipped) {
-                return <button onClick={() => handleEquip(item.id, false)} className="w-full bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded transition-colors">Unequip</button>;
+            const equipButton = isEquipped
+                ? <button onClick={() => handleEquip(item.id, false)} className="w-full bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded transition-colors">Unequip</button>
+                : <button onClick={() => handleEquip(item.id, true)} className="w-full bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded transition-colors">Equip</button>;
+            if (previewButton) {
+                return <div className="space-y-2">{previewButton}{equipButton}</div>;
             }
-            return <button onClick={() => handleEquip(item.id, true)} className="w-full bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded transition-colors">Equip</button>;
+            return equipButton;
         }
         
         if (isOwned && item.type === 'tree_sapling') {
@@ -47,7 +60,11 @@ function ShopPage() {
         }
 
         const canAfford = totalCoins >= item.cost;
-        return <button onClick={() => handleBuy(item.id)} disabled={!canAfford} className={`w-full ${canAfford ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-600 cursor-not-allowed'} text-white px-4 py-2 rounded transition-colors`}>Buy for {item.cost.toLocaleString()} Coins</button>;
+        const buyButton = <button onClick={() => handleBuy(item.id)} disabled={!canAfford} className={`w-full ${canAfford ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-600 cursor-not-allowed'} text-white px-4 py-2 rounded transition-colors`}>Buy for {item.cost.toLocaleString()} Coins</button>;
+        if (previewButton) {
+            return <div className="space-y-2">{previewButton}{buyButton}</div>;
+        }
+        return buyButton;
     };
     
     // --- START: CORRECT TREE GALLERY LOGIC ---
