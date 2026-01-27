@@ -22,8 +22,8 @@ function Sidebar() {
       { name: 'Shooter', href: '/minigame/asteroid-shooter', icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> },
     ];
     
-    const activeLink = isKawaiiTheme ? "bg-pink-300 text-pink-900" : "bg-yellow-400 text-gray-900";
-    const inactiveLink = isKawaiiTheme ? "text-pink-900/80 hover:bg-white/60 hover:text-pink-900" : "text-gray-300 hover:bg-gray-700 hover:text-white";
+    const activeLink = isKawaiiTheme ? "bg-slate-200 text-slate-900" : "bg-yellow-400 text-gray-900";
+    const inactiveLink = isKawaiiTheme ? "text-slate-200/80 hover:bg-white/10 hover:text-white" : "text-gray-300 hover:bg-gray-700 hover:text-white";
 
     return (
       <>
@@ -38,21 +38,21 @@ function Sidebar() {
 
         {/* The Sidebar panel */}
         <aside 
-            className={`${isKawaiiTheme ? 'bg-pink-200/20 text-gray-900 border-r border-pink-200/50' : 'bg-black bg-opacity-20 text-gray-300'} w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform transition-transform duration-300 ease-in-out z-40
+            className={`${isKawaiiTheme ? 'bg-slate-900/70 text-slate-100 border-r border-slate-700/70' : 'bg-black bg-opacity-20 text-gray-300'} w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform transition-transform duration-300 ease-in-out z-40
                 md:relative md:translate-x-0 
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`
             }
         >
             {isKawaiiTheme && (
                 <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute -top-10 left-6 w-32 h-10 rounded-full bg-white/60 blur-[1px] animate-[kawaiiCloud_14s_linear_infinite]" />
-                    <div className="absolute top-16 -left-10 w-24 h-8 rounded-full bg-white/40 blur-[1px] animate-[kawaiiCloud_18s_linear_infinite]" />
-                    <div className="absolute bottom-14 left-10 w-20 h-20 rounded-[24px] bg-pink-200/40 rotate-45 animate-[kawaiiGlow_6s_ease-in-out_infinite]" />
-                    <div className="absolute bottom-8 right-6 w-12 h-12 rounded-[18px] bg-sky-200/40 rotate-45 animate-[kawaiiGlow_7s_ease-in-out_infinite]" />
+                    <div className="absolute -top-10 left-6 w-32 h-10 rounded-full bg-slate-200/20 blur-[1px] animate-[kawaiiCloud_18s_linear_infinite]" />
+                    <div className="absolute top-16 -left-10 w-24 h-8 rounded-full bg-slate-200/15 blur-[1px] animate-[kawaiiCloud_22s_linear_infinite]" />
+                    <div className="absolute bottom-14 left-10 w-20 h-20 rounded-[24px] bg-fuchsia-300/20 rotate-45 animate-[kawaiiGlow_8s_ease-in-out_infinite]" />
+                    <div className="absolute bottom-8 right-6 w-12 h-12 rounded-[18px] bg-sky-300/20 rotate-45 animate-[kawaiiGlow_9s_ease-in-out_infinite]" />
                 </div>
             )}
             <div className="px-4">
-                <h1 className={`text-2xl font-bold font-serif-display ${isKawaiiTheme ? 'text-pink-900' : 'text-white'}`}>Phoenix</h1>
+                <h1 className={`text-2xl font-bold font-serif-display ${isKawaiiTheme ? 'text-slate-100' : 'text-white'}`}>Phoenix</h1>
             </div>
             <nav>
                 <ul>
