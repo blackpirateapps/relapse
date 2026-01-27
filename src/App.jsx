@@ -16,6 +16,7 @@ import AsteroidShooterPage from './pages/AsteroidShooterPage.jsx';
 import LevelShowcasePage from './pages/LevelShowcasePage.jsx';
 import FireBackground from './components/FireBackground.jsx';
 import PhoenixConstellationBackground from './components/PhoenixConstellationBackground.jsx';
+import SolarSystemBackground from './components/SolarSystemBackground.jsx';
 
 import { ranks } from './data/ranks.js';
 import { fetchState, fetchShopData } from './api.js';
@@ -29,7 +30,8 @@ const AppLayout = () => {
   const { state, previewThemeId, setPreviewThemeId } = React.useContext(AppContext);
   const backgroundThemes = {
     burning_fire_bg: FireBackground,
-    phoenix_constellation_bg: PhoenixConstellationBackground
+    phoenix_constellation_bg: PhoenixConstellationBackground,
+    solar_system_bg: SolarSystemBackground
   };
   const equippedThemeId = Object.keys(backgroundThemes).find((id) => state?.equipped_upgrades?.[id]);
   const activeThemeId = isForestPage ? null : (previewThemeId || equippedThemeId);

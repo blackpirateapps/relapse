@@ -108,6 +108,23 @@ export async function initDb() {
       ],
     });
   }
+
+  const { rows: solarSystemRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'solar_system_bg';");
+  if (solarSystemRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO shop_items (id, name, description, cost, type, preview_image, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+      args: [
+        'solar_system_bg',
+        'Solar System',
+        'A living orrery with colorful, moving planets.',
+        100000,
+        'background_theme',
+        '/img/bg-solar-system.svg',
+        true,
+        92
+      ],
+    });
+  }
 }
 
 export default client;
