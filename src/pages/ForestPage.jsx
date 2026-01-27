@@ -1,17 +1,11 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { AppContext } from '../App.jsx';
 import { buyItem } from '../api.js';
 import Modal from '../components/Modal.jsx';
-import * as THREE from 'three';
 
 function ForestPage() {
     const { state, treeTypes, refetchData } = useContext(AppContext);
     const [modal, setModal] = useState({ isOpen: false, title: '', message: '' });
-    const sceneRef = useRef(null);
-    const rendererRef = useRef(null);
-    const cameraRef = useRef(null);
-    const forestGroupRef = useRef(null);
-    const animationRef = useRef(null);
 
     const forest = state?.forest || [];
     const saplings = Object.values(treeTypes);
@@ -20,6 +14,51 @@ function ForestPage() {
         growing: forest.filter(t => t.status === 'growing' && new Date(t.matureDate) > new Date()).length,
         matured: forest.filter(t => t.status === 'matured' || new Date(t.matureDate) <= new Date()).length,
         withered: forest.filter(t => t.status === 'withered').length,
+    };
+
+    const visibleTrees = useMemo(() => {
+        const treeGrid = [];
+        if (!forest.length) return treeGrid;
+        const columns = 9;
+        const rows = Math.max(4, Math.ceil(forest.length / columns));
+        const paddingX = 6;
+        const paddingY = 6;
+        const width = columns + paddingX * 2;
+        const height = rows + paddingY * 2;
+
+        forest.forEach((tree, index) => {
+            const col = index % columns;
+            const row = Math.floor(index / columns);
+            const x = col + paddingX + (index % 2 ? 0.6 : 0.2);
+            const y = row + paddingY + (col % 3 ? 0.3 : 0.7);
+            treeGrid.push({
+                ...tree,
+                gridX: x,
+                gridY: y,
+                spriteSize: tree.status === 'matured' ? 3.2 : tree.status === 'growing' ? 2.6 : 2.4
+            });
+        });
+
+        return treeGrid;
+    }, [forest]);
+
+    const pixelShadows = {
+        growing: 'bg-emerald-400/60',
+        matured: 'bg-emerald-300/80',
+        withered: 'bg-amber-400/40'
+    };
+
+    const getTreeSprite = (tree) => {
+        const config = treeTypes[tree.treeType];
+        if (!config) return null;
+        if (tree.status === 'withered') return config.witheredImage;
+        if (tree.status === 'matured' || new Date(tree.matureDate) <= new Date()) {
+            const matureStage = config.stages[config.stages.length - 1];
+            return matureStage?.image;
+        }
+        const hoursSincePlanted = (Date.now() - new Date(tree.purchaseDate).getTime()) / (1000 * 60 * 60);
+        const currentStage = config.stages.slice().reverse().find(stage => hoursSincePlanted >= stage.hours) || config.stages[0];
+        return currentStage?.image;
     };
 
 
@@ -36,135 +75,6 @@ function ForestPage() {
             setModal({ isOpen: true, title: 'Error', message: error.message || 'Purchase failed.' });
         }
     };
-
-    useEffect(() => {
-        if (!sceneRef.current || rendererRef.current) return;
-
-        const container = sceneRef.current;
-        const scene = new THREE.Scene();
-        scene.fog = new THREE.Fog(0x0b0f12, 8, 40);
-
-        const camera = new THREE.PerspectiveCamera(55, container.clientWidth / container.clientHeight, 0.1, 200);
-        camera.position.set(0, 6, 12);
-        camera.lookAt(0, 2, 0);
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-        container.appendChild(renderer.domElement);
-
-        const ambient = new THREE.AmbientLight(0x9bb3b8, 0.7);
-        scene.add(ambient);
-        const sun = new THREE.DirectionalLight(0xf6d7a7, 0.9);
-        sun.position.set(-8, 10, 6);
-        scene.add(sun);
-
-        const ground = new THREE.Mesh(
-            new THREE.CircleGeometry(18, 64),
-            new THREE.MeshPhongMaterial({ color: 0x0f2a1f, shininess: 10 })
-        );
-        ground.rotation.x = -Math.PI / 2;
-        ground.position.y = -0.1;
-        scene.add(ground);
-
-        const forestGroup = new THREE.Group();
-        scene.add(forestGroup);
-
-        sceneRef.current.__threeScene = scene;
-        rendererRef.current = renderer;
-        cameraRef.current = camera;
-        forestGroupRef.current = forestGroup;
-
-        const handleResize = () => {
-            if (!sceneRef.current || !rendererRef.current || !cameraRef.current) return;
-            const { clientWidth, clientHeight } = sceneRef.current;
-            cameraRef.current.aspect = clientWidth / clientHeight;
-            cameraRef.current.updateProjectionMatrix();
-            rendererRef.current.setSize(clientWidth, clientHeight);
-        };
-
-        const animate = () => {
-            animationRef.current = requestAnimationFrame(animate);
-            forestGroup.rotation.y += 0.0008;
-            renderer.render(scene, camera);
-        };
-        animate();
-        window.addEventListener('resize', handleResize);
-
-        return () => {
-            cancelAnimationFrame(animationRef.current);
-            window.removeEventListener('resize', handleResize);
-            renderer.dispose();
-            container.removeChild(renderer.domElement);
-            rendererRef.current = null;
-            cameraRef.current = null;
-            forestGroupRef.current = null;
-        };
-    }, []);
-
-    useEffect(() => {
-        const scene = sceneRef.current?.__threeScene;
-        const forestGroup = forestGroupRef.current;
-        if (!scene || !forestGroup) return;
-
-        while (forestGroup.children.length) {
-            const child = forestGroup.children.pop();
-            if (child.geometry) child.geometry.dispose();
-            if (child.material) {
-                if (Array.isArray(child.material)) {
-                    child.material.forEach((mat) => mat.dispose());
-                } else {
-                    child.material.dispose();
-                }
-            }
-        }
-
-        const hash = (value) => {
-            let h = 2166136261;
-            const str = String(value);
-            for (let i = 0; i < str.length; i++) {
-                h ^= str.charCodeAt(i);
-                h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
-            }
-            return Math.abs(h);
-        };
-
-        forest.forEach((tree, index) => {
-            const seed = hash(tree.id || `${tree.treeType}-${index}`);
-            const radius = 4 + (seed % 900) / 100;
-            const angle = (seed % 360) * (Math.PI / 180);
-            const x = Math.cos(angle) * radius;
-            const z = Math.sin(angle) * radius;
-
-            const status = tree.status;
-            const trunkColor = status === 'withered' ? 0x6b4b3e : 0x7a4a21;
-            const leafColor = status === 'matured' ? 0x3bbd84 : status === 'withered' ? 0x6f5f4b : 0x4aa96c;
-
-            const trunkHeight = 0.8 + (seed % 40) / 50;
-            const trunk = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.12, 0.18, trunkHeight, 6),
-                new THREE.MeshStandardMaterial({ color: trunkColor, roughness: 0.9 })
-            );
-            trunk.position.y = trunkHeight / 2;
-
-            const canopyHeight = 1.2 + (seed % 60) / 60;
-            const canopy = new THREE.Mesh(
-                new THREE.ConeGeometry(0.7 + (seed % 30) / 60, canopyHeight, 8),
-                new THREE.MeshStandardMaterial({ color: leafColor, roughness: 0.8 })
-            );
-            canopy.position.y = trunkHeight + canopyHeight / 2 - 0.1;
-
-            const treeGroup = new THREE.Group();
-            treeGroup.add(trunk);
-            treeGroup.add(canopy);
-            treeGroup.position.set(x, 0, z);
-
-            const growthScale = status === 'growing' ? 0.75 : status === 'withered' ? 0.6 : 1;
-            treeGroup.scale.setScalar(growthScale);
-
-            forestGroup.add(treeGroup);
-        });
-    }, [forest, treeTypes]);
     
     return (
         <>
@@ -191,10 +101,61 @@ function ForestPage() {
                                 <p className="text-sm mt-2">Buy a sapling from the shop to begin.</p>
                             </div>
                         ) : (
-                            <div className="h-[60vh] rounded-2xl border border-gray-700/60 bg-gradient-to-b from-emerald-900/20 via-gray-900/60 to-black/70 overflow-hidden relative">
-                                <div ref={sceneRef} className="absolute inset-0" />
-                                <div className="relative z-10 p-4 text-xs text-gray-300">
-                                    <span className="bg-black/50 px-3 py-1 rounded-full">3D Forest View</span>
+                            <div className="h-[60vh] rounded-2xl border border-gray-700/70 bg-[#0f1612] overflow-hidden relative">
+                                <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(9,40,24,0.9),rgba(8,16,14,0.95),rgba(4,6,8,1))]" />
+                                <div className="absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(to_top,rgba(0,0,0,0.8),rgba(0,0,0,0))]" />
+                                <div className="absolute inset-0 opacity-40 mix-blend-screen" style={{
+                                    backgroundImage:
+                                        'radial-gradient(circle at 20% 30%, rgba(52,255,165,0.12), transparent 45%),' +
+                                        'radial-gradient(circle at 80% 40%, rgba(41,173,255,0.12), transparent 40%),' +
+                                        'radial-gradient(circle at 40% 70%, rgba(108,255,140,0.08), transparent 40%)'
+                                }} />
+                                <div className="absolute inset-0 opacity-20" style={{
+                                    backgroundImage: 'linear-gradient(transparent 80%, rgba(0,0,0,0.4) 80%), linear-gradient(90deg, transparent 80%, rgba(0,0,0,0.35) 80%)',
+                                    backgroundSize: '6px 6px'
+                                }} />
+                                <div className="absolute inset-0" style={{
+                                    backgroundImage:
+                                        'linear-gradient(to right, rgba(0,0,0,0.2) 1px, transparent 1px), ' +
+                                        'linear-gradient(to bottom, rgba(0,0,0,0.2) 1px, transparent 1px)',
+                                    backgroundSize: '24px 24px',
+                                    opacity: 0.2
+                                }} />
+                                <div className="relative z-10 h-full w-full">
+                                    <div className="absolute top-4 left-4 px-3 py-1 text-[11px] uppercase tracking-[0.35em] bg-black/60 text-emerald-200 border border-emerald-500/30">
+                                        Pixel Forest
+                                    </div>
+                                    <div className="absolute inset-0">
+                                        {visibleTrees.map((tree) => {
+                                            const sprite = getTreeSprite(tree);
+                                            if (!sprite) return null;
+                                            return (
+                                                <div
+                                                    key={tree.id}
+                                                    className="absolute"
+                                                    style={{
+                                                        left: `${(tree.gridX / 22) * 100}%`,
+                                                        top: `${(tree.gridY / 18) * 100}%`,
+                                                        width: `${tree.spriteSize}rem`,
+                                                        height: `${tree.spriteSize}rem`,
+                                                        transform: 'translate(-50%, -50%)',
+                                                        imageRendering: 'pixelated'
+                                                    }}
+                                                >
+                                                    <div
+                                                        className={`absolute left-1/2 -bottom-1 h-2 w-6 rounded-full ${pixelShadows[tree.status] || 'bg-emerald-400/40'}`}
+                                                        style={{ transform: 'translateX(-50%) scale(1.2, 0.6)' }}
+                                                    />
+                                                    <img
+                                                        src={sprite}
+                                                        alt={tree.treeType}
+                                                        className="w-full h-full object-contain drop-shadow-[0_6px_8px_rgba(0,0,0,0.5)]"
+                                                        style={{ imageRendering: 'pixelated' }}
+                                                    />
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
                             </div>
                         )}
