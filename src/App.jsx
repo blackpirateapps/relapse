@@ -18,6 +18,7 @@ import FireBackground from './components/FireBackground.jsx';
 import PhoenixConstellationBackground from './components/PhoenixConstellationBackground.jsx';
 import SolarSystemBackground from './components/SolarSystemBackground.jsx';
 import DarkForestBackground from './components/DarkForestBackground.jsx';
+import UrgeTasksPage from './pages/UrgeTasksPage.jsx';
 
 import { ranks } from './data/ranks.js';
 import { fetchState, fetchShopData } from './api.js';
@@ -78,6 +79,7 @@ const AppLayout = () => {
           <Route path="/progression/levels" element={<LevelShowcasePage />} />
           <Route path="*" element={<Navigate to="/" />} />
           <Route path="/minigame/asteroid-shooter" element={<AsteroidShooterPage />} />
+          <Route path="/journey/urge" element={<UrgeTasksPage />} />
         </Routes>
       </main>
     </div>

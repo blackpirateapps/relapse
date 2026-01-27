@@ -61,6 +61,20 @@ export const endGame = (playId, score) => apiRequest('minigame', {
 });
 // --- END: New Calls ---
 
+// --- Urge Task API Calls ---
+export const fetchUrgeTask = () => apiRequest('urge');
+export const startUrgeTask = () => apiRequest('urge', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ action: 'start' }),
+});
+export const claimUrgeTask = () => apiRequest('urge', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ action: 'claim' }),
+});
+// --- END: Urge Task Calls ---
+
 // Utility function to get rank, now client-side
 export function getRank(totalHours, ranks) {
   for (let i = ranks.length - 1; i >= 0; i--) {

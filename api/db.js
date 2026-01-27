@@ -44,6 +44,17 @@ export async function initDb() {
       coins_spent INTEGER DEFAULT 0,
       coins_won INTEGER DEFAULT 0,
       FOREIGN KEY (game_id) REFERENCES minigames (id)
+    );`,
+    `CREATE TABLE IF NOT EXISTS urge_tasks (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT NOT NULL,
+      duration_minutes INTEGER NOT NULL,
+      reward_coins INTEGER NOT NULL,
+      reward_hours INTEGER NOT NULL,
+      started_at TEXT,
+      completed_at TEXT,
+      claimed_at TEXT
     );`
   ], 'write');
 
@@ -139,6 +150,21 @@ export async function initDb() {
         '/img/bg-dark-forest.svg',
         true,
         95
+      ],
+    });
+  }
+
+  const { rows: taskRows } = await client.execute("SELECT id FROM urge_tasks WHERE id = 'read_newspaper';");
+  if (taskRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO urge_tasks (id, name, description, duration_minutes, reward_coins, reward_hours) VALUES (?, ?, ?, ?, ?, ?);",
+      args: [
+        'read_newspaper',
+        "Read Today's Newspaper",
+        'Read the newspaper for 30 minutes.',
+        30,
+        200,
+        1
       ],
     });
   }

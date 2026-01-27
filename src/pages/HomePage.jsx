@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { AppContext } from '../App.jsx';
 import { postRelapse } from '../api.js';
 import Modal from '../components/Modal.jsx';
@@ -9,7 +10,6 @@ function HomePage() {
 
   // State is now managed by a single object for clarity
   const [modalState, setModalState] = useState({
-    urge: false,
     confirm: false,
     notification: null, // Will hold { title, message }
   });
@@ -30,10 +30,6 @@ function HomePage() {
     return () => clearInterval(timer);
   }, [state]);
 
-  const openModal = (modalName) => {
-    setModalState(prevState => ({ ...prevState, [modalName]: true }));
-  };
-
   const closeModal = (modalName) => {
     setModalState(prevState => ({ ...prevState, [modalName]: false }));
   };
@@ -42,10 +38,10 @@ function HomePage() {
     try {
       await postRelapse();
       await refetchData(); // Refetch all state from the server
-      setModalState({ urge: false, confirm: false, notification: { title: "A New Journey Begins", message: "Your streak has been reset. Rise from the ashes and begin again." } });
+      setModalState({ confirm: false, notification: { title: "A New Journey Begins", message: "Your streak has been reset. Rise from the ashes and begin again." } });
     } catch (error) {
       console.error("Relapse API error:", error);
-      setModalState({ urge: false, confirm: false, notification: { title: "Error", message: "Failed to process relapse. Please check your connection and try again." } });
+      setModalState({ confirm: false, notification: { title: "Error", message: "Failed to process relapse. Please check your connection and try again." } });
     }
   };
 
@@ -65,22 +61,14 @@ function HomePage() {
         <p className="text-gray-400 mt-2 max-w-md">{currentRank.storyline}</p>
         
         <div className="flex space-x-4 mt-8">
-          <button onClick={() => openModal('urge')} className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105">
+          <Link to="/journey/urge" className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105">
             I Feel an Urge
-          </button>
-          <button onClick={() => openModal('confirm')} className="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105">
+          </Link>
+          <button onClick={() => setModalState(prev => ({ ...prev, confirm: true }))} className="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105">
             I Relapsed
           </button>
         </div>
       </div>
-
-      {/* Urge Modal */}
-      <Modal isOpen={modalState.urge} onClose={() => closeModal('urge')} title="Hold Strong">
-        <div className="text-center">
-          <p className="mb-4">This feeling is temporary. Your strength is permanent.</p>
-          <p className="font-semibold">Remember the Celestial Phoenix you are becoming.</p>
-        </div>
-      </Modal>
 
       {/* Confirmation Modal */}
       <Modal isOpen={modalState.confirm} onClose={() => closeModal('confirm')} title="Confirm Relapse">
