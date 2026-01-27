@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useContext, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { AppContext } from '../App.jsx';
 import { fetchHistory } from '../api.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 import PhoenixImage from '../components/PhoenixImage.jsx';
+import { VirtuosoGrid } from 'react-virtuoso';
 
 function AviaryPage() {
   const { state, currentRank } = useContext(AppContext);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [scrollState, setScrollState] = useState({ top: 0, height: 0, width: 0 });
-  const gridRef = useRef(null);
 
   useEffect(() => {
     const loadHistory = async () => {
@@ -61,89 +60,46 @@ function AviaryPage() {
     return [current, ...history.map((phoenix) => ({ type: 'history', ...phoenix }))];
   }, [currentRank, history, state.equipped_upgrades]);
 
-  useEffect(() => {
-    const scrollEl = document.querySelector('main');
-    if (!scrollEl) return;
-
-    const update = () => {
-      const width = gridRef.current?.clientWidth || 0;
-      setScrollState({ top: scrollEl.scrollTop, height: scrollEl.clientHeight, width });
-    };
-    const onScroll = () => {
-      setScrollState((prev) => ({ ...prev, top: scrollEl.scrollTop }));
-    };
-
-    update();
-    scrollEl.addEventListener('scroll', onScroll);
-    window.addEventListener('resize', update);
-
-    const observer = new ResizeObserver(update);
-    if (gridRef.current) observer.observe(gridRef.current);
-
-    return () => {
-      scrollEl.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', update);
-      observer.disconnect();
-    };
-  }, []);
-
-  const columns = useMemo(() => {
-    const width = scrollState.width;
-    if (width >= 1280) return 4;
-    if (width >= 1024) return 3;
-    if (width >= 768) return 2;
-    return 1;
-  }, [scrollState.width]);
-
-  const rowHeight = 250;
-  const totalRows = Math.ceil(items.length / columns);
-  const overscan = 2;
-  const startRow = Math.max(0, Math.floor(scrollState.top / rowHeight) - overscan);
-  const visibleRows = Math.ceil(scrollState.height / rowHeight) + overscan * 2;
-  const endRow = Math.min(totalRows, startRow + visibleRows);
-  const startIndex = startRow * columns;
-  const endIndex = Math.min(items.length, endRow * columns);
-  const visibleItems = items.slice(startIndex, endIndex);
-  const paddingTop = startRow * rowHeight;
-  const paddingBottom = (totalRows - endRow) * rowHeight;
+  const isEmpty = history.length === 0;
 
   return (
     <section>
-      <div
-        ref={gridRef}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-        style={{ paddingTop, paddingBottom }}
-      >
-        {visibleItems.map((phoenix) => {
-          if (phoenix.type === 'current') {
+      <div className="h-[70vh]">
+        <VirtuosoGrid
+          data={items}
+          totalCount={items.length}
+          itemContent={(index, phoenix) => {
+            if (phoenix.type === 'current') {
+              return (
+                <div className="card p-6 flex flex-col items-center text-center border-2 border-yellow-400/50 relative">
+                  <div className="absolute top-2 right-2 bg-yellow-400 text-gray-900 text-xs font-bold px-2 py-1 rounded-full animate-pulse">LIVE</div>
+                  <PhoenixImage 
+                    rankLevel={phoenix.final_rank_level} 
+                    equippedUpgrades={state.equipped_upgrades}
+                    className="w-24 h-24 mb-4"
+                  />
+                  <h3 className="font-serif-display text-xl text-white">{phoenix.final_rank_name}</h3>
+                  <p className="text-lg font-bold font-mono text-green-400 mt-2">In Progress</p>
+                </div>
+              );
+            }
             return (
-              <div key={phoenix.id} className="card p-6 flex flex-col items-center text-center border-2 border-yellow-400/50 relative">
-                <div className="absolute top-2 right-2 bg-yellow-400 text-gray-900 text-xs font-bold px-2 py-1 rounded-full animate-pulse">LIVE</div>
+              <div className="card p-6 flex flex-col items-center text-center">
                 <PhoenixImage 
                   rankLevel={phoenix.final_rank_level} 
-                  equippedUpgrades={state.equipped_upgrades}
+                  equippedUpgrades={parseUpgrades(phoenix.upgrades_json)}
                   className="w-24 h-24 mb-4"
                 />
                 <h3 className="font-serif-display text-xl text-white">{phoenix.final_rank_name}</h3>
-                <p className="text-lg font-bold font-mono text-green-400 mt-2">In Progress</p>
+                <p className="text-sm text-gray-400 mb-2">{phoenix.name || 'Past Life'}</p>
+                <p className="text-lg font-bold text-green-400">{formatHistoricStreak(phoenix.streak_duration_ms)}</p>
               </div>
             );
-          }
-          return (
-            <div key={phoenix.id} className="card p-6 flex flex-col items-center text-center">
-              <PhoenixImage 
-                rankLevel={phoenix.final_rank_level} 
-                equippedUpgrades={parseUpgrades(phoenix.upgrades_json)}
-                className="w-24 h-24 mb-4"
-              />
-              <h3 className="font-serif-display text-xl text-white">{phoenix.final_rank_name}</h3>
-              <p className="text-sm text-gray-400 mb-2">{phoenix.name || 'Past Life'}</p>
-              <p className="text-lg font-bold text-green-400">{formatHistoricStreak(phoenix.streak_duration_ms)}</p>
-            </div>
-          );
-        })}
+          }}
+          listClassName="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        />
       </div>
-      {history.length === 0 && (
+      {isEmpty && (
         <div className="text-center text-gray-400 mt-10">
           <p className="text-lg">Your Aviary is empty.</p>
           <p className="text-sm mt-2">When a streak ends, your phoenix will be immortalized here.</p>

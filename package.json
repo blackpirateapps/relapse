@@ -13,6 +13,7 @@
     "react-dom": "latest",
     "react-router-dom": "latest",
     "framer-motion": "latest",
+    "react-virtuoso": "latest",
     "@libsql/client": "latest",
     "cookie": "latest"
   },
