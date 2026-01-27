@@ -43,10 +43,6 @@ function AviaryPage() {
     }
   };
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
-
   const items = useMemo(() => {
     const current = {
       type: 'current',
@@ -59,6 +55,10 @@ function AviaryPage() {
     };
     return [current, ...history.map((phoenix) => ({ type: 'history', ...phoenix }))];
   }, [currentRank, history, state.equipped_upgrades]);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   const isEmpty = history.length === 0;
 
