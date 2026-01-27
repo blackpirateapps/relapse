@@ -161,6 +161,23 @@ export async function initDb() {
     });
   }
 
+  const { rows: starfieldRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'starfield_warp_bg';");
+  if (starfieldRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO shop_items (id, name, description, cost, type, preview_image, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+      args: [
+        'starfield_warp_bg',
+        'Starfield Drift',
+        'A vivid starfield warp with drifting trails.',
+        50000,
+        'background_theme',
+        '/img/bg-starfield-warp.svg',
+        true,
+        94
+      ],
+    });
+  }
+
   const { rows: darkForestRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'dark_forest_bg';");
   if (darkForestRows.length === 0) {
     await client.execute({

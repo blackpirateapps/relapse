@@ -21,6 +21,7 @@ import DarkForestBackground from './components/DarkForestBackground.jsx';
 import UrgeTasksPage from './pages/UrgeTasksPage.jsx';
 import PushupSessionPage from './pages/PushupSessionPage.jsx';
 import KawaiiCityBackground from './components/KawaiiCityBackground.jsx';
+import StarfieldWarpBackground from './components/StarfieldWarpBackground.jsx';
 
 import { ranks } from './data/ranks.js';
 import { fetchState, fetchShopData } from './api.js';
@@ -36,7 +37,8 @@ const AppLayout = () => {
     burning_fire_bg: FireBackground,
     phoenix_constellation_bg: PhoenixConstellationBackground,
     solar_system_bg: SolarSystemBackground,
-    kawaii_city_bg: KawaiiCityBackground
+    kawaii_city_bg: KawaiiCityBackground,
+    starfield_warp_bg: StarfieldWarpBackground
   };
   const forestThemes = {
     dark_forest_bg: DarkForestBackground
