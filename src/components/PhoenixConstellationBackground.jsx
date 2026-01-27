@@ -1,26 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 
-const PHOENIX_POINTS = [
-  { x: 0.5, y: 0.2 },
-  { x: 0.42, y: 0.28 },
-  { x: 0.58, y: 0.28 },
-  { x: 0.3, y: 0.4 },
-  { x: 0.7, y: 0.4 },
-  { x: 0.22, y: 0.52 },
-  { x: 0.78, y: 0.52 },
-  { x: 0.35, y: 0.6 },
-  { x: 0.65, y: 0.6 },
-  { x: 0.5, y: 0.7 },
-  { x: 0.4, y: 0.78 },
-  { x: 0.6, y: 0.78 }
-];
-
-const PHOENIX_EDGES = [
-  [0, 1], [0, 2], [1, 3], [2, 4],
-  [3, 5], [4, 6], [5, 7], [6, 8],
-  [7, 9], [8, 9], [9, 10], [9, 11]
-];
-
 const PhoenixConstellationBackground = () => {
   const canvasRef = useRef(null);
 
@@ -30,6 +9,8 @@ const PhoenixConstellationBackground = () => {
 
     const ctx = canvas.getContext('2d');
     let stars = [];
+    let shootingStars = [];
+    let supernovas = [];
     let animationFrameId;
 
     const resizeCanvas = () => {
@@ -38,7 +19,7 @@ const PhoenixConstellationBackground = () => {
     };
 
     const createStars = () => {
-      const count = 200;
+      const count = 220;
       stars = [];
       for (let i = 0; i < count; i++) {
         stars.push({
@@ -49,6 +30,30 @@ const PhoenixConstellationBackground = () => {
           speed: 0.004 + Math.random() * 0.01
         });
       }
+    };
+
+    const spawnShootingStar = () => {
+      const startX = Math.random() * canvas.width;
+      const startY = Math.random() * canvas.height * 0.4;
+      shootingStars.push({
+        x: startX,
+        y: startY,
+        vx: 6 + Math.random() * 6,
+        vy: 3 + Math.random() * 4,
+        life: 0,
+        maxLife: 40 + Math.random() * 30
+      });
+    };
+
+    const spawnSupernova = () => {
+      supernovas.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height * 0.7,
+        radius: 0,
+        maxRadius: 120 + Math.random() * 180,
+        life: 0,
+        maxLife: 120 + Math.random() * 120
+      });
     };
 
     const draw = () => {
@@ -79,26 +84,45 @@ const PhoenixConstellationBackground = () => {
         star.twinkle += star.speed;
       });
 
-      const constellationPoints = PHOENIX_POINTS.map((point, idx) => ({
-        x: point.x * canvas.width,
-        y: point.y * canvas.height + Math.sin(Date.now() / 900 + idx) * 2
-      }));
+      if (Math.random() < 0.03 && shootingStars.length < 6) {
+        spawnShootingStar();
+      }
+      if (Math.random() < 0.01 && supernovas.length < 3) {
+        spawnSupernova();
+      }
 
-      ctx.strokeStyle = 'rgba(255, 170, 80, 0.35)';
-      ctx.lineWidth = 1.5;
-      PHOENIX_EDGES.forEach(([from, to]) => {
+      shootingStars.forEach((star, idx) => {
+        const alpha = 1 - star.life / star.maxLife;
+        ctx.strokeStyle = `rgba(255, 220, 160, ${alpha})`;
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(constellationPoints[from].x, constellationPoints[from].y);
-        ctx.lineTo(constellationPoints[to].x, constellationPoints[to].y);
+        ctx.moveTo(star.x, star.y);
+        ctx.lineTo(star.x - star.vx * 2.5, star.y - star.vy * 2.5);
         ctx.stroke();
+        star.x += star.vx;
+        star.y += star.vy;
+        star.life += 1;
+        if (star.life >= star.maxLife || star.x > canvas.width + 80 || star.y > canvas.height + 80) {
+          shootingStars.splice(idx, 1);
+        }
       });
 
-      constellationPoints.forEach((point, idx) => {
-        const pulse = 0.5 + Math.sin(Date.now() / 700 + idx) * 0.4;
-        ctx.fillStyle = `rgba(255, 210, 120, ${0.6 + pulse * 0.4})`;
+      supernovas.forEach((nova, idx) => {
+        const lifeRatio = nova.life / nova.maxLife;
+        nova.radius = nova.maxRadius * lifeRatio;
+        const intensity = 1 - lifeRatio;
+        const grad = ctx.createRadialGradient(nova.x, nova.y, 0, nova.x, nova.y, nova.radius);
+        grad.addColorStop(0, `rgba(255, 240, 200, ${0.55 * intensity})`);
+        grad.addColorStop(0.4, `rgba(255, 170, 90, ${0.35 * intensity})`);
+        grad.addColorStop(1, 'rgba(255, 100, 20, 0)');
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.arc(point.x, point.y, 2.5 + pulse * 1.2, 0, Math.PI * 2);
+        ctx.arc(nova.x, nova.y, nova.radius, 0, Math.PI * 2);
         ctx.fill();
+        nova.life += 1;
+        if (nova.life >= nova.maxLife) {
+          supernovas.splice(idx, 1);
+        }
       });
 
       animationFrameId = requestAnimationFrame(draw);
