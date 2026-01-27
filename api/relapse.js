@@ -66,6 +66,21 @@ export default async function handler(req, res) {
         // Wither any growing trees
         await db.execute("UPDATE forest SET status = 'withered' WHERE status = 'growing';");
 
+        // Remove relapse-only skins and apply 1% discount for re-purchase
+        const upgrades = JSON.parse(state.upgrades || '{}');
+        if (upgrades.scarlet_phoenix_skin) {
+            delete upgrades.scarlet_phoenix_skin;
+            await db.execute({
+                sql: "UPDATE user_state SET upgrades = ? WHERE id = 1;",
+                args: [JSON.stringify(upgrades)]
+            });
+
+            await db.execute({
+                sql: "UPDATE shop_items SET cost = ? WHERE id = 'scarlet_phoenix_skin';",
+                args: [1980]
+            });
+        }
+
         // Update the user's state for the new streak
         const newLongestStreak = Math.max(state.longestStreak || 0, currentStreakMs);
         

@@ -144,6 +144,13 @@ async function handlePurchase(itemId, res) {
       upgrades[itemId] = true;
       await db.execute({ sql: "UPDATE user_state SET upgrades = ? WHERE id = 1", args: [JSON.stringify(upgrades)] });
     }
+
+    if (item.id === 'scarlet_phoenix_skin') {
+      await db.execute({
+        sql: "UPDATE shop_items SET cost = ? WHERE id = 'scarlet_phoenix_skin';",
+        args: [2000]
+      });
+    }
     
     await db.execute({
       sql: "UPDATE user_state SET coinsAtLastRelapse = ?, lastClaimedLevel = ? WHERE id = 1;",

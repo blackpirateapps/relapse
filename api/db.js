@@ -190,6 +190,23 @@ export async function initDb() {
       ],
     });
   }
+
+  const { rows: scarletRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'scarlet_phoenix_skin';");
+  if (scarletRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO shop_items (id, name, description, cost, type, preview_image, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+      args: [
+        'scarlet_phoenix_skin',
+        'Scarlet Phoenix',
+        'A blazing crimson phoenix that must be reclaimed after relapse.',
+        2000,
+        'phoenix_skin',
+        '/img/skins/scarlet/celestial-phoenix.webp',
+        true,
+        70
+      ],
+    });
+  }
 }
 
 export default client;
