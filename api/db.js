@@ -144,6 +144,23 @@ export async function initDb() {
     });
   }
 
+  const { rows: kawaiiRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'kawaii_city_bg';");
+  if (kawaiiRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO shop_items (id, name, description, cost, type, preview_image, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+      args: [
+        'kawaii_city_bg',
+        'Kawaii City Lights',
+        'A pastel anime skyline with floating hearts. Also re-skins the sidebar.',
+        50000,
+        'background_theme',
+        '/img/bg-kawaii-city.svg',
+        true,
+        93
+      ],
+    });
+  }
+
   const { rows: darkForestRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'dark_forest_bg';");
   if (darkForestRows.length === 0) {
     await client.execute({
