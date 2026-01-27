@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { login } from '../api.js';
 
-function LoginPage({ setIsAuthenticated }) {
+function LoginPage({ refetchData }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -13,7 +13,7 @@ function LoginPage({ setIsAuthenticated }) {
     try {
       const success = await login(password);
       if (success) {
-        setIsAuthenticated(true);
+        await refetchData();
       } else {
         setError('Invalid password.');
       }
@@ -55,4 +55,3 @@ function LoginPage({ setIsAuthenticated }) {
 }
 
 export default LoginPage;
-

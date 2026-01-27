@@ -86,7 +86,7 @@ function App() {
   }
 
   if (!isAuthenticated || !state) {
-    return <LoginPage setIsAuthenticated={setIsAuthenticated} refetchData={refetchData} />;
+    return <LoginPage refetchData={refetchData} />;
   }
   
   const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
