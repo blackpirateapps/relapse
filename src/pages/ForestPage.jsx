@@ -108,11 +108,15 @@ function ForestPage() {
                                         Pixel Forest
                                     </div>
                                     <div
-                                        className="absolute inset-0 grid place-items-center"
+                                        className="absolute inset-0 overflow-y-auto"
+                                        style={{ paddingTop: '40px' }}
+                                    >
+                                        <div
+                                            className="grid place-items-center"
                                         style={{
                                             gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))',
                                             gridAutoRows: '72px',
-                                            padding: '56px 40px 32px'
+                                                padding: '16px 40px 32px'
                                         }}
                                     >
                                         {visibleTrees.map((tree) => {
@@ -141,6 +145,7 @@ function ForestPage() {
                                                 </div>
                                             );
                                         })}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
