@@ -14,6 +14,7 @@ import Starfield from './components/Starfield.jsx';
 import ForestBackground from './components/ForestBackground.jsx';
 import AsteroidShooterPage from './pages/AsteroidShooterPage.jsx';
 import LevelShowcasePage from './pages/LevelShowcasePage.jsx';
+import FireBackground from './components/FireBackground.jsx';
 
 import { ranks } from './data/ranks.js';
 import { fetchState, fetchShopData } from './api.js';
@@ -24,10 +25,13 @@ export const AppContext = React.createContext();
 const AppLayout = () => {
   const location = useLocation();
   const isForestPage = location.pathname === '/forest';
+  const { state } = React.useContext(AppContext);
+  const isFireThemeEquipped = state?.equipped_upgrades?.burning_fire_bg;
+  const Background = isForestPage ? ForestBackground : (isFireThemeEquipped ? FireBackground : Starfield);
 
   return (
     <div className="relative min-h-screen md:flex text-gray-200">
-      {isForestPage ? <ForestBackground /> : <Starfield />}
+      <Background />
       <Sidebar />
       <main className="flex-1 p-4 sm:p-6 md:p-10 overflow-y-auto h-screen">
         <Header />

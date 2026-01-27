@@ -73,6 +73,24 @@ export async function initDb() {
       args: ['asteroid_shooter', 'Asteroid Shooter', 20, true],
     });
   }
+
+  // Initialize burning fire background theme if missing
+  const { rows: fireThemeRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'burning_fire_bg';");
+  if (fireThemeRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO shop_items (id, name, description, cost, type, preview_image, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+      args: [
+        'burning_fire_bg',
+        'Burning Fire',
+        'Replace the starfield with a blazing, animated fire sky.',
+        50000,
+        'background_theme',
+        '/img/bg-burning-fire.svg',
+        true,
+        90
+      ],
+    });
+  }
 }
 
 export default client;

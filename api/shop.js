@@ -187,6 +187,13 @@ async function handleEquipment(itemId, equip, res) {
         equippedUpgrades[skin.id] = false;
       }
     }
+
+    if (equip && item && item.type === 'background_theme') {
+      const themeResult = await db.execute("SELECT id FROM shop_items WHERE type = 'background_theme';");
+      for (const theme of themeResult.rows) {
+        equippedUpgrades[theme.id] = false;
+      }
+    }
     
     equippedUpgrades[itemId] = equip;
 
@@ -208,4 +215,3 @@ async function handleEquipment(itemId, equip, res) {
     return res.status(500).json({ message: 'Failed to update equipment.' });
   }
 }
-

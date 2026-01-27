@@ -100,6 +100,7 @@ function ShopPage() {
         <>
             <section id="shop">
                 {renderShopSection('Phoenix Skins', 'phoenix_skin')}
+                {renderShopSection('Background Themes', 'background_theme')}
                 {renderShopSection('Tree Saplings', 'tree_sapling')}
                 {/* Add other sections as needed */}
             </section>
@@ -111,4 +112,3 @@ function ShopPage() {
 }
 
 export default ShopPage;
-
