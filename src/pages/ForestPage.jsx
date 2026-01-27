@@ -17,29 +17,11 @@ function ForestPage() {
     };
 
     const visibleTrees = useMemo(() => {
-        const treeGrid = [];
-        if (!forest.length) return treeGrid;
-        const columns = 9;
-        const rows = Math.max(4, Math.ceil(forest.length / columns));
-        const paddingX = 6;
-        const paddingY = 6;
-        const width = columns + paddingX * 2;
-        const height = rows + paddingY * 2;
-
-        forest.forEach((tree, index) => {
-            const col = index % columns;
-            const row = Math.floor(index / columns);
-            const x = col + paddingX + (index % 2 ? 0.6 : 0.2);
-            const y = row + paddingY + (col % 3 ? 0.3 : 0.7);
-            treeGrid.push({
-                ...tree,
-                gridX: x,
-                gridY: y,
-                spriteSize: tree.status === 'matured' ? 3.2 : tree.status === 'growing' ? 2.6 : 2.4
-            });
-        });
-
-        return treeGrid;
+        if (!forest.length) return [];
+        return forest.map((tree) => ({
+            ...tree,
+            spriteSize: tree.status === 'matured' ? 3 : tree.status === 'growing' ? 2.6 : 2.4
+        }));
     }, [forest]);
 
     const pixelShadows = {
@@ -125,20 +107,24 @@ function ForestPage() {
                                     <div className="absolute top-4 left-4 px-3 py-1 text-[11px] uppercase tracking-[0.35em] bg-black/60 text-emerald-200 border border-emerald-500/30">
                                         Pixel Forest
                                     </div>
-                                    <div className="absolute inset-0">
+                                    <div
+                                        className="absolute inset-0 grid place-items-center"
+                                        style={{
+                                            gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))',
+                                            gridAutoRows: '72px',
+                                            padding: '56px 40px 32px'
+                                        }}
+                                    >
                                         {visibleTrees.map((tree) => {
                                             const sprite = getTreeSprite(tree);
                                             if (!sprite) return null;
                                             return (
                                                 <div
                                                     key={tree.id}
-                                                    className="absolute"
+                                                    className="relative flex items-center justify-center"
                                                     style={{
-                                                        left: `${(tree.gridX / 22) * 100}%`,
-                                                        top: `${(tree.gridY / 18) * 100}%`,
                                                         width: `${tree.spriteSize}rem`,
                                                         height: `${tree.spriteSize}rem`,
-                                                        transform: 'translate(-50%, -50%)',
                                                         imageRendering: 'pixelated'
                                                     }}
                                                 >
