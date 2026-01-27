@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { AppContext } from '../App.jsx';
 import { buyItem } from '../api.js';
 import Modal from '../components/Modal.jsx';
@@ -77,6 +77,8 @@ function Tree({ tree, treeConfig }) {
 function ForestPage() {
     const { state, treeTypes, refetchData } = useContext(AppContext);
     const [modal, setModal] = useState({ isOpen: false, title: '', message: '' });
+    const [scrollState, setScrollState] = useState({ top: 0, height: 0, width: 0 });
+    const gridRef = useRef(null);
 
     const forest = state?.forest || [];
     const saplings = Object.values(treeTypes);
@@ -86,6 +88,52 @@ function ForestPage() {
         matured: forest.filter(t => t.status === 'matured' || new Date(t.matureDate) <= new Date()).length,
         withered: forest.filter(t => t.status === 'withered').length,
     };
+
+    useEffect(() => {
+        const scrollEl = document.querySelector('main');
+        if (!scrollEl) return;
+
+        const update = () => {
+            const width = gridRef.current?.clientWidth || 0;
+            setScrollState({ top: scrollEl.scrollTop, height: scrollEl.clientHeight, width });
+        };
+        const onScroll = () => {
+            setScrollState((prev) => ({ ...prev, top: scrollEl.scrollTop }));
+        };
+
+        update();
+        scrollEl.addEventListener('scroll', onScroll);
+        window.addEventListener('resize', update);
+
+        const observer = new ResizeObserver(update);
+        if (gridRef.current) observer.observe(gridRef.current);
+
+        return () => {
+            scrollEl.removeEventListener('scroll', onScroll);
+            window.removeEventListener('resize', update);
+            observer.disconnect();
+        };
+    }, []);
+
+    const columns = useMemo(() => {
+        const width = scrollState.width;
+        if (width >= 1024) return 5;
+        if (width >= 768) return 4;
+        if (width >= 640) return 3;
+        return 2;
+    }, [scrollState.width]);
+
+    const rowHeight = 220;
+    const totalRows = Math.ceil(forest.length / columns);
+    const overscan = 2;
+    const startRow = Math.max(0, Math.floor(scrollState.top / rowHeight) - overscan);
+    const visibleRows = Math.ceil(scrollState.height / rowHeight) + overscan * 2;
+    const endRow = Math.min(totalRows, startRow + visibleRows);
+    const startIndex = startRow * columns;
+    const endIndex = Math.min(forest.length, endRow * columns);
+    const visibleForest = forest.slice(startIndex, endIndex);
+    const paddingTop = startRow * rowHeight;
+    const paddingBottom = (totalRows - endRow) * rowHeight;
 
     const handleBuyTree = async (treeId) => {
         try {
@@ -126,8 +174,12 @@ function ForestPage() {
                                 <p className="text-sm mt-2">Buy a sapling from the shop to begin.</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 justify-items-center">
-                                {forest.map((tree) => (
+                            <div
+                                ref={gridRef}
+                                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 justify-items-center"
+                                style={{ paddingTop, paddingBottom }}
+                            >
+                                {visibleForest.map((tree) => (
                                     <Tree key={tree.id} tree={tree} treeConfig={treeTypes[tree.treeType]} />
                                 ))}
                             </div>
