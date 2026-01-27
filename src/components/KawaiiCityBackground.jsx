@@ -21,6 +21,12 @@ function KawaiiCityBackground() {
       <div className="absolute inset-x-0 bottom-24 h-32">
         <div className="kawaii-tree-line" />
       </div>
+      <div className="absolute bottom-10 left-10 kawaii-cat">
+        <span className="cat-eye left" />
+        <span className="cat-eye right" />
+        <span className="cat-mouth" />
+        <span className="cat-tail" />
+      </div>
 
       <div className="absolute inset-0 pointer-events-none">
         <span className="kawaii-heart heart-a" />
@@ -49,6 +55,17 @@ function KawaiiCityBackground() {
         <span className="kawaii-rain rain-m" />
         <span className="kawaii-rain rain-n" />
         <span className="kawaii-rain rain-o" />
+        <span className="kawaii-rain rain-p" />
+        <span className="kawaii-rain rain-q" />
+        <span className="kawaii-rain rain-r" />
+        <span className="kawaii-rain rain-s" />
+        <span className="kawaii-rain rain-t" />
+        <span className="kawaii-rain rain-u" />
+        <span className="kawaii-rain rain-v" />
+        <span className="kawaii-rain rain-w" />
+        <span className="kawaii-rain rain-x" />
+        <span className="kawaii-rain rain-y" />
+        <span className="kawaii-rain rain-z" />
         <span className="kawaii-lightning lightning-a" />
         <span className="kawaii-lightning lightning-b" />
         <span className="kawaii-firecracker firecracker-a" />
@@ -108,6 +125,61 @@ function KawaiiCityBackground() {
           );
           filter: blur(0.3px);
           opacity: 0.8;
+        }
+
+        .kawaii-cat {
+          width: 72px;
+          height: 72px;
+          background: #1c2033;
+          border-radius: 18px 18px 12px 12px;
+          position: relative;
+          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+        .kawaii-cat::before,
+        .kawaii-cat::after {
+          content: '';
+          position: absolute;
+          top: -14px;
+          width: 20px;
+          height: 20px;
+          background: #1c2033;
+          border-radius: 4px;
+        }
+        .kawaii-cat::before { left: 6px; transform: rotate(-12deg); }
+        .kawaii-cat::after { right: 6px; transform: rotate(12deg); }
+        .kawaii-cat::after {
+          box-shadow: 0 0 0 0 rgba(0,0,0,0);
+        }
+
+        .kawaii-cat .cat-eye {
+          position: absolute;
+          top: 28px;
+          width: 6px;
+          height: 10px;
+          background: #f4f7ff;
+          border-radius: 4px;
+        }
+        .kawaii-cat .cat-eye.left { left: 20px; }
+        .kawaii-cat .cat-eye.right { right: 20px; }
+        .kawaii-cat .cat-mouth {
+          position: absolute;
+          top: 42px;
+          left: 50%;
+          width: 14px;
+          height: 6px;
+          border-bottom: 2px solid #f4f7ff;
+          border-radius: 0 0 8px 8px;
+          transform: translateX(-50%);
+        }
+        .kawaii-cat .cat-tail {
+          position: absolute;
+          right: -8px;
+          bottom: 10px;
+          width: 18px;
+          height: 10px;
+          border-radius: 10px;
+          background: #1c2033;
+          transform: rotate(20deg);
         }
 
         .kawaii-heart {
@@ -188,17 +260,28 @@ function KawaiiCityBackground() {
         .rain-m { left: 6%; top: -20%; animation-delay: -1.2s; }
         .rain-n { left: 52%; top: -20%; animation-delay: -0.3s; }
         .rain-o { left: 96%; top: -24%; animation-delay: -1.5s; }
+        .rain-p { left: 14%; top: -18%; animation-delay: -0.9s; }
+        .rain-q { left: 22%; top: -14%; animation-delay: -1.4s; }
+        .rain-r { left: 36%; top: -26%; animation-delay: -0.6s; }
+        .rain-s { left: 44%; top: -18%; animation-delay: -1.1s; }
+        .rain-t { left: 60%; top: -26%; animation-delay: -0.5s; }
+        .rain-u { left: 68%; top: -18%; animation-delay: -1.3s; }
+        .rain-v { left: 74%; top: -26%; animation-delay: -0.8s; }
+        .rain-w { left: 82%; top: -18%; animation-delay: -1.5s; }
+        .rain-x { left: 88%; top: -12%; animation-delay: -0.7s; }
+        .rain-y { left: 92%; top: -20%; animation-delay: -1.2s; }
+        .rain-z { left: 98%; top: -16%; animation-delay: -0.4s; }
 
         .kawaii-lightning {
           position: absolute;
           inset: 0;
           background: radial-gradient(circle at 60% 18%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0));
           opacity: 0;
-          animation: lightningFlash 9s ease-in-out infinite;
+          animation: lightningFlash 18s ease-in-out infinite;
           mix-blend-mode: screen;
         }
-        .lightning-a { animation-delay: -2s; }
-        .lightning-b { animation-delay: -6s; background: radial-gradient(circle at 30% 12%, rgba(180, 210, 255, 0.8), rgba(255, 255, 255, 0)); }
+        .lightning-a { animation-delay: -4s; }
+        .lightning-b { animation-delay: -11s; background: radial-gradient(circle at 30% 12%, rgba(180, 210, 255, 0.8), rgba(255, 255, 255, 0)); }
 
         .kawaii-firecracker {
           position: absolute;
