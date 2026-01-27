@@ -207,6 +207,30 @@ export async function initDb() {
       ],
     });
   }
+
+  const { rows: scarletImages } = await client.execute("SELECT id FROM shop_item_images WHERE item_id = 'scarlet_phoenix_skin' LIMIT 1;");
+  if (scarletImages.length === 0) {
+    const stages = [
+      'egg-1', 'egg-2', 'egg-3',
+      'hatchling-1', 'hatchling-2', 'hatchling-3',
+      'chick-1', 'chick-2',
+      'youngling-1', 'youngling-2',
+      'sunfire-1', 'sunfire-2',
+      'guardian-1', 'guardian-2',
+      'drake', 'celestial-phoenix'
+    ];
+    for (let i = 0; i < stages.length; i += 1) {
+      await client.execute({
+        sql: "INSERT INTO shop_item_images (item_id, image_url, image_type, stage_name, sort_order) VALUES (?, ?, 'progression', ?, ?);",
+        args: [
+          'scarlet_phoenix_skin',
+          `/img/skins/scarlet/${stages[i]}.webp`,
+          stages[i],
+          i
+        ]
+      });
+    }
+  }
 }
 
 export default client;
