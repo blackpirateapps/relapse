@@ -80,10 +80,10 @@ async function handleGetShop(req, res) {
 async function handleShopAction(req, res) {
   try {
     const body = await parseJsonBody(req);
-    const { action, itemId, equip } = body;
+    const { action, itemId, equip, x, y } = body;
 
     if (action === 'buy') {
-      return handlePurchase(itemId, res);
+      return handlePurchase(itemId, res, { x, y });
     } else if (action === 'equip') {
       return handleEquipment(itemId, equip, res);
     } else {
@@ -96,7 +96,7 @@ async function handleShopAction(req, res) {
 }
 
 // Handles the logic for purchasing an item
-async function handlePurchase(itemId, res) {
+async function handlePurchase(itemId, res, position = {}) {
   try {
     const itemResult = await db.execute({
       sql: "SELECT * FROM shop_items WHERE id = ? AND is_active = true;",
@@ -154,9 +154,11 @@ async function handlePurchase(itemId, res) {
     } else if (item.type === 'tree_sapling') {
       const purchaseDate = new Date();
       const matureDate = new Date(purchaseDate.getTime() + item.growth_hours * 60 * 60 * 1000);
+      const posX = typeof position.x === 'number' ? Math.max(0.05, Math.min(0.95, position.x)) : 0.5;
+      const posY = typeof position.y === 'number' ? Math.max(0.08, Math.min(0.92, position.y)) : 0.6;
       await db.execute({
-        sql: "INSERT INTO forest (treeType, status, purchaseDate, matureDate) VALUES (?, 'growing', ?, ?);",
-        args: [item.id, purchaseDate.toISOString(), matureDate.toISOString()]
+        sql: "INSERT INTO forest (treeType, status, purchaseDate, matureDate, x, y) VALUES (?, 'growing', ?, ?, ?, ?);",
+        args: [item.id, purchaseDate.toISOString(), matureDate.toISOString(), posX, posY]
       });
     } else {
       let upgrades = JSON.parse(state.upgrades || '{}');

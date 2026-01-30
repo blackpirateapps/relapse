@@ -35,10 +35,10 @@ export const fetchShopData = () => apiRequest('shop');
 export const fetchHistory = () => apiRequest('history');
 export const postRelapse = () => apiRequest('relapse', { method: 'POST' });
 
-export const buyItem = (itemId) => apiRequest('shop', {
+export const buyItem = (itemId, options = {}) => apiRequest('shop', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ action: 'buy', itemId }),
+  body: JSON.stringify({ action: 'buy', itemId, ...options }),
 });
 
 export const equipItem = (itemId, equip) => apiRequest('shop', {

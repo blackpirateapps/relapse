@@ -16,7 +16,8 @@ export async function initDb() {
       streak_duration_ms INTEGER, start_date TEXT, end_date TEXT, upgrades_json TEXT
     );`,
     `CREATE TABLE IF NOT EXISTS forest (
-      id INTEGER PRIMARY KEY AUTOINCREMENT, treeType TEXT, status TEXT, purchaseDate TEXT, matureDate TEXT
+      id INTEGER PRIMARY KEY AUTOINCREMENT, treeType TEXT, status TEXT, purchaseDate TEXT, matureDate TEXT,
+      x REAL, y REAL
     );`,
     `CREATE TABLE IF NOT EXISTS shop_items (
       id TEXT PRIMARY KEY, name TEXT, description TEXT, cost INTEGER, type TEXT, preview_image TEXT,
@@ -63,6 +64,15 @@ export async function initDb() {
   const hasSessionSeconds = taskColumns.some((col) => col.name === 'last_session_seconds');
   if (!hasSessionSeconds) {
     await client.execute("ALTER TABLE urge_tasks ADD COLUMN last_session_seconds INTEGER;");
+  }
+
+  const { rows: forestColumns } = await client.execute("PRAGMA table_info(forest);");
+  const forestColumnNames = forestColumns.map((col) => col.name);
+  if (!forestColumnNames.includes('x')) {
+    await client.execute("ALTER TABLE forest ADD COLUMN x REAL;");
+  }
+  if (!forestColumnNames.includes('y')) {
+    await client.execute("ALTER TABLE forest ADD COLUMN y REAL;");
   }
 
   const { rows: userColumns } = await client.execute("PRAGMA table_info(user_state);");

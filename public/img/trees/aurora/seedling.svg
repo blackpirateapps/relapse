@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Aurora Seedling">
+  <rect width="120" height="120" rx="18" fill="transparent"/>
+  <ellipse cx="60" cy="92" rx="22" ry="8" fill="#0b0f14" opacity="0.45"/>
+  <path d="M60 78c2-12 8-20 16-26" fill="none" stroke="#7dd3a7" stroke-width="6" stroke-linecap="round"/>
+  <path d="M60 78c-3-10-10-16-20-20" fill="none" stroke="#4ade80" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="60" cy="70" r="8" fill="#22c55e"/>
+</svg>

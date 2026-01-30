@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Ember Young Tree">
+  <rect width="120" height="120" rx="18" fill="transparent"/>
+  <ellipse cx="60" cy="96" rx="28" ry="9" fill="#0b0f14" opacity="0.45"/>
+  <rect x="54" y="58" width="12" height="32" rx="6" fill="#8b4a1f"/>
+  <circle cx="44" cy="58" r="18" fill="#fb923c"/>
+  <circle cx="76" cy="56" r="20" fill="#f97316"/>
+  <circle cx="60" cy="44" r="22" fill="#fdba74"/>
+</svg>
