@@ -1,4 +1,5 @@
 import React, { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../App';
 import { buyItem, equipItem } from '../api';
 import Modal from '../components/Modal';
@@ -6,6 +7,7 @@ import Modal from '../components/Modal';
 function ShopPage() {
     const { state, shopItems, totalCoins, refetchData, setPreviewThemeId } = useContext(AppContext);
     const [modal, setModal] = useState({ isOpen: false, title: '', message: '' });
+    const navigate = useNavigate();
 
     const handleBuy = async (itemId) => {
         try {
@@ -39,7 +41,10 @@ function ShopPage() {
 
         const previewButton = (isBackgroundTheme || isForestTheme) ? (
             <button
-                onClick={() => setPreviewThemeId(item.id)}
+                onClick={(event) => {
+                    event.stopPropagation();
+                    setPreviewThemeId(item.id);
+                }}
                 className="w-full bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded transition-colors"
             >
                 Preview
@@ -48,8 +53,8 @@ function ShopPage() {
 
         if (isOwned && item.type !== 'tree_sapling') {
             const equipButton = isEquipped
-                ? <button onClick={() => handleEquip(item.id, false)} className="w-full bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded transition-colors">Unequip</button>
-                : <button onClick={() => handleEquip(item.id, true)} className="w-full bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded transition-colors">Equip</button>;
+                ? <button onClick={(event) => { event.stopPropagation(); handleEquip(item.id, false); }} className="w-full bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded transition-colors">Unequip</button>
+                : <button onClick={(event) => { event.stopPropagation(); handleEquip(item.id, true); }} className="w-full bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded transition-colors">Equip</button>;
             if (previewButton) {
                 return <div className="space-y-2">{previewButton}{equipButton}</div>;
             }
@@ -61,7 +66,15 @@ function ShopPage() {
         }
 
         const canAfford = totalCoins >= item.cost;
-        const buyButton = <button onClick={() => handleBuy(item.id)} disabled={!canAfford} className={`w-full ${canAfford ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-600 cursor-not-allowed'} text-white px-4 py-2 rounded transition-colors`}>Buy for {item.cost.toLocaleString()} Coins</button>;
+        const buyButton = (
+            <button
+                onClick={(event) => { event.stopPropagation(); handleBuy(item.id); }}
+                disabled={!canAfford}
+                className={`w-full ${canAfford ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-600 cursor-not-allowed'} text-white px-4 py-2 rounded transition-colors`}
+            >
+                Buy for {item.cost.toLocaleString()} Coins
+            </button>
+        );
         if (previewButton) {
             return <div className="space-y-2">{previewButton}{buyButton}</div>;
         }
@@ -103,7 +116,19 @@ function ShopPage() {
                 <h2 className="text-3xl font-bold text-white mb-6 font-serif-display">{title}</h2>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {items.map(item => (
-                        <div key={item.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 flex flex-col">
+                        <div
+                            key={item.id}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => navigate(`/shop/${item.id}`)}
+                            onKeyDown={(event) => {
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                    event.preventDefault();
+                                    navigate(`/shop/${item.id}`);
+                                }
+                            }}
+                            className="bg-gray-800 p-4 rounded-lg border border-gray-700 flex flex-col cursor-pointer hover:border-yellow-300/60 transition-colors"
+                        >
                             <img
                               src={item.preview_image || '/img/placeholder.png'}
                               alt={item.name}

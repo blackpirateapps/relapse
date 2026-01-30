@@ -141,7 +141,7 @@ async function handlePurchase(itemId, res) {
     } else {
       let upgrades = JSON.parse(state.upgrades || '{}');
       if (upgrades[itemId]) return res.status(400).json({ message: 'Item already owned.' });
-      upgrades[itemId] = true;
+      upgrades[itemId] = { purchasedAt: new Date().toISOString() };
       await db.execute({ sql: "UPDATE user_state SET upgrades = ? WHERE id = 1", args: [JSON.stringify(upgrades)] });
     }
 
