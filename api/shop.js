@@ -80,18 +80,38 @@ async function handleGetShop(req, res) {
 async function handleShopAction(req, res) {
   try {
     const body = await parseJsonBody(req);
-    const { action, itemId, equip, x, y } = body;
+    const { action, itemId, equip, x, y, treeId } = body;
 
     if (action === 'buy') {
       return handlePurchase(itemId, res, { x, y });
     } else if (action === 'equip') {
       return handleEquipment(itemId, equip, res);
+    } else if (action === 'move_tree') {
+      return handleTreeMove(treeId, x, y, res);
     } else {
       return res.status(400).json({ message: 'Invalid action.' });
     }
   } catch (error) {
     console.error('Shop POST Error:', error);
     res.status(500).json({ message: 'Failed to process request.' });
+  }
+}
+
+async function handleTreeMove(treeId, x, y, res) {
+  try {
+    if (!treeId || typeof x !== 'number' || typeof y !== 'number') {
+      return res.status(400).json({ message: 'Invalid tree position.' });
+    }
+    const posX = Math.max(0.05, Math.min(0.95, x));
+    const posY = Math.max(0.08, Math.min(0.92, y));
+    await db.execute({
+      sql: "UPDATE forest SET x = ?, y = ? WHERE id = ?;",
+      args: [posX, posY, treeId]
+    });
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Tree Move Error:', error);
+    return res.status(500).json({ message: 'Failed to move tree.' });
   }
 }
 
