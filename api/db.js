@@ -65,6 +65,27 @@ export async function initDb() {
     await client.execute("ALTER TABLE urge_tasks ADD COLUMN last_session_seconds INTEGER;");
   }
 
+  const { rows: userColumns } = await client.execute("PRAGMA table_info(user_state);");
+  const userColumnNames = userColumns.map((col) => col.name);
+  const ensureUserColumn = async (name, type, defaultValue = null) => {
+    if (!userColumnNames.includes(name)) {
+      await client.execute(`ALTER TABLE user_state ADD COLUMN ${name} ${type};`);
+      if (defaultValue !== null) {
+        await client.execute({
+          sql: `UPDATE user_state SET ${name} = ? WHERE ${name} IS NULL;`,
+          args: [defaultValue]
+        });
+      }
+    }
+  };
+
+  await ensureUserColumn('potion_inventory', 'INTEGER', 0);
+  await ensureUserColumn('potion_last_purchase_at', 'TEXT');
+  await ensureUserColumn('potion_purchases_this_streak', 'INTEGER', 0);
+  await ensureUserColumn('potion_active_until', 'TEXT');
+  await ensureUserColumn('potion_relapse_used_at', 'TEXT');
+  await ensureUserColumn('potion_protected_uses_this_streak', 'INTEGER', 0);
+
   // Initialize user if not exists
   const { rows: userRows } = await client.execute("SELECT id FROM user_state WHERE id = 1;");
   if (userRows.length === 0) {
@@ -191,6 +212,23 @@ export async function initDb() {
         '/img/bg-dark-forest.svg',
         true,
         95
+      ],
+    });
+  }
+
+  const { rows: potionRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'phoenix_guard_potion';");
+  if (potionRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO shop_items (id, name, description, cost, type, preview_image, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+      args: [
+        'phoenix_guard_potion',
+        'Phoenix Guard Potion',
+        'A rare tonic that shields a single relapse and preserves your streak momentum.',
+        8000,
+        'potion',
+        '/img/potion-phoenix-guard.svg',
+        true,
+        40
       ],
     });
   }

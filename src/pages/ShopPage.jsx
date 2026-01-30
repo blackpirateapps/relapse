@@ -34,10 +34,24 @@ function ShopPage() {
     };
 
     const renderActionButtons = (item) => {
+        const isPotion = item.type === 'potion';
         const isOwned = state.upgrades && state.upgrades[item.id];
         const isEquipped = state.equipped_upgrades && state.equipped_upgrades[item.id];
         const isBackgroundTheme = item.type === 'background_theme';
         const isForestTheme = item.type === 'forest_theme';
+
+        if (isPotion) {
+            const canAfford = totalCoins >= item.cost;
+            return (
+                <button
+                    onClick={(event) => { event.stopPropagation(); handleBuy(item.id); }}
+                    disabled={!canAfford}
+                    className={`w-full ${canAfford ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-600 cursor-not-allowed'} text-white px-4 py-2 rounded transition-colors`}
+                >
+                    Buy for {item.cost.toLocaleString()} Coins
+                </button>
+            );
+        }
 
         const previewButton = (isBackgroundTheme || isForestTheme) ? (
             <button
@@ -157,6 +171,7 @@ function ShopPage() {
                 {renderShopSection('Phoenix Skins', 'phoenix_skin')}
                 {renderShopSection('Background Themes', 'background_theme')}
                 {renderShopSection('Forest Themes', 'forest_theme')}
+                {renderShopSection('Potions', 'potion')}
                 {renderShopSection('Tree Saplings', 'tree_sapling')}
                 {/* Add other sections as needed */}
             </section>

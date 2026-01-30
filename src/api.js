@@ -47,6 +47,11 @@ export const equipItem = (itemId, equip) => apiRequest('shop', {
   body: JSON.stringify({ action: 'equip', itemId, equip }),
 });
 
+export const usePotion = () => apiRequest('potion', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' }
+});
+
 // --- NEW: Minigame API Calls ---
 export const startGame = (gameId) => apiRequest('minigame', {
   method: 'POST',

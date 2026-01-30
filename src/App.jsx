@@ -16,6 +16,7 @@ const ForestPage = React.lazy(() => import('./pages/ForestPage.jsx'));
 const AviaryPage = React.lazy(() => import('./pages/AviaryPage.jsx'));
 const ShopPage = React.lazy(() => import('./pages/ShopPage.jsx'));
 const ShopItemPage = React.lazy(() => import('./pages/ShopItemPage.jsx'));
+const InventoryPage = React.lazy(() => import('./pages/InventoryPage.jsx'));
 const PhoenixFlightPage = React.lazy(() => import('./pages/PhoenixFlightPage.jsx'));
 const AsteroidShooterPage = React.lazy(() => import('./pages/AsteroidShooterPage.jsx'));
 const LevelShowcasePage = React.lazy(() => import('./pages/LevelShowcasePage.jsx'));
@@ -97,6 +98,7 @@ const AppLayout = () => {
             <Route path="/aviary" element={<AviaryPage />} />
             <Route path="/shop" element={<ShopPage />} />
             <Route path="/shop/:itemId" element={<ShopItemPage />} />
+            <Route path="/inventory" element={<InventoryPage />} />
             <Route path="/phoenix-flight" element={<PhoenixFlightPage />} />
             <Route path="/progression/levels" element={<LevelShowcasePage />} />
             <Route path="*" element={<Navigate to="/" />} />

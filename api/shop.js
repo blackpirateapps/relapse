@@ -1,4 +1,4 @@
-import db from './db.js';
+import db, { initDb } from './db.js';
 import { checkAuth } from './auth.js';
 import { ranks, getRank } from './ranks.js';
 
@@ -53,6 +53,8 @@ export default async function handler(req, res) {
   if (!checkAuth(req)) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
+
+  await initDb();
 
   if (req.method === 'GET') {
     return handleGetShop(req, res);
@@ -126,12 +128,30 @@ async function handlePurchase(itemId, res) {
     if (totalAvailableCoins < item.cost) {
       return res.status(400).json({ message: 'Cannot afford item.' });
     }
-    
+
     const finalCoinBalance = totalAvailableCoins - item.cost;
     const newCoinsAtLastRelapse = finalCoinBalance - streakCoins;
     const newLastClaimedLevel = currentRank.level;
 
-    if (item.type === 'tree_sapling') {
+    if (item.type === 'potion') {
+      const now = new Date();
+      const lastPurchaseAt = state.potion_last_purchase_at ? new Date(state.potion_last_purchase_at) : null;
+      const purchasesThisStreak = Number(state.potion_purchases_this_streak || 0);
+      const minDelayMs = 2 * 24 * 60 * 60 * 1000;
+
+      if (purchasesThisStreak >= 2) {
+        return res.status(400).json({ message: 'Potion purchase limit reached for this streak.' });
+      }
+      if (lastPurchaseAt && now.getTime() - lastPurchaseAt.getTime() < minDelayMs) {
+        return res.status(400).json({ message: 'Potion can only be purchased once every 2 days.' });
+      }
+
+      const inventory = Number(state.potion_inventory || 0) + 1;
+      await db.execute({
+        sql: "UPDATE user_state SET potion_inventory = ?, potion_last_purchase_at = ?, potion_purchases_this_streak = ? WHERE id = 1;",
+        args: [inventory, now.toISOString(), purchasesThisStreak + 1]
+      });
+    } else if (item.type === 'tree_sapling') {
       const purchaseDate = new Date();
       const matureDate = new Date(purchaseDate.getTime() + item.growth_hours * 60 * 60 * 1000);
       await db.execute({

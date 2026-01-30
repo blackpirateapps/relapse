@@ -11,7 +11,8 @@ const buildDescription = (item) => {
     background_theme: `A full-scene backdrop tuned for focus sessions and late-night streaks. Expect rich motion, soft parallax, and a mood shift that makes every visit feel fresh.`,
     forest_theme: `A forest skin that deepens the sanctuary vibe with layered atmospherics and a calmer palette. It keeps the journey page grounded while still feeling cinematic.`,
     phoenix_skin: `A forged skin with a mythic silhouette and brighter ember highlights. It evolves through every rank so your phoenix looks like it’s actually growing with you.`,
-    tree_sapling: `A living marker of your recovery timeline. Each stage matures over time, giving you a visual reminder that small habits compound into real growth.`
+    tree_sapling: `A living marker of your recovery timeline. Each stage matures over time, giving you a visual reminder that small habits compound into real growth.`,
+    potion: `A rare safeguard brewed for tough days. Activate it from your inventory to shield a single relapse while the 12-hour effect is live.`
   };
   const addon = templates[item.type] || `A crafted upgrade designed to make your journey feel more personal and rewarding.`;
   return `${base}\n\n${addon}`;
@@ -62,6 +63,9 @@ function ShopItemPage() {
 
   const getPurchaseDate = () => {
     if (!state || !item) return null;
+    if (item.type === 'potion') {
+      return state.potion_last_purchase_at || null;
+    }
     if (item.type === 'tree_sapling') {
       const matches = (state.forest || []).filter((tree) => tree.treeType === item.id);
       if (!matches.length) return null;
@@ -76,8 +80,12 @@ function ShopItemPage() {
   };
 
   const purchaseDate = getPurchaseDate();
-  const isOwned = !!state?.upgrades?.[item?.id] || (item?.type === 'tree_sapling' && !!purchaseDate);
+  const potionInventory = Number(state?.potion_inventory || 0);
+  const isOwned = item?.type === 'potion'
+    ? potionInventory > 0
+    : (!!state?.upgrades?.[item?.id] || (item?.type === 'tree_sapling' && !!purchaseDate));
   const isEquipped = !!state?.equipped_upgrades?.[item?.id];
+  const isPotion = item?.type === 'potion';
   const isBackgroundTheme = item?.type === 'background_theme';
   const isForestTheme = item?.type === 'forest_theme';
   const canAfford = item ? totalCoins >= item.cost : false;
@@ -109,6 +117,18 @@ function ShopItemPage() {
   ) : null;
 
   const actionButtons = () => {
+    if (isPotion) {
+      return (
+        <button
+          type="button"
+          onClick={() => handleBuy(item.id)}
+          disabled={!canAfford}
+          className={`w-full ${canAfford ? 'bg-green-600 hover:bg-green-500' : 'bg-gray-600 cursor-not-allowed'} text-white px-4 py-2 rounded transition-colors`}
+        >
+          Buy for {item.cost.toLocaleString()} Coins
+        </button>
+      );
+    }
     if (isOwned && item.type !== 'tree_sapling') {
       const equipButton = isEquipped
         ? <button type="button" onClick={() => handleEquip(item.id, false)} className="w-full bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded transition-colors">Unequip</button>
@@ -168,6 +188,12 @@ function ShopItemPage() {
             <div className="text-gray-300 whitespace-pre-line leading-relaxed">
               {buildDescription(item)}
             </div>
+            {isPotion && (
+              <div className="rounded-lg border border-white/10 bg-white/5 p-4 text-sm text-gray-300">
+                <p>Inventory: <span className="text-white font-semibold">{Number(state?.potion_inventory || 0)}</span></p>
+                <p className="text-gray-400 mt-1">Consume potions from the Inventory page.</p>
+              </div>
+            )}
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-lg border border-white/10 bg-white/5 p-4">
                 <p className="text-xs uppercase tracking-wider text-yellow-300">Cost</p>
@@ -176,7 +202,7 @@ function ShopItemPage() {
               <div className="rounded-lg border border-white/10 bg-white/5 p-4">
                 <p className="text-xs uppercase tracking-wider text-green-300">Status</p>
                 <p className="text-lg font-semibold text-white">{isOwned ? 'Owned' : 'Available'}</p>
-                {isOwned && (
+                {purchaseDate && (
                   <p className="text-xs text-gray-400 mt-1">
                     {formatDate(purchaseDate) ? `Purchased on ${formatDate(purchaseDate)}` : 'Purchased date unavailable'}
                   </p>
