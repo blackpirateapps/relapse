@@ -3,7 +3,6 @@ import { AppContext } from '../App.jsx';
 import { fetchHistory } from '../api.js';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 import PhoenixImage from '../components/PhoenixImage.jsx';
-import { VirtuosoGrid } from 'react-virtuoso';
 
 function AviaryPage() {
   const { state, currentRank } = useContext(AppContext);
@@ -96,66 +95,92 @@ function AviaryPage() {
   }
 
   const isEmpty = history.length === 0;
+  const totalLives = history.length + 1;
+  const longestStreakMs = typeof state?.longestStreak === 'number' ? state.longestStreak : null;
 
   return (
     <section>
-      <div className="h-[70vh]">
-        <VirtuosoGrid
-          data={items}
-          totalCount={items.length}
-          itemContent={(index, phoenix) => {
-            if (phoenix.type === 'current') {
-              return (
-                <button
-                  type="button"
-                  onClick={() => setSelectedPhoenix(phoenix)}
-                  className="card p-6 flex flex-col items-center text-center border-2 border-yellow-400/50 relative transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400/60"
-                >
-                  <div className="absolute top-2 right-2 bg-yellow-400 text-gray-900 text-xs font-bold px-2 py-1 rounded-full animate-pulse">LIVE</div>
-                  <PhoenixImage 
-                    rankLevel={phoenix.final_rank_level} 
+      <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.35em] text-yellow-300/70 mb-3">Aviary</p>
+          <h1 className="text-3xl sm:text-4xl font-serif-display text-white">Your Phoenix Lineage</h1>
+          <p className="text-gray-400 mt-3 max-w-2xl">
+            Every streak becomes a living record. Tap any phoenix to revisit its journey, loadout, and timeline.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 lg:w-[420px]">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <p className="text-xs uppercase tracking-widest text-yellow-300">Lives</p>
+            <p className="text-2xl font-semibold text-white">{totalLives}</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <p className="text-xs uppercase tracking-widest text-green-300">Longest</p>
+            <p className="text-2xl font-semibold text-white">{formatHistoricStreak(longestStreakMs)}</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <p className="text-xs uppercase tracking-widest text-blue-300">Current Rank</p>
+            <p className="text-lg font-semibold text-white">{currentRank?.name || '—'}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        {items.map((phoenix) => {
+          if (phoenix.type === 'current') {
+            return (
+              <button
+                key={phoenix.id}
+                type="button"
+                onClick={() => setSelectedPhoenix(phoenix)}
+                className="relative overflow-hidden rounded-2xl border border-yellow-400/50 bg-gradient-to-br from-yellow-500/15 via-gray-900/70 to-gray-900/40 p-6 text-center transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400/60"
+              >
+                <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_top,rgba(253,224,71,0.25),transparent_55%)]" />
+                <div className="absolute top-3 right-3 bg-yellow-400 text-gray-900 text-xs font-bold px-2 py-1 rounded-full animate-pulse">LIVE</div>
+                <div className="relative flex flex-col items-center">
+                  <PhoenixImage
+                    rankLevel={phoenix.final_rank_level}
                     equippedUpgrades={state.equipped_upgrades}
                     className="w-24 h-24 mb-4"
                   />
                   <h3 className="font-serif-display text-xl text-white">{phoenix.final_rank_name}</h3>
                   <p className="text-lg font-bold font-mono text-green-400 mt-2">In Progress</p>
-                </button>
-              );
-            }
-            return (
-              <button
-                type="button"
-                onClick={() => setSelectedPhoenix(phoenix)}
-                className="card p-6 flex flex-col items-center text-center transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400/60"
-              >
-                <PhoenixImage 
-                  rankLevel={phoenix.final_rank_level} 
-                  equippedUpgrades={parseUpgrades(phoenix.upgrades_json)}
-                  className="w-24 h-24 mb-4"
-                />
-                <h3 className="font-serif-display text-xl text-white">{phoenix.final_rank_name}</h3>
-                <p className="text-sm text-gray-400 mb-2">{phoenix.name || 'Past Life'}</p>
-                <p className="text-lg font-bold text-green-400">{formatHistoricStreak(phoenix.streak_duration_ms)}</p>
+                </div>
               </button>
             );
-          }}
-          listClassName="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-        />
+          }
+          return (
+            <button
+              key={phoenix.id}
+              type="button"
+              onClick={() => setSelectedPhoenix(phoenix)}
+              className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400/60"
+            >
+              <PhoenixImage
+                rankLevel={phoenix.final_rank_level}
+                equippedUpgrades={parseUpgrades(phoenix.upgrades_json)}
+                className="w-24 h-24 mb-4"
+              />
+              <h3 className="font-serif-display text-xl text-white">{phoenix.final_rank_name}</h3>
+              <p className="text-sm text-gray-400 mb-2">{phoenix.name || 'Past Life'}</p>
+              <p className="text-lg font-bold text-green-400">{formatHistoricStreak(phoenix.streak_duration_ms)}</p>
+            </button>
+          );
+        })}
       </div>
       {isEmpty && (
         <div className="text-center text-gray-400 mt-10">
-          <p className="text-lg">Your Aviary is empty.</p>
+          <p className="text-lg">Your Aviary is just getting started.</p>
           <p className="text-sm mt-2">When a streak ends, your phoenix will be immortalized here.</p>
         </div>
       )}
       {selectedPhoenix && (
         <div
-          className="fixed inset-0 z-50 bg-black/80"
+          className="fixed inset-0 z-50 bg-black/80 overflow-y-auto"
           onClick={() => setSelectedPhoenix(null)}
         >
           <div className="min-h-screen w-full px-4 sm:px-8 py-10">
             <div
-              className="mx-auto w-full max-w-5xl bg-gray-900/95 border border-gray-700 rounded-3xl p-8 shadow-2xl"
+              className="mx-auto w-full max-w-5xl bg-gray-900/95 border border-gray-700 rounded-3xl p-5 sm:p-8 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {(() => {
@@ -180,12 +205,12 @@ function AviaryPage() {
                       </button>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 sm:gap-8">
                       <div className="flex flex-col items-center text-center bg-gray-800/60 border border-gray-700 rounded-2xl p-6">
                         <PhoenixImage
                           rankLevel={selectedPhoenix.final_rank_level}
                           equippedUpgrades={details?.isCurrent ? state.equipped_upgrades : parseUpgrades(selectedPhoenix.upgrades_json)}
-                          className="w-40 h-40 mb-4"
+                          className="w-32 h-32 sm:w-40 sm:h-40 mb-4"
                         />
                         <p className="text-sm text-gray-400">Rank Level</p>
                         <p className="text-xl font-semibold text-white">{selectedPhoenix.final_rank_level}</p>
