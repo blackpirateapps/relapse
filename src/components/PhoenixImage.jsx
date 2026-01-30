@@ -46,21 +46,24 @@ const PhoenixImage = ({ rankLevel, equippedUpgrades, className = "w-48 h-48", al
     <div className={`${className} mx-auto transition-all duration-500 relative`}>
       {activeAuraId && (
         <>
-          <div className={`absolute inset-0 -z-10 ${auraStyles[activeAuraId] || ''}`} />
+          <div className={`absolute inset-0 ${auraStyles[activeAuraId] || ''}`} />
           <style jsx>{`
             .aura-ember {
               background: radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.35), rgba(249, 115, 22, 0.2), transparent 70%);
               filter: blur(6px);
+              transform-origin: 50% 50%;
               animation: auraPulse 3.8s ease-in-out infinite;
             }
             .aura-celestial {
               background: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.35), rgba(99, 102, 241, 0.25), transparent 70%);
               filter: blur(7px);
+              transform-origin: 50% 50%;
               animation: auraOrbit 6s linear infinite;
             }
             .aura-verdant {
               background: radial-gradient(circle at 50% 50%, rgba(74, 222, 128, 0.35), rgba(16, 185, 129, 0.25), transparent 70%);
               filter: blur(6px);
+              transform-origin: 50% 50%;
               animation: auraPulse 4.6s ease-in-out infinite;
             }
             @keyframes auraPulse {
@@ -78,7 +81,7 @@ const PhoenixImage = ({ rankLevel, equippedUpgrades, className = "w-48 h-48", al
       <img 
         src={getPhoenixImageUrl()} 
         alt={ranks[rankLevel]?.name || 'Phoenix'} 
-        className="w-full h-full object-contain drop-shadow-[0_5px_15px_rgba(253,224,71,0.3)]"
+        className="relative z-10 w-full h-full object-contain drop-shadow-[0_5px_15px_rgba(253,224,71,0.3)]"
         onError={(e) => { e.target.onerror = null; e.target.src='/img/placeholder.png'; }}
       />
     </div>
