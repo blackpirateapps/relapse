@@ -45,6 +45,7 @@ function ProgressionPage() {
                                        rankLevel={index}
                                        equippedUpgrades={state.equipped_upgrades}
                                        className="w-24 h-24 object-contain rounded-lg bg-black/20 shrink-0 hover:scale-105 transition-transform"
+                                       allowPreview={isCurrent}
                                    />
                                </Link>
                                

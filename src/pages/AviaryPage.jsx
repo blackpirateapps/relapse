@@ -159,6 +159,7 @@ function AviaryPage() {
                 rankLevel={phoenix.final_rank_level}
                 equippedUpgrades={parseUpgrades(phoenix.upgrades_json)}
                 className="w-24 h-24 mb-4"
+                allowPreview={false}
               />
               <h3 className="font-serif-display text-xl text-white">{phoenix.final_rank_name}</h3>
               <p className="text-sm text-gray-400 mb-2">{phoenix.name || 'Past Life'}</p>
@@ -211,6 +212,7 @@ function AviaryPage() {
                           rankLevel={selectedPhoenix.final_rank_level}
                           equippedUpgrades={details?.isCurrent ? state.equipped_upgrades : parseUpgrades(selectedPhoenix.upgrades_json)}
                           className="w-32 h-32 sm:w-40 sm:h-40 mb-4"
+                          allowPreview={!!details?.isCurrent}
                         />
                         <p className="text-sm text-gray-400">Rank Level</p>
                         <p className="text-xl font-semibold text-white">{selectedPhoenix.final_rank_level}</p>

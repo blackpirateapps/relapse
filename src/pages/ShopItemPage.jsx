@@ -12,7 +12,8 @@ const buildDescription = (item) => {
     forest_theme: `A forest skin that deepens the sanctuary vibe with layered atmospherics and a calmer palette. It keeps the journey page grounded while still feeling cinematic.`,
     phoenix_skin: `A forged skin with a mythic silhouette and brighter ember highlights. It evolves through every rank so your phoenix looks like it’s actually growing with you.`,
     tree_sapling: `A living marker of your recovery timeline. Each stage matures over time, giving you a visual reminder that small habits compound into real growth.`,
-    potion: `A rare safeguard brewed for tough days. Activate it from your inventory to shield a single relapse while the 12-hour effect is live.`
+    potion: `A rare safeguard brewed for tough days. Activate it from your inventory to shield a single relapse while the 12-hour effect is live.`,
+    phoenix_aura: `A radiant ring that sits behind your phoenix, adding energy and presence without changing the base skin.`
   };
   const addon = templates[item.type] || `A crafted upgrade designed to make your journey feel more personal and rewarding.`;
   return `${base}\n\n${addon}`;
@@ -32,7 +33,7 @@ const formatDate = (isoDate) => {
 function ShopItemPage() {
   const { itemId } = useParams();
   const navigate = useNavigate();
-  const { state, shopItems, totalCoins, refetchData, setPreviewThemeId } = useContext(AppContext);
+  const { state, shopItems, totalCoins, refetchData, setPreviewThemeId, setPreviewAuraId } = useContext(AppContext);
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '' });
 
   const item = useMemo(() => shopItems.find((entry) => entry.id === itemId), [shopItems, itemId]);
@@ -88,6 +89,7 @@ function ShopItemPage() {
   const isPotion = item?.type === 'potion';
   const isBackgroundTheme = item?.type === 'background_theme';
   const isForestTheme = item?.type === 'forest_theme';
+  const isAura = item?.type === 'phoenix_aura';
   const canAfford = item ? totalCoins >= item.cost : false;
 
   if (!item) {
@@ -106,10 +108,16 @@ function ShopItemPage() {
     );
   }
 
-  const previewButton = (isBackgroundTheme || isForestTheme) ? (
+  const previewButton = (isBackgroundTheme || isForestTheme || isAura) ? (
     <button
       type="button"
-      onClick={() => setPreviewThemeId(item.id)}
+      onClick={() => {
+        if (isAura) {
+          setPreviewAuraId(item.id);
+        } else {
+          setPreviewThemeId(item.id);
+        }
+      }}
       className="w-full bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded transition-colors"
     >
       Preview

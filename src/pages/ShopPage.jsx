@@ -5,7 +5,7 @@ import { buyItem, equipItem } from '../api';
 import Modal from '../components/Modal';
 
 function ShopPage() {
-    const { state, shopItems, totalCoins, refetchData, setPreviewThemeId } = useContext(AppContext);
+    const { state, shopItems, totalCoins, refetchData, setPreviewThemeId, setPreviewAuraId } = useContext(AppContext);
     const [modal, setModal] = useState({ isOpen: false, title: '', message: '' });
     const navigate = useNavigate();
 
@@ -39,6 +39,7 @@ function ShopPage() {
         const isEquipped = state.equipped_upgrades && state.equipped_upgrades[item.id];
         const isBackgroundTheme = item.type === 'background_theme';
         const isForestTheme = item.type === 'forest_theme';
+        const isAura = item.type === 'phoenix_aura';
 
         if (isPotion) {
             const canAfford = totalCoins >= item.cost;
@@ -53,11 +54,15 @@ function ShopPage() {
             );
         }
 
-        const previewButton = (isBackgroundTheme || isForestTheme) ? (
+        const previewButton = (isBackgroundTheme || isForestTheme || isAura) ? (
             <button
                 onClick={(event) => {
                     event.stopPropagation();
-                    setPreviewThemeId(item.id);
+                    if (isAura) {
+                        setPreviewAuraId(item.id);
+                    } else {
+                        setPreviewThemeId(item.id);
+                    }
                 }}
                 className="w-full bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded transition-colors"
             >
@@ -171,6 +176,7 @@ function ShopPage() {
                 {renderShopSection('Phoenix Skins', 'phoenix_skin')}
                 {renderShopSection('Background Themes', 'background_theme')}
                 {renderShopSection('Forest Themes', 'forest_theme')}
+                {renderShopSection('Phoenix Auras', 'phoenix_aura')}
                 {renderShopSection('Potions', 'potion')}
                 {renderShopSection('Tree Saplings', 'tree_sapling')}
                 {/* Add other sections as needed */}

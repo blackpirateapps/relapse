@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="Celestial Ring">
+  <rect width="320" height="320" rx="48" fill="#0b1120"/>
+  <defs>
+    <radialGradient id="celestial" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.9"/>
+      <stop offset="55%" stop-color="#818cf8" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#312e81" stop-opacity="0.15"/>
+    </radialGradient>
+  </defs>
+  <circle cx="160" cy="160" r="110" fill="none" stroke="url(#celestial)" stroke-width="16"/>
+  <circle cx="160" cy="160" r="72" fill="none" stroke="#a5b4fc" stroke-opacity="0.5" stroke-width="6"/>
+  <circle cx="92" cy="120" r="6" fill="#e0f2fe"/>
+  <circle cx="226" cy="98" r="4" fill="#e0f2fe"/>
+  <circle cx="246" cy="206" r="5" fill="#e0f2fe"/>
+</svg>

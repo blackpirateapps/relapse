@@ -216,6 +216,57 @@ export async function initDb() {
     });
   }
 
+  const { rows: auraEmberRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'aura_ember';");
+  if (auraEmberRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO shop_items (id, name, description, cost, type, preview_image, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+      args: [
+        'aura_ember',
+        'Ember Halo',
+        'A warm ring of embers that intensifies your phoenix glow.',
+        12000,
+        'phoenix_aura',
+        '/img/auras/ember-halo.svg',
+        true,
+        60
+      ],
+    });
+  }
+
+  const { rows: auraCelestialRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'aura_celestial';");
+  if (auraCelestialRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO shop_items (id, name, description, cost, type, preview_image, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+      args: [
+        'aura_celestial',
+        'Celestial Ring',
+        'A shimmering ring of starlight that orbits your phoenix.',
+        18000,
+        'phoenix_aura',
+        '/img/auras/celestial-ring.svg',
+        true,
+        61
+      ],
+    });
+  }
+
+  const { rows: auraVerdantRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'aura_verdant';");
+  if (auraVerdantRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO shop_items (id, name, description, cost, type, preview_image, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+      args: [
+        'aura_verdant',
+        'Verdant Pulse',
+        'Soft emerald pulses that hint at growth and renewal.',
+        15000,
+        'phoenix_aura',
+        '/img/auras/verdant-pulse.svg',
+        true,
+        62
+      ],
+    });
+  }
+
   const { rows: potionRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'phoenix_guard_potion';");
   if (potionRows.length === 0) {
     await client.execute({

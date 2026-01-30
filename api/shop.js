@@ -223,6 +223,13 @@ async function handleEquipment(itemId, equip, res) {
         equippedUpgrades[theme.id] = false;
       }
     }
+
+    if (equip && item && item.type === 'phoenix_aura') {
+      const auraResult = await db.execute("SELECT id FROM shop_items WHERE type = 'phoenix_aura';");
+      for (const aura of auraResult.rows) {
+        equippedUpgrades[aura.id] = false;
+      }
+    }
     
     equippedUpgrades[itemId] = equip;
 

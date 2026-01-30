@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="Ember Halo">
+  <rect width="320" height="320" rx="48" fill="#0b1120"/>
+  <defs>
+    <radialGradient id="ember" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fde047" stop-opacity="0.9"/>
+      <stop offset="55%" stop-color="#fb923c" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#ef4444" stop-opacity="0.1"/>
+    </radialGradient>
+  </defs>
+  <circle cx="160" cy="160" r="108" fill="none" stroke="url(#ember)" stroke-width="18"/>
+  <circle cx="160" cy="160" r="72" fill="none" stroke="#fbbf24" stroke-opacity="0.5" stroke-width="6"/>
+</svg>

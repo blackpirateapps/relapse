@@ -46,7 +46,7 @@ const BackgroundFallback = () => (
 const AppLayout = () => {
   const location = useLocation();
   const isForestPage = location.pathname === '/forest';
-  const { state, previewThemeId, setPreviewThemeId } = React.useContext(AppContext);
+  const { state, previewThemeId, setPreviewThemeId, previewAuraId, setPreviewAuraId } = React.useContext(AppContext);
   const backgroundThemes = {
     burning_fire_bg: FireBackground,
     phoenix_constellation_bg: PhoenixConstellationBackground,
@@ -65,20 +65,24 @@ const AppLayout = () => {
   const ForestBg = isPreviewForest ? forestThemes[previewThemeId] : (equippedForestThemeId ? forestThemes[equippedForestThemeId] : ForestBackground);
   const Background = isForestPage ? ForestBg : (activeThemeId ? backgroundThemes[activeThemeId] : Starfield);
 
+  const isPreviewActive = previewThemeId || previewAuraId;
+
   return (
     <div className="relative min-h-screen min-h-[100dvh] md:flex text-gray-200">
       <React.Suspense fallback={<BackgroundFallback />}>
         <Background />
       </React.Suspense>
-      {previewThemeId && (
+      {isPreviewActive && (
         <div className="fixed top-0 left-0 right-0 z-50">
           <div className="mx-4 sm:mx-8 mt-4 rounded-xl border border-amber-400/40 bg-gradient-to-r from-amber-500/20 via-pink-500/10 to-cyan-500/20 backdrop-blur-md px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
-            <span className="text-amber-200">Preview mode enabled. This is a temporary background.</span>
+            <span className="text-amber-200">
+              Preview mode enabled. {previewThemeId ? 'Background' : 'Aura'} preview is temporary.
+            </span>
             <div className="flex items-center gap-2">
               <Link to="/shop" className="px-3 py-1.5 rounded-md bg-yellow-500 text-gray-900 font-semibold hover:bg-yellow-400">Purchase</Link>
               <button
                 type="button"
-                onClick={() => setPreviewThemeId(null)}
+                onClick={() => { setPreviewThemeId(null); setPreviewAuraId(null); }}
                 className="px-3 py-1.5 rounded-md bg-gray-800 text-gray-200 hover:bg-gray-700"
               >
                 Exit
@@ -120,6 +124,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [previewThemeId, setPreviewThemeId] = React.useState(null);
+  const [previewAuraId, setPreviewAuraId] = React.useState(null);
 
   const refetchData = async () => {
     try {
@@ -185,7 +190,9 @@ function App() {
     setIsSidebarOpen,
     refetchData,
     previewThemeId,
-    setPreviewThemeId
+    setPreviewThemeId,
+    previewAuraId,
+    setPreviewAuraId
   };
 
   return (

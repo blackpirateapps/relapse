@@ -74,6 +74,7 @@ function LevelShowcasePage() {
                 rankLevel={index}
                 equippedUpgrades={state.equipped_upgrades}
                 className="w-full max-w-xl h-72 sm:h-96 object-contain rounded-2xl bg-gradient-to-br from-black/30 via-gray-900/20 to-black/30 shadow-[0_0_40px_rgba(255,180,60,0.35)]"
+                allowPreview={currentRank.level === index}
               />
             </motion.div>
 

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="Verdant Pulse">
+  <rect width="320" height="320" rx="48" fill="#0b1120"/>
+  <defs>
+    <radialGradient id="verdant" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4ade80" stop-opacity="0.9"/>
+      <stop offset="55%" stop-color="#22c55e" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#064e3b" stop-opacity="0.15"/>
+    </radialGradient>
+  </defs>
+  <circle cx="160" cy="160" r="108" fill="none" stroke="url(#verdant)" stroke-width="18"/>
+  <path d="M120 178c20-36 70-36 90 0" fill="none" stroke="#86efac" stroke-opacity="0.7" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="160" cy="128" r="8" fill="#bbf7d0"/>
+</svg>
