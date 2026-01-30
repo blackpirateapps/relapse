@@ -78,7 +78,13 @@ function ShopPage() {
                 <div className="grid grid-cols-5 gap-2">
                     {item.stages.map((stage, index) => (
                         <div key={index} className="text-center">
-                            <img src={stage.image} alt={stage.status} className="w-12 h-12 object-contain rounded bg-black/20 mx-auto" />
+                            <img
+                              src={stage.image}
+                              alt={stage.status}
+                              loading="lazy"
+                              decoding="async"
+                              className="w-12 h-12 object-contain rounded bg-black/20 mx-auto"
+                            />
                             <p className="text-xs text-gray-400 mt-1">{stage.hours}h</p>
                         </div>
                     ))}
@@ -98,7 +104,13 @@ function ShopPage() {
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {items.map(item => (
                         <div key={item.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 flex flex-col">
-                            <img src={item.preview_image || '/img/placeholder.png'} alt={item.name} className="w-full h-40 object-contain rounded mb-3" />
+                            <img
+                              src={item.preview_image || '/img/placeholder.png'}
+                              alt={item.name}
+                              loading="lazy"
+                              decoding="async"
+                              className="w-full h-40 object-contain rounded mb-3"
+                            />
                             <div className="flex-grow">
                                 <h3 className="text-lg font-semibold text-white mb-2">{item.name}</h3>
                                 <p className="text-sm text-gray-400 mb-4 flex-grow">{item.description}</p>

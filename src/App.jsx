@@ -2,31 +2,43 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import Sidebar from './components/Sidebar.jsx';
 import Header from './components/Header.jsx';
-import HomePage from './pages/HomePage.jsx';
-import ProgressionPage from './pages/ProgressionPage.jsx';
-import ForestPage from './pages/ForestPage.jsx';
-import AviaryPage from './pages/AviaryPage.jsx';
-import ShopPage from './pages/ShopPage.jsx';
-import PhoenixFlightPage from './pages/PhoenixFlightPage.jsx'; // Import the new game page
 import LoginPage from './pages/LoginPage.jsx';
 import LoadingSpinner from './components/LoadingSpinner.jsx';
-import Starfield from './components/Starfield.jsx';
-import ForestBackground from './components/ForestBackground.jsx';
-import AsteroidShooterPage from './pages/AsteroidShooterPage.jsx';
-import LevelShowcasePage from './pages/LevelShowcasePage.jsx';
-import FireBackground from './components/FireBackground.jsx';
-import PhoenixConstellationBackground from './components/PhoenixConstellationBackground.jsx';
-import SolarSystemBackground from './components/SolarSystemBackground.jsx';
-import DarkForestBackground from './components/DarkForestBackground.jsx';
-import UrgeTasksPage from './pages/UrgeTasksPage.jsx';
-import PushupSessionPage from './pages/PushupSessionPage.jsx';
-import KawaiiCityBackground from './components/KawaiiCityBackground.jsx';
-import StarfieldWarpBackground from './components/StarfieldWarpBackground.jsx';
 
 import { ranks } from './data/ranks.js';
 import { fetchState, fetchShopData } from './api.js';
 
 export const AppContext = React.createContext();
+
+const HomePage = React.lazy(() => import('./pages/HomePage.jsx'));
+const ProgressionPage = React.lazy(() => import('./pages/ProgressionPage.jsx'));
+const ForestPage = React.lazy(() => import('./pages/ForestPage.jsx'));
+const AviaryPage = React.lazy(() => import('./pages/AviaryPage.jsx'));
+const ShopPage = React.lazy(() => import('./pages/ShopPage.jsx'));
+const PhoenixFlightPage = React.lazy(() => import('./pages/PhoenixFlightPage.jsx'));
+const AsteroidShooterPage = React.lazy(() => import('./pages/AsteroidShooterPage.jsx'));
+const LevelShowcasePage = React.lazy(() => import('./pages/LevelShowcasePage.jsx'));
+const UrgeTasksPage = React.lazy(() => import('./pages/UrgeTasksPage.jsx'));
+const PushupSessionPage = React.lazy(() => import('./pages/PushupSessionPage.jsx'));
+
+const Starfield = React.lazy(() => import('./components/Starfield.jsx'));
+const ForestBackground = React.lazy(() => import('./components/ForestBackground.jsx'));
+const FireBackground = React.lazy(() => import('./components/FireBackground.jsx'));
+const PhoenixConstellationBackground = React.lazy(() => import('./components/PhoenixConstellationBackground.jsx'));
+const SolarSystemBackground = React.lazy(() => import('./components/SolarSystemBackground.jsx'));
+const DarkForestBackground = React.lazy(() => import('./components/DarkForestBackground.jsx'));
+const KawaiiCityBackground = React.lazy(() => import('./components/KawaiiCityBackground.jsx'));
+const StarfieldWarpBackground = React.lazy(() => import('./components/StarfieldWarpBackground.jsx'));
+
+const InlineSpinner = () => (
+  <div className="flex items-center justify-center py-16">
+    <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+  </div>
+);
+
+const BackgroundFallback = () => (
+  <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950" />
+);
 
 // This component handles the main layout and conditional background rendering
 const AppLayout = () => {
@@ -52,8 +64,10 @@ const AppLayout = () => {
   const Background = isForestPage ? ForestBg : (activeThemeId ? backgroundThemes[activeThemeId] : Starfield);
 
   return (
-    <div className="relative min-h-screen md:flex text-gray-200">
-      <Background />
+    <div className="relative min-h-screen min-h-[100dvh] md:flex text-gray-200">
+      <React.Suspense fallback={<BackgroundFallback />}>
+        <Background />
+      </React.Suspense>
       {previewThemeId && (
         <div className="fixed top-0 left-0 right-0 z-50">
           <div className="mx-4 sm:mx-8 mt-4 rounded-xl border border-amber-400/40 bg-gradient-to-r from-amber-500/20 via-pink-500/10 to-cyan-500/20 backdrop-blur-md px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
@@ -72,21 +86,23 @@ const AppLayout = () => {
         </div>
       )}
       <Sidebar />
-      <main className={`flex-1 p-4 sm:p-6 md:p-10 overflow-y-auto h-screen ${previewThemeId ? 'pt-20' : ''}`}>
+      <main className={`flex-1 p-4 sm:p-6 md:p-10 md:overflow-y-auto md:h-screen ${previewThemeId ? 'pt-20' : ''}`}>
         <Header />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/progression" element={<ProgressionPage />} />
-          <Route path="/forest" element={<ForestPage />} />
-          <Route path="/aviary" element={<AviaryPage />} />
-          <Route path="/shop" element={<ShopPage />} />
-          <Route path="/phoenix-flight" element={<PhoenixFlightPage />} /> {/* Add the new route */}
-          <Route path="/progression/levels" element={<LevelShowcasePage />} />
-          <Route path="*" element={<Navigate to="/" />} />
-          <Route path="/minigame/asteroid-shooter" element={<AsteroidShooterPage />} />
-          <Route path="/journey/urge" element={<UrgeTasksPage />} />
-          <Route path="/journey/urge/pushups" element={<PushupSessionPage />} />
-        </Routes>
+        <React.Suspense fallback={<InlineSpinner />}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/progression" element={<ProgressionPage />} />
+            <Route path="/forest" element={<ForestPage />} />
+            <Route path="/aviary" element={<AviaryPage />} />
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/phoenix-flight" element={<PhoenixFlightPage />} />
+            <Route path="/progression/levels" element={<LevelShowcasePage />} />
+            <Route path="*" element={<Navigate to="/" />} />
+            <Route path="/minigame/asteroid-shooter" element={<AsteroidShooterPage />} />
+            <Route path="/journey/urge" element={<UrgeTasksPage />} />
+            <Route path="/journey/urge/pushups" element={<PushupSessionPage />} />
+          </Routes>
+        </React.Suspense>
       </main>
     </div>
   );

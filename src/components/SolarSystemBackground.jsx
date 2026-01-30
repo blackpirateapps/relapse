@@ -12,8 +12,17 @@ const randomStars = (count, maxArea, minArea = 0, starSize = 0) => {
 };
 
 const SolarSystemBackground = () => {
-  const stars = useMemo(() => randomStars(500, 1800), []);
-  const asteroids = useMemo(() => randomStars(390, 290, -145, -104), []);
+  const prefersReducedMotion = typeof window !== 'undefined'
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false;
+  const width = typeof window !== 'undefined' ? window.innerWidth : 1200;
+  const isSmallScreen = width < 640;
+  const starCount = prefersReducedMotion ? 180 : (isSmallScreen ? 260 : 500);
+  const asteroidCount = prefersReducedMotion ? 120 : (isSmallScreen ? 220 : 390);
+  const starArea = isSmallScreen ? 1200 : 1800;
+
+  const stars = useMemo(() => randomStars(starCount, starArea), [starCount, starArea]);
+  const asteroids = useMemo(() => randomStars(asteroidCount, 290, -145, -104), [asteroidCount]);
 
   return (
     <div
@@ -273,6 +282,14 @@ const SolarSystemBackground = () => {
         @keyframes orb {
           from { transform: rotate(0deg); }
           to { transform: rotate(-360deg); }
+        }
+
+        @media (max-width: 640px) {
+          .solar-syst { transform: scale(0.85); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .solar-syst div { animation: none !important; }
         }
       `}</style>
     </div>

@@ -58,6 +58,16 @@ const DarkForestBackground = () => {
           50% { transform: translateX(8%) translateY(-3%); }
           100% { transform: translateX(0) translateY(0); }
         }
+
+        @media (max-width: 640px) {
+          .dark-forest-bg { animation: none; }
+          .fog-b, .fog-c { display: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .dark-forest-bg { animation: none; }
+          .dark-forest-fog { animation: none; }
+        }
       `}</style>
     </>
   );

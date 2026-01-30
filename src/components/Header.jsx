@@ -14,7 +14,7 @@ function Header() {
     }, [location]);
 
     return (
-        <header className="flex justify-between items-center mb-8">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
             <div className="flex items-center">
                 {/* Hamburger Menu Button - Shows only on screens smaller than 'md' */}
                 <button 
@@ -30,7 +30,7 @@ function Header() {
                     <h1 className="text-3xl font-bold text-white font-serif-display">{pageTitle}</h1>
                 </div>
             </div>
-            <div className="card p-3 px-5 text-right">
+            <div className="card p-3 px-5 text-left sm:text-right w-full sm:w-auto">
                 <p className="text-xs text-yellow-300 uppercase tracking-wider">Coins</p>
                 <p className="text-2xl font-bold text-white">{Math.floor(totalCoins).toLocaleString()}</p>
                 <p className="text-xs text-green-400 font-mono">+{Math.floor(coinRatePerHour).toLocaleString()}/hr</p>

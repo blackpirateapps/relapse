@@ -9,17 +9,28 @@ const FireBackground = () => {
 
     const ctx = canvas.getContext('2d');
     let flames = [];
-    const flameCount = 120;
     let animationFrameId;
+    let lastTime = 0;
+    let viewport = { width: 0, height: 0, dpr: 1 };
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const saveData = navigator.connection?.saveData;
+    const isSmallScreen = window.innerWidth < 640;
+    const isLowPower = prefersReducedMotion || saveData;
+    const targetFps = isLowPower ? 0 : (isSmallScreen ? 24 : 36);
+    const flameCount = isLowPower ? (isSmallScreen ? 30 : 45) : (isSmallScreen ? 70 : 120);
 
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, isLowPower ? 1 : 1.5);
+      viewport = { width: window.innerWidth, height: window.innerHeight, dpr };
+      canvas.width = Math.floor(viewport.width * dpr);
+      canvas.height = Math.floor(viewport.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
     const createFlame = () => ({
-      x: Math.random() * canvas.width,
-      y: canvas.height + Math.random() * canvas.height * 0.2,
+      x: Math.random() * viewport.width,
+      y: viewport.height + Math.random() * viewport.height * 0.2,
       radius: 18 + Math.random() * 40,
       speed: 0.6 + Math.random() * 1.6,
       drift: (Math.random() - 0.5) * 0.6,
@@ -48,30 +59,41 @@ const FireBackground = () => {
       ctx.fill();
     };
 
-    const animate = () => {
+    const drawFrame = () => {
       ctx.fillStyle = 'rgba(8, 2, 2, 0.25)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, viewport.width, viewport.height);
 
       flames.forEach((flame, i) => {
         drawFlame(flame);
-        flame.y -= flame.speed;
-        flame.x += flame.drift;
-        flame.life += 1;
-        if (flame.life >= flame.maxLife || flame.y + flame.radius < 0) {
-          flames[i] = createFlame();
+        if (targetFps > 0) {
+          flame.y -= flame.speed;
+          flame.x += flame.drift;
+          flame.life += 1;
+          if (flame.life >= flame.maxLife || flame.y + flame.radius < 0) {
+            flames[i] = createFlame();
+          }
         }
       });
+    };
 
+    const animate = (time) => {
+      if (targetFps === 0) return;
+      if (!lastTime || time - lastTime >= 1000 / targetFps) {
+        lastTime = time;
+        drawFrame();
+      }
       animationFrameId = requestAnimationFrame(animate);
     };
 
     resizeCanvas();
     seedFlames();
-    animate();
+    drawFrame();
+    animationFrameId = requestAnimationFrame(animate);
 
     const handleResize = () => {
       resizeCanvas();
       seedFlames();
+      drawFrame();
     };
 
     window.addEventListener('resize', handleResize);

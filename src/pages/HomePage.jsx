@@ -51,16 +51,16 @@ function HomePage() {
 
   return (
     <>
-      <div className="text-center flex flex-col items-center justify-center h-full -mt-16">
+      <div className="text-center flex flex-col items-center justify-center min-h-[60vh] sm:min-h-[70vh] -mt-4 sm:-mt-8 md:-mt-16">
         <PhoenixImage 
           rankLevel={currentRank.level} 
           equippedUpgrades={state.equipped_upgrades} 
         />
-        <h1 className="text-4xl font-bold text-white font-serif-display mt-4">{currentRank.name}</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold text-white font-serif-display mt-4">{currentRank.name}</h1>
         <p className="text-xl font-mono text-green-400 mt-2">{streak}</p>
         <p className="text-gray-400 mt-2 max-w-md">{currentRank.storyline}</p>
         
-        <div className="flex space-x-4 mt-8">
+        <div className="flex flex-col sm:flex-row gap-3 sm:space-x-4 mt-8">
           <Link to="/journey/urge" className="bg-yellow-500 hover:bg-yellow-400 text-gray-900 font-bold py-3 px-6 rounded-lg transition-transform transform hover:scale-105">
             I Feel an Urge
           </Link>

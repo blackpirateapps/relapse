@@ -14,14 +14,25 @@ const PhoenixConstellationBackground = () => {
     let asteroids = [];
     let globalFlash = 0;
     let animationFrameId;
+    let lastTime = 0;
+    let viewport = { width: 0, height: 0, dpr: 1 };
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const saveData = navigator.connection?.saveData;
+    const isSmallScreen = window.innerWidth < 640;
+    const isLowPower = prefersReducedMotion || saveData;
+    const targetFps = isLowPower ? 0 : (isSmallScreen ? 24 : 40);
 
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, isLowPower ? 1 : 1.5);
+      viewport = { width: window.innerWidth, height: window.innerHeight, dpr };
+      canvas.width = Math.floor(viewport.width * dpr);
+      canvas.height = Math.floor(viewport.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
     const createStars = () => {
-      const count = 220;
+      const count = isLowPower ? (isSmallScreen ? 80 : 120) : (isSmallScreen ? 160 : 220);
       stars = [];
       const starColors = [
         [255, 220, 170],
@@ -44,12 +55,12 @@ const PhoenixConstellationBackground = () => {
     };
 
     const createAsteroids = () => {
-      const count = 40;
+      const count = isLowPower ? (isSmallScreen ? 12 : 20) : (isSmallScreen ? 28 : 40);
       asteroids = [];
       for (let i = 0; i < count; i++) {
         asteroids.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
+          x: Math.random() * viewport.width,
+          y: Math.random() * viewport.height,
           size: 6 + Math.random() * 18,
           speed: 2 + Math.random() * 6,
           drift: 0.6 + Math.random() * 1.8,
@@ -59,8 +70,8 @@ const PhoenixConstellationBackground = () => {
     };
 
     const spawnShootingStar = () => {
-      const startX = Math.random() * canvas.width;
-      const startY = Math.random() * canvas.height * 0.4;
+      const startX = Math.random() * viewport.width;
+      const startY = Math.random() * viewport.height * 0.4;
       shootingStars.push({
         x: startX,
         y: startY,
@@ -76,8 +87,8 @@ const PhoenixConstellationBackground = () => {
         const bursts = 6 + Math.floor(Math.random() * 6);
         for (let i = 0; i < bursts; i++) {
           supernovas.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height * 0.8,
+            x: Math.random() * viewport.width,
+            y: Math.random() * viewport.height * 0.8,
             radius: 0,
             maxRadius: 180 + Math.random() * 220,
             life: 0,
@@ -89,8 +100,8 @@ const PhoenixConstellationBackground = () => {
         return;
       }
       supernovas.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height * 0.7,
+        x: Math.random() * viewport.width,
+        y: Math.random() * viewport.height * 0.7,
         radius: 0,
         maxRadius: 120 + Math.random() * 180,
         life: 0,
@@ -99,41 +110,43 @@ const PhoenixConstellationBackground = () => {
       });
     };
 
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const drawFrame = () => {
+      ctx.clearRect(0, 0, viewport.width, viewport.height);
       ctx.fillStyle = '#090712';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, viewport.width, viewport.height);
 
       const gradient = ctx.createRadialGradient(
-        canvas.width * 0.5,
-        canvas.height * 0.2,
-        canvas.width * 0.1,
-        canvas.width * 0.5,
-        canvas.height * 0.2,
-        canvas.width * 0.6
+        viewport.width * 0.5,
+        viewport.height * 0.2,
+        viewport.width * 0.1,
+        viewport.width * 0.5,
+        viewport.height * 0.2,
+        viewport.width * 0.6
       );
       gradient.addColorStop(0, 'rgba(120, 80, 255, 0.25)');
       gradient.addColorStop(0.5, 'rgba(50, 20, 120, 0.2)');
       gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, viewport.width, viewport.height);
 
       stars.forEach((star) => {
         const opacity = 0.35 + Math.sin(star.twinkle) * 0.35;
         ctx.fillStyle = `rgba(${star.color[0]}, ${star.color[1]}, ${star.color[2]}, ${opacity})`;
         ctx.beginPath();
-        ctx.arc(star.x * canvas.width, star.y * canvas.height, star.radius, 0, Math.PI * 2);
+        ctx.arc(star.x * viewport.width, star.y * viewport.height, star.radius, 0, Math.PI * 2);
         ctx.fill();
-        star.twinkle += star.speed;
+        if (targetFps > 0) {
+          star.twinkle += star.speed;
+        }
       });
 
-      if (Math.random() < 0.03 && shootingStars.length < 6) {
+      if (!isLowPower && Math.random() < 0.03 && shootingStars.length < 6) {
         spawnShootingStar();
       }
-      if (Math.random() < 0.007 && supernovas.length < 4) {
+      if (!isLowPower && Math.random() < 0.007 && supernovas.length < 4) {
         spawnSupernova(false);
       }
-      if (Math.random() < 0.0015) {
+      if (!isLowPower && Math.random() < 0.0015) {
         spawnSupernova(true);
       }
 
@@ -152,17 +165,19 @@ const PhoenixConstellationBackground = () => {
         ctx.ellipse(asteroid.x, asteroid.y, asteroid.size * 0.5, asteroid.size * 0.3, 0.3, 0, Math.PI * 2);
         ctx.fill();
 
-        asteroid.x += asteroid.speed;
-        asteroid.y += asteroid.drift;
-        if (asteroid.x > canvas.width + 60 || asteroid.y > canvas.height + 60) {
-          asteroids[idx] = {
-            x: -40 - Math.random() * canvas.width * 0.2,
-            y: Math.random() * canvas.height * 0.3,
-            size: 6 + Math.random() * 18,
-            speed: 2 + Math.random() * 6,
-            drift: 0.6 + Math.random() * 1.8,
-            opacity: 0.4 + Math.random() * 0.5
-          };
+        if (targetFps > 0) {
+          asteroid.x += asteroid.speed;
+          asteroid.y += asteroid.drift;
+          if (asteroid.x > viewport.width + 60 || asteroid.y > viewport.height + 60) {
+            asteroids[idx] = {
+              x: -40 - Math.random() * viewport.width * 0.2,
+              y: Math.random() * viewport.height * 0.3,
+              size: 6 + Math.random() * 18,
+              speed: 2 + Math.random() * 6,
+              drift: 0.6 + Math.random() * 1.8,
+              opacity: 0.4 + Math.random() * 0.5
+            };
+          }
         }
       });
 
@@ -174,11 +189,13 @@ const PhoenixConstellationBackground = () => {
         ctx.moveTo(star.x, star.y);
         ctx.lineTo(star.x - star.vx * 2.5, star.y - star.vy * 2.5);
         ctx.stroke();
-        star.x += star.vx;
-        star.y += star.vy;
-        star.life += 1;
-        if (star.life >= star.maxLife || star.x > canvas.width + 80 || star.y > canvas.height + 80) {
-          shootingStars.splice(idx, 1);
+        if (targetFps > 0) {
+          star.x += star.vx;
+          star.y += star.vy;
+          star.life += 1;
+          if (star.life >= star.maxLife || star.x > viewport.width + 80 || star.y > viewport.height + 80) {
+            shootingStars.splice(idx, 1);
+          }
         }
       });
 
@@ -194,30 +211,44 @@ const PhoenixConstellationBackground = () => {
         ctx.beginPath();
         ctx.arc(nova.x, nova.y, nova.radius, 0, Math.PI * 2);
         ctx.fill();
-        nova.life += 1;
-        if (nova.life >= nova.maxLife) {
-          supernovas.splice(idx, 1);
+        if (targetFps > 0) {
+          nova.life += 1;
+          if (nova.life >= nova.maxLife) {
+            supernovas.splice(idx, 1);
+          }
         }
       });
 
       if (globalFlash > 0) {
         ctx.fillStyle = `rgba(255, 200, 140, ${0.2 * globalFlash})`;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        globalFlash = Math.max(0, globalFlash - 0.03);
+        ctx.fillRect(0, 0, viewport.width, viewport.height);
+        if (targetFps > 0) {
+          globalFlash = Math.max(0, globalFlash - 0.03);
+        }
       }
-
-      animationFrameId = requestAnimationFrame(draw);
     };
 
     resizeCanvas();
     createStars();
     createAsteroids();
-    draw();
+    drawFrame();
+
+    const animate = (time) => {
+      if (targetFps === 0) return;
+      if (!lastTime || time - lastTime >= 1000 / targetFps) {
+        lastTime = time;
+        drawFrame();
+      }
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    animationFrameId = requestAnimationFrame(animate);
 
     const handleResize = () => {
       resizeCanvas();
       createStars();
       createAsteroids();
+      drawFrame();
     };
 
     window.addEventListener('resize', handleResize);

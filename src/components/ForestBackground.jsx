@@ -33,6 +33,14 @@ const ForestBackground = () => {
             from { background-position: 0 0, 0 0, 0% 0, 0% 0, 0% 0, 0 0; }
             to { background-position: 0 0, 0 0, -400px 0, -450px 0, -500px 0, 0 0; }
         }
+
+        @media (max-width: 640px) {
+          .forest-bg { animation: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .forest-bg { animation: none; }
+        }
       `}</style>
     </>
   );

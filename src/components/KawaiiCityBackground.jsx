@@ -343,6 +343,25 @@ function KawaiiCityBackground() {
           94% { opacity: 0.2; transform: scale(1.4); }
           100% { opacity: 0; transform: scale(0.2); }
         }
+
+        @media (max-width: 640px) {
+          .kawaii-city { animation: none; }
+          .rain-n, .rain-o, .rain-p, .rain-q, .rain-r, .rain-s, .rain-t, .rain-u,
+          .rain-v, .rain-w, .rain-x, .rain-y, .rain-z { display: none; }
+          .petal-d, .petal-e { display: none; }
+          .sparkle-b, .sparkle-c { display: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .kawaii-cloud,
+          .kawaii-heart,
+          .kawaii-sparkle,
+          .kawaii-petal,
+          .kawaii-rain,
+          .kawaii-lightning,
+          .kawaii-firecracker,
+          .kawaii-city { animation: none !important; }
+        }
       `}</style>
     </div>
   );
