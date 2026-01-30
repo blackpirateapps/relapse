@@ -47,6 +47,12 @@ export const equipItem = (itemId, equip) => apiRequest('shop', {
   body: JSON.stringify({ action: 'equip', itemId, equip }),
 });
 
+export const updateForestTree = (treeId, x, y) => apiRequest('forest', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ action: 'move', treeId, x, y }),
+});
+
 export const usePotion = () => apiRequest('potion', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' }

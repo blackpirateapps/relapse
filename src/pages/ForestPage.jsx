@@ -1,270 +1,443 @@
-import React, { useContext, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { AppContext } from '../App.jsx';
-import { buyItem } from '../api.js';
-import Modal from '../components/Modal.jsx';
+import { buyItem, updateForestTree } from '../api.js';
+
+const CANVAS_WIDTH = 900;
+const CANVAS_HEIGHT = 520;
 
 function ForestPage() {
-    const { state, treeTypes, refetchData } = useContext(AppContext);
-    const [modal, setModal] = useState({ isOpen: false, title: '', message: '' });
-    const [selectedTreeType, setSelectedTreeType] = useState(null);
-    const [selectedTree, setSelectedTree] = useState(null);
-    const forestRef = useRef(null);
+  const { state, treeTypes, refetchData } = useContext(AppContext);
+  const [selectedTreeType, setSelectedTreeType] = useState(null);
+  const [statusText, setStatusText] = useState('Ready.');
+  const [infoText, setInfoText] = useState('');
+  const [trees, setTrees] = useState([]);
 
-    const forest = state?.forest || [];
-    const saplings = Object.values(treeTypes);
-    
-    const stats = {
-        growing: forest.filter(t => t.status === 'growing' && new Date(t.matureDate) > new Date()).length,
-        matured: forest.filter(t => t.status === 'matured' || new Date(t.matureDate) <= new Date()).length,
-        withered: forest.filter(t => t.status === 'withered').length,
+  const canvasRef = useRef(null);
+  const canvasWrapRef = useRef(null);
+  const dragRef = useRef({
+    id: null,
+    offsetX: 0,
+    offsetY: 0,
+    moved: false
+  });
+  const sizeRef = useRef({ width: CANVAS_WIDTH, height: CANVAS_HEIGHT, dpr: 1 });
+  const imageCacheRef = useRef(new Map());
+  const treesRef = useRef([]);
+  const rafRef = useRef(null);
+
+  const forest = state?.forest || [];
+  const saplings = Object.values(treeTypes);
+
+  const stats = {
+    total: forest.length,
+    growing: forest.filter((t) => t.status === 'growing' && new Date(t.matureDate) > new Date()).length,
+    matured: forest.filter((t) => t.status === 'matured' || new Date(t.matureDate) <= new Date()).length,
+    withered: forest.filter((t) => t.status === 'withered').length
+  };
+
+  const treeVariants = ['aurora', 'ember', 'verdant'];
+  const saplingVariantMap = useMemo(() => {
+    const map = {};
+    saplings.forEach((tree, index) => {
+      map[tree.id] = treeVariants[index % treeVariants.length];
+    });
+    return map;
+  }, [saplings]);
+
+  const getTreeFolder = (treeType) => {
+    if (treeType && treeType.toLowerCase().includes('cactus')) return 'cactus';
+    return saplingVariantMap[treeType] || treeVariants[0];
+  };
+
+  const getStage = (tree) => {
+    if (tree.status === 'withered') return 'withered';
+    const now = Date.now();
+    const planted = new Date(tree.purchaseDate).getTime();
+    const growthHours = treeTypes[tree.treeType]?.growth_hours || 24;
+    const hoursSince = Math.max(0, (now - planted) / (1000 * 60 * 60));
+    if (hoursSince >= growthHours || tree.status === 'matured') return 'mature';
+    if (hoursSince >= growthHours * 0.5) return 'young';
+    return 'seedling';
+  };
+
+  const getTreeSprite = (tree) => {
+    const folder = getTreeFolder(tree.treeType);
+    const stage = getStage(tree);
+    return `/img/trees/${folder}/${stage}.svg`;
+  };
+
+  const getTreeSize = (stage) => {
+    if (stage === 'seedling') return 34;
+    if (stage === 'young') return 46;
+    if (stage === 'mature') return 64;
+    return 56;
+  };
+
+  const fallbackPosition = (tree) => {
+    const base = String(tree.id || '');
+    let hash = 0;
+    for (let i = 0; i < base.length; i += 1) {
+      hash = (hash * 31 + base.charCodeAt(i)) % 1000;
+    }
+    const normX = 0.15 + (hash % 70) / 100;
+    const normY = 0.18 + ((hash * 7) % 60) / 100;
+    return { x: normX, y: normY };
+  };
+
+  const getTreePosition = (tree) => {
+    if (typeof tree.x === 'number' && typeof tree.y === 'number') {
+      return { x: tree.x, y: tree.y };
+    }
+    return fallbackPosition(tree);
+  };
+
+  const setCanvasSize = () => {
+    const canvas = canvasRef.current;
+    const wrap = canvasWrapRef.current;
+    if (!canvas || !wrap) return;
+
+    const rect = wrap.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+    sizeRef.current = { width: rect.width, height: rect.height, dpr };
+
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+
+  const loadImage = (src) => {
+    const cache = imageCacheRef.current;
+    if (cache.has(src)) return cache.get(src);
+    const img = new Image();
+    img.src = src;
+    cache.set(src, img);
+    return img;
+  };
+
+  const drawBackground = (ctx, width, height) => {
+    ctx.clearRect(0, 0, width, height);
+
+    const grd = ctx.createLinearGradient(0, 0, 0, height);
+    grd.addColorStop(0, 'rgba(40, 110, 60, 0.35)');
+    grd.addColorStop(1, 'rgba(10, 20, 12, 0.15)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.save();
+    ctx.globalAlpha = 0.18;
+    ctx.strokeStyle = 'rgba(255,255,255,.18)';
+    ctx.lineWidth = 1;
+    const step = 40;
+    for (let x = 0; x <= width; x += step) {
+      ctx.beginPath();
+      ctx.moveTo(x + 0.5, 0);
+      ctx.lineTo(x + 0.5, height);
+      ctx.stroke();
+    }
+    for (let y = 0; y <= height; y += step) {
+      ctx.beginPath();
+      ctx.moveTo(0, y + 0.5);
+      ctx.lineTo(width, y + 0.5);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.save();
+    const v = ctx.createRadialGradient(width / 2, height / 2, 50, width / 2, height / 2, Math.max(width, height) / 1.2);
+    v.addColorStop(0, 'rgba(0,0,0,0)');
+    v.addColorStop(1, 'rgba(0,0,0,0.55)');
+    ctx.fillStyle = v;
+    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
+  };
+
+  const drawTrees = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const { width, height } = sizeRef.current;
+    drawBackground(ctx, width, height);
+
+    treesRef.current.forEach((tree) => {
+      const stage = getStage(tree);
+      const sprite = getTreeSprite(tree);
+      const img = loadImage(sprite);
+      const size = getTreeSize(stage);
+      const position = getTreePosition(tree);
+      const x = position.x * width;
+      const y = position.y * height;
+
+      ctx.save();
+      ctx.globalAlpha = 0.35;
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.ellipse(x, y + size * 0.55, size * 0.5, size * 0.22, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      if (img.complete) {
+        ctx.drawImage(img, x - size / 2, y - size / 2, size, size);
+      } else {
+        img.onload = () => drawTrees();
+      }
+
+      if (dragRef.current.id === tree.id) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(120, 220, 255, 0.9)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(x, y, size * 0.6, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    });
+  };
+
+  const scheduleDraw = () => {
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(drawTrees);
+  };
+
+  const canvasPointFromEvent = (event) => {
+    const rect = canvasRef.current.getBoundingClientRect();
+    const clientX = event.clientX ?? event.touches?.[0]?.clientX;
+    const clientY = event.clientY ?? event.touches?.[0]?.clientY;
+    return {
+      x: (clientX - rect.left),
+      y: (clientY - rect.top)
+    };
+  };
+
+  const hitTestTree = (x, y) => {
+    const { width, height } = sizeRef.current;
+    for (let i = treesRef.current.length - 1; i >= 0; i -= 1) {
+      const tree = treesRef.current[i];
+      const stage = getStage(tree);
+      const size = getTreeSize(stage);
+      const pos = getTreePosition(tree);
+      const dx = x - pos.x * width;
+      const dy = y - pos.y * height;
+      if (dx * dx + dy * dy <= (size * 0.6) ** 2) return tree;
+    }
+    return null;
+  };
+
+  const formatAge = (purchaseDate) => {
+    if (!purchaseDate) return 'Unknown';
+    const diff = Math.max(0, Date.now() - new Date(purchaseDate).getTime());
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  };
+
+  const handleBuyTree = async (treeId, position) => {
+    try {
+      const result = await buyItem(treeId, position);
+      if (result.success) {
+        await refetchData();
+        setStatusText('Planted!');
+      } else {
+        setStatusText(result.message || 'Purchase failed.');
+      }
+    } catch (error) {
+      setStatusText(error.message || 'Purchase failed.');
+    }
+  };
+
+  const onPointerDown = (event) => {
+    event.preventDefault();
+    const point = canvasPointFromEvent(event);
+    const hit = hitTestTree(point.x, point.y);
+    if (hit) {
+      dragRef.current.id = hit.id;
+      const pos = getTreePosition(hit);
+      dragRef.current.offsetX = point.x - pos.x * sizeRef.current.width;
+      dragRef.current.offsetY = point.y - pos.y * sizeRef.current.height;
+      dragRef.current.moved = false;
+      setStatusText('Dragging tree…');
+      return;
+    }
+
+    if (!selectedTreeType) {
+      setStatusText('Select a sapling to plant.');
+      return;
+    }
+
+    const normX = point.x / sizeRef.current.width;
+    const normY = point.y / sizeRef.current.height;
+    handleBuyTree(selectedTreeType, { x: normX, y: normY });
+  };
+
+  const onPointerMove = (event) => {
+    if (!dragRef.current.id) return;
+    event.preventDefault();
+    const point = canvasPointFromEvent(event);
+    const { width, height } = sizeRef.current;
+    const newX = (point.x - dragRef.current.offsetX) / width;
+    const newY = (point.y - dragRef.current.offsetY) / height;
+
+    setTrees((prev) => prev.map((tree) => (
+      tree.id === dragRef.current.id
+        ? { ...tree, x: Math.max(0.05, Math.min(0.95, newX)), y: Math.max(0.08, Math.min(0.92, newY)) }
+        : tree
+    )));
+    dragRef.current.moved = true;
+    scheduleDraw();
+  };
+
+  const onPointerUp = async (event) => {
+    if (!dragRef.current.id) return;
+    event.preventDefault();
+
+    const treeId = dragRef.current.id;
+    dragRef.current.id = null;
+
+    const tree = treesRef.current.find((item) => item.id === treeId);
+    if (tree && dragRef.current.moved) {
+      await updateForestTree(treeId, tree.x ?? 0.5, tree.y ?? 0.6);
+      setStatusText('Dropped.');
+    } else if (tree) {
+      const planted = new Date(tree.purchaseDate).toLocaleString();
+      const age = formatAge(tree.purchaseDate);
+      setInfoText(`Planted ${planted} • Age ${age}`);
+      setStatusText('Tree details updated.');
+    }
+    dragRef.current.moved = false;
+    scheduleDraw();
+  };
+
+  const handleClearSelection = () => {
+    setSelectedTreeType(null);
+    setInfoText('');
+    setStatusText('Selection cleared.');
+  };
+
+  useEffect(() => {
+    setTrees(forest);
+  }, [forest]);
+
+  useEffect(() => {
+    treesRef.current = trees;
+    scheduleDraw();
+  }, [trees]);
+
+  useEffect(() => {
+    setCanvasSize();
+    scheduleDraw();
+
+    const handleResize = () => {
+      setCanvasSize();
+      scheduleDraw();
     };
 
-    const treeVariants = ['aurora', 'ember', 'verdant'];
-    const saplingVariantMap = useMemo(() => {
-        const map = {};
-        saplings.forEach((tree, index) => {
-            map[tree.id] = treeVariants[index % treeVariants.length];
-        });
-        return map;
-    }, [saplings]);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-    const getStage = (tree) => {
-        if (tree.status === 'withered') return 'withered';
-        const now = Date.now();
-        const purchaseTime = new Date(tree.purchaseDate).getTime();
-        const growthHours = treeTypes[tree.treeType]?.growth_hours || 24;
-        const hoursSincePlanted = Math.max(0, (now - purchaseTime) / (1000 * 60 * 60));
-        if (hoursSincePlanted >= growthHours || tree.status === 'matured') return 'mature';
-        if (hoursSincePlanted >= growthHours * 0.5) return 'young';
-        return 'seedling';
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    canvas.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
+    window.addEventListener('pointerup', onPointerUp, { passive: false });
+    window.addEventListener('pointercancel', onPointerUp, { passive: false });
+
+    return () => {
+      canvas.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
     };
+  }, [selectedTreeType, trees]);
 
-    const getTreeSprite = (tree) => {
-        const variant = saplingVariantMap[tree.treeType] || treeVariants[0];
-        const stage = getStage(tree);
-        return `/img/trees/${variant}/${stage}.svg`;
-    };
+  useEffect(() => () => cancelAnimationFrame(rafRef.current), []);
 
-    const handleBuyTree = async (treeId, position) => {
-        try {
-            const result = await buyItem(treeId, position);
-            if (result.success) {
-                await refetchData();
-                setModal({ isOpen: true, title: 'Success!', message: result.message });
-            } else {
-                setModal({ isOpen: true, title: 'Error', message: result.message });
-            }
-        } catch (error) {
-            setModal({ isOpen: true, title: 'Error', message: error.message || 'Purchase failed.' });
-        }
-    };
+  const selectedTree = saplings.find((tree) => tree.id === selectedTreeType);
 
-    const fallbackPosition = (tree) => {
-        const base = String(tree.id || '');
-        let hash = 0;
-        for (let i = 0; i < base.length; i += 1) {
-            hash = (hash * 31 + base.charCodeAt(i)) % 1000;
-        }
-        const normX = 0.15 + (hash % 70) / 100;
-        const normY = 0.18 + ((hash * 7) % 60) / 100;
-        return { x: normX, y: normY };
-    };
+  return (
+    <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6">
+      <div className="space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border border-white/10 rounded-[14px] bg-white/5 backdrop-blur">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="px-3 py-2 rounded-full bg-white/10 border border-white/15 text-xs sm:text-sm">🌱 Tap to plant</div>
+            <div className="px-3 py-2 rounded-full bg-white/10 border border-white/15 text-xs sm:text-sm">🫳 Drag trees to move</div>
+            <div className="px-3 py-2 rounded-full bg-white/10 border border-white/15 text-xs sm:text-sm">Trees: {stats.total}</div>
+            {selectedTree && (
+              <div className="px-3 py-2 rounded-full bg-white/10 border border-white/15 text-xs sm:text-sm">
+                Selected: {selectedTree.name}
+              </div>
+            )}
+            {infoText && (
+              <div className="px-3 py-2 rounded-full bg-white/10 border border-white/15 text-xs sm:text-sm">{infoText}</div>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={handleClearSelection}
+            className="px-3 py-2 rounded-[12px] border border-white/15 bg-white/10 text-sm font-semibold"
+          >
+            Clear
+          </button>
+        </div>
 
-    const getTreePosition = (tree) => {
-        if (typeof tree.x === 'number' && typeof tree.y === 'number') {
-            return { x: tree.x, y: tree.y };
-        }
-        return fallbackPosition(tree);
-    };
+        <div className="rounded-[18px] border border-white/10 bg-gradient-to-br from-emerald-900/20 via-transparent to-emerald-800/10 p-2">
+          <div ref={canvasWrapRef} className="w-full">
+            <canvas
+              ref={canvasRef}
+              width={CANVAS_WIDTH}
+              height={CANVAS_HEIGHT}
+              className="w-full h-auto rounded-[18px] border border-white/10 bg-[radial-gradient(1200px_600px_at_50%_20%,rgba(120,200,120,.14),rgba(0,0,0,0)),linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01))]"
+              aria-label="Forest planter canvas"
+            />
+          </div>
+        </div>
 
-    const handleForestClick = async (event) => {
-        if (!forestRef.current) return;
-        const rect = forestRef.current.getBoundingClientRect();
-        const clickX = event.clientX - rect.left;
-        const clickY = event.clientY - rect.top;
-        const normX = clickX / rect.width;
-        const normY = clickY / rect.height;
+        <div className="flex items-center justify-between text-xs text-gray-400 px-1">
+          <div className="opacity-80">Controls: Tap to plant • Drag to move • Tap tree to view age</div>
+          <div>{statusText}</div>
+        </div>
+      </div>
 
-        const hitTree = forest.find((tree) => {
-            const position = getTreePosition(tree);
-            const treeX = position.x * rect.width;
-            const treeY = position.y * rect.height;
-            const dx = treeX - clickX;
-            const dy = treeY - clickY;
-            return Math.sqrt(dx * dx + dy * dy) < 36;
-        });
-
-        if (hitTree) {
-            setSelectedTree(hitTree);
-            return;
-        }
-
-        if (!selectedTreeType) {
-            setModal({
-                isOpen: true,
-                title: 'Select a sapling',
-                message: 'Pick a tree from the right to plant it in the forest.'
-            });
-            return;
-        }
-
-        await handleBuyTree(selectedTreeType, { x: normX, y: normY });
-    };
-
-    const formatAge = (purchaseDate) => {
-        if (!purchaseDate) return 'Unknown';
-        const diff = Math.max(0, Date.now() - new Date(purchaseDate).getTime());
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        if (days > 0) return `${days}d ${hours}h`;
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        return `${hours}h ${minutes}m`;
-    };
-    
-    return (
-        <>
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-grow">
-                <div className="lg:col-span-2 flex flex-col">
-                    <div className="card p-4 grid grid-cols-3 divide-x divide-gray-700 text-center mb-6 flex-shrink-0">
-                        <div>
-                            <p className="text-2xl font-bold text-green-400">{stats.growing}</p>
-                            <p className="text-sm text-gray-400">Growing</p>
-                        </div>
-                        <div>
-                            <p className="text-2xl font-bold text-cyan-400">{stats.matured}</p>
-                            <p className="text-sm text-gray-400">Matured</p>
-                        </div>
-                        <div>
-                            <p className="text-2xl font-bold text-red-500">{stats.withered}</p>
-                            <p className="text-sm text-gray-400">Withered</p>
-                        </div>
-                    </div>
-                    <div className="card p-6 md:p-8 flex-grow">
-                            <div className="h-[60vh] rounded-2xl border border-gray-700/70 bg-[#0f1612] overflow-hidden relative">
-                                <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(9,40,24,0.9),rgba(8,16,14,0.95),rgba(4,6,8,1))]" />
-                                <div className="absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(to_top,rgba(0,0,0,0.8),rgba(0,0,0,0))]" />
-                                <div className="absolute inset-0 opacity-40 mix-blend-screen" style={{
-                                    backgroundImage:
-                                        'radial-gradient(circle at 20% 30%, rgba(52,255,165,0.12), transparent 45%),' +
-                                        'radial-gradient(circle at 80% 40%, rgba(41,173,255,0.12), transparent 40%),' +
-                                        'radial-gradient(circle at 40% 70%, rgba(108,255,140,0.08), transparent 40%)'
-                                }} />
-                                <div className="absolute inset-0 opacity-20" style={{
-                                    backgroundImage: 'linear-gradient(transparent 80%, rgba(0,0,0,0.4) 80%), linear-gradient(90deg, transparent 80%, rgba(0,0,0,0.35) 80%)',
-                                    backgroundSize: '6px 6px'
-                                }} />
-                                <div className="absolute inset-0" style={{
-                                    backgroundImage:
-                                        'linear-gradient(to right, rgba(0,0,0,0.2) 1px, transparent 1px), ' +
-                                        'linear-gradient(to bottom, rgba(0,0,0,0.2) 1px, transparent 1px)',
-                                    backgroundSize: '24px 24px',
-                                    opacity: 0.2
-                                }} />
-                                <div className="relative z-10 h-full w-full">
-                                    <div className="absolute top-4 left-4 px-3 py-1 text-[11px] uppercase tracking-[0.35em] bg-black/60 text-emerald-200 border border-emerald-500/30">
-                                        Tap to plant
-                                    </div>
-                                    {forest.length === 0 && (
-                                        <div className="absolute inset-0 flex items-center justify-center text-center text-gray-400 pointer-events-none">
-                                            <div>
-                                                <p className="text-lg">Your Forest is empty.</p>
-                                                <p className="text-sm mt-2">Pick a sapling on the right, then tap the forest to plant.</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                    <div
-                                        ref={forestRef}
-                                        className="absolute inset-0"
-                                        onClick={handleForestClick}
-                                        role="button"
-                                        tabIndex={0}
-                                        onKeyDown={(event) => {
-                                            if (event.key === 'Enter' || event.key === ' ') {
-                                                event.preventDefault();
-                                            }
-                                        }}
-                                    >
-                                        {forest.map((tree) => {
-                                            const sprite = getTreeSprite(tree);
-                                            const position = getTreePosition(tree);
-                                            const x = position.x * 100;
-                                            const y = position.y * 100;
-                                            return (
-                                                <button
-                                                    key={tree.id}
-                                                    type="button"
-                                                    onClick={(event) => {
-                                                        event.stopPropagation();
-                                                        setSelectedTree(tree);
-                                                    }}
-                                                    className="absolute -translate-x-1/2 -translate-y-1/2 focus:outline-none"
-                                                    style={{ left: `${x}%`, top: `${y}%` }}
-                                                >
-                                                    <img
-                                                        src={sprite}
-                                                        alt={tree.treeType}
-                                                        className="w-16 h-16 sm:w-20 sm:h-20 object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.5)]"
-                                                    />
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            </div>
-                    </div>
+      <aside className="space-y-4">
+        <h2 className="text-2xl font-bold text-white">Sapling Shop</h2>
+        <div className="space-y-4">
+          {saplings.map((tree) => {
+            const selected = selectedTreeType === tree.id;
+            return (
+              <button
+                key={tree.id}
+                type="button"
+                onClick={() => {
+                  setSelectedTreeType(tree.id);
+                  setStatusText(`Selected ${tree.name}. Tap the forest to plant.`);
+                }}
+                className={`w-full text-left p-4 rounded-[14px] border ${selected ? 'border-emerald-400/70 bg-emerald-500/10' : 'border-white/10 bg-white/5'} transition-colors`}
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src={`/img/trees/${getTreeFolder(tree.id)}/seedling.svg`}
+                    alt={tree.name}
+                    className="w-14 h-14 object-contain"
+                  />
+                  <div>
+                    <p className="text-lg font-semibold text-white">{tree.name}</p>
+                    <p className="text-xs text-gray-400">{tree.cost.toLocaleString()} coins • {tree.growth_hours}h to mature</p>
+                  </div>
                 </div>
-
-                <aside>
-                    <h2 className="text-2xl font-bold text-white mb-4">Sapling Shop</h2>
-                    <div className="space-y-4">
-                        {saplings.map(tree => (
-                            <div
-                                key={tree.id}
-                                className={`bg-gray-800 p-6 rounded-lg border ${selectedTreeType === tree.id ? 'border-emerald-400/70' : 'border-gray-700'}`}
-                            >
-                                <div className="flex items-center gap-4 mb-4">
-                                    <img src={`/img/trees/${saplingVariantMap[tree.id] || treeVariants[0]}/seedling.svg`} alt={tree.name} className="w-16 h-16 object-contain rounded" />
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-white">{tree.name}</h3>
-                                        <p className="text-sm text-gray-300">{tree.cost.toLocaleString()} Coins</p>
-                                        <p className="text-xs text-gray-400 mt-1">{tree.growth_hours}h to mature</p>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => setSelectedTreeType(tree.id)}
-                                    className="w-full bg-emerald-500/90 hover:bg-emerald-400 text-gray-900 px-4 py-3 rounded transition-colors font-semibold"
-                                >
-                                    {selectedTreeType === tree.id ? 'Selected to Plant' : 'Select to Plant'}
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                </aside>
-            </section>
-            <Modal isOpen={modal.isOpen} onClose={() => setModal({ isOpen: false, title: '', message: '' })} title={modal.title}>
-                <p>{modal.message}</p>
-            </Modal>
-            <Modal
-                isOpen={!!selectedTree}
-                onClose={() => setSelectedTree(null)}
-                title="Tree Details"
-            >
-                {selectedTree && (
-                    <div className="space-y-3">
-                        <p className="text-gray-300">
-                            Planted on{' '}
-                            <span className="text-white font-semibold">
-                                {new Date(selectedTree.purchaseDate).toLocaleString()}
-                            </span>
-                        </p>
-                        <p className="text-gray-300">
-                            Age: <span className="text-white font-semibold">{formatAge(selectedTree.purchaseDate)}</span>
-                        </p>
-                    </div>
-                )}
-            </Modal>
-        </>
-    );
+              </button>
+            );
+          })}
+        </div>
+      </aside>
+    </section>
+  );
 }
 
 export default ForestPage;
