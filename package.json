@@ -9,17 +9,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@libsql/client": "latest",
+    "cookie": "latest",
+    "dotenv": "^17.2.3",
+    "framer-motion": "latest",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-router-dom": "latest",
-    "framer-motion": "latest",
-    "react-virtuoso": "latest",
-    "@libsql/client": "latest",
-    "cookie": "latest"
+    "react-virtuoso": "latest"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "latest",
-    "vite": "latest",
-    "vercel": "latest"
+    "vercel": "latest",
+    "vite": "latest"
   }
 }

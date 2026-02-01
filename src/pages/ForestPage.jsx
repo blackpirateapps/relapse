@@ -11,6 +11,7 @@ function ForestPage() {
   const [statusText, setStatusText] = useState('Ready.');
   const [infoText, setInfoText] = useState('');
   const [trees, setTrees] = useState([]);
+  const [isShopExpanded, setIsShopExpanded] = useState(false);
 
   const canvasRef = useRef(null);
   const canvasWrapRef = useRef(null);
@@ -97,12 +98,16 @@ function ForestPage() {
     if (!canvas || !wrap) return;
 
     const rect = wrap.getBoundingClientRect();
+    // Fallback to canvas dimensions if wrapper hasn't been sized yet
+    const width = rect.width || canvas.clientWidth || CANVAS_WIDTH;
+    const height = rect.height || canvas.clientHeight || (width * 10 / 16); // 16:10 aspect ratio
+
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
-    sizeRef.current = { width: rect.width, height: rect.height, dpr };
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    sizeRef.current = { width, height, dpr };
 
     const ctx = canvas.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -328,8 +333,15 @@ function ForestPage() {
   }, [trees]);
 
   useEffect(() => {
-    setCanvasSize();
-    scheduleDraw();
+    // Wait for layout to be calculated before sizing canvas
+    const initCanvas = () => {
+      requestAnimationFrame(() => {
+        setCanvasSize();
+        scheduleDraw();
+      });
+    };
+
+    initCanvas();
 
     const handleResize = () => {
       setCanvasSize();
@@ -362,80 +374,101 @@ function ForestPage() {
   const selectedTree = saplings.find((tree) => tree.id === selectedTreeType);
 
   return (
-    <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6">
-      <div className="space-y-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border border-white/10 rounded-[14px] bg-white/5 backdrop-blur">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="px-3 py-2 rounded-full bg-white/10 border border-white/15 text-xs sm:text-sm">🌱 Tap to plant</div>
-            <div className="px-3 py-2 rounded-full bg-white/10 border border-white/15 text-xs sm:text-sm">🫳 Drag trees to move</div>
-            <div className="px-3 py-2 rounded-full bg-white/10 border border-white/15 text-xs sm:text-sm">Trees: {stats.total}</div>
-            {selectedTree && (
-              <div className="px-3 py-2 rounded-full bg-white/10 border border-white/15 text-xs sm:text-sm">
-                Selected: {selectedTree.name}
-              </div>
-            )}
-            {infoText && (
-              <div className="px-3 py-2 rounded-full bg-white/10 border border-white/15 text-xs sm:text-sm">{infoText}</div>
-            )}
-          </div>
+    <section className="space-y-4">
+      {/* Forest Canvas - Full Width */}
+      <div className="rounded-[18px] border border-white/10 bg-gradient-to-br from-emerald-900/20 via-transparent to-emerald-800/10 p-2">
+        <div ref={canvasWrapRef} className="w-full" style={{ aspectRatio: '16/10' }}>
+          <canvas
+            ref={canvasRef}
+            width={CANVAS_WIDTH}
+            height={CANVAS_HEIGHT}
+            className="w-full h-full rounded-[18px] border border-white/10 bg-[radial-gradient(1200px_600px_at_50%_20%,rgba(120,200,120,.14),rgba(0,0,0,0)),linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01))]"
+            aria-label="Forest planter canvas"
+          />
+        </div>
+      </div>
+
+      {/* Controls Bar */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border border-white/10 rounded-[14px] bg-white/5 backdrop-blur">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="px-3 py-2 rounded-full bg-white/10 border border-white/15 text-xs sm:text-sm">🌱 Tap to plant</div>
+          <div className="px-3 py-2 rounded-full bg-white/10 border border-white/15 text-xs sm:text-sm">🫳 Drag to move</div>
+          <div className="px-3 py-2 rounded-full bg-white/10 border border-white/15 text-xs sm:text-sm">Trees: {stats.total}</div>
+          {selectedTree && (
+            <div className="px-3 py-2 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-xs sm:text-sm text-emerald-300">
+              ✓ {selectedTree.name}
+            </div>
+          )}
+          {infoText && (
+            <div className="px-3 py-2 rounded-full bg-white/10 border border-white/15 text-xs sm:text-sm">{infoText}</div>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-400">{statusText}</span>
           <button
             type="button"
             onClick={handleClearSelection}
-            className="px-3 py-2 rounded-[12px] border border-white/15 bg-white/10 text-sm font-semibold"
+            className="px-3 py-2 rounded-[12px] border border-white/15 bg-white/10 text-sm font-semibold hover:bg-white/15 transition-colors"
           >
             Clear
           </button>
         </div>
-
-        <div className="rounded-[18px] border border-white/10 bg-gradient-to-br from-emerald-900/20 via-transparent to-emerald-800/10 p-2">
-          <div ref={canvasWrapRef} className="w-full">
-            <canvas
-              ref={canvasRef}
-              width={CANVAS_WIDTH}
-              height={CANVAS_HEIGHT}
-              className="w-full h-auto rounded-[18px] border border-white/10 bg-[radial-gradient(1200px_600px_at_50%_20%,rgba(120,200,120,.14),rgba(0,0,0,0)),linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01))]"
-              aria-label="Forest planter canvas"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between text-xs text-gray-400 px-1">
-          <div className="opacity-80">Controls: Tap to plant • Drag to move • Tap tree to view age</div>
-          <div>{statusText}</div>
-        </div>
       </div>
 
-      <aside className="space-y-4">
-        <h2 className="text-2xl font-bold text-white">Sapling Shop</h2>
-        <div className="space-y-4">
-          {saplings.map((tree) => {
-            const selected = selectedTreeType === tree.id;
-            return (
-              <button
-                key={tree.id}
-                type="button"
-                onClick={() => {
-                  setSelectedTreeType(tree.id);
-                  setStatusText(`Selected ${tree.name}. Tap the forest to plant.`);
-                }}
-                className={`w-full text-left p-4 rounded-[14px] border ${selected ? 'border-emerald-400/70 bg-emerald-500/10' : 'border-white/10 bg-white/5'} transition-colors`}
-              >
-                <div className="flex items-center gap-3">
-                  <img
-                    src={`/img/trees/${getTreeFolder(tree.id)}/seedling.svg`}
-                    alt={tree.name}
-                    className="w-14 h-14 object-contain"
-                  />
-                  <div>
-                    <p className="text-lg font-semibold text-white">{tree.name}</p>
-                    <p className="text-xs text-gray-400">{tree.cost.toLocaleString()} coins • {tree.growth_hours}h to mature</p>
+      {/* Collapsible Sapling Shop */}
+      <div className="border border-white/10 rounded-[14px] bg-white/5 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setIsShopExpanded(!isShopExpanded)}
+          className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-lg">🌿</span>
+            <span className="text-lg font-bold text-white">Sapling Shop</span>
+            <span className="text-sm text-gray-400">({saplings.length} available)</span>
+          </div>
+          <svg
+            className={`w-5 h-5 text-gray-400 transition-transform ${isShopExpanded ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {isShopExpanded && (
+          <div className="p-4 pt-0 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            {saplings.map((tree) => {
+              const selected = selectedTreeType === tree.id;
+              return (
+                <button
+                  key={tree.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedTreeType(tree.id);
+                    setStatusText(`Selected ${tree.name}. Tap the forest to plant.`);
+                    setIsShopExpanded(false);
+                  }}
+                  className={`text-left p-3 rounded-[12px] border ${selected ? 'border-emerald-400/70 bg-emerald-500/15' : 'border-white/10 bg-white/5 hover:bg-white/10'} transition-colors`}
+                >
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <img
+                      src={`/img/trees/${getTreeFolder(tree.id)}/seedling.svg`}
+                      alt={tree.name}
+                      className="w-12 h-12 object-contain"
+                    />
+                    <div>
+                      <p className="text-sm font-semibold text-white">{tree.name}</p>
+                      <p className="text-xs text-gray-400">{tree.cost.toLocaleString()} coins</p>
+                    </div>
                   </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </aside>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </section>
   );
 }

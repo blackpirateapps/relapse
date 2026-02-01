@@ -1,12 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="Ember Halo">
   <rect width="320" height="320" rx="48" fill="#0b1120"/>
   <defs>
-    <radialGradient id="ember" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#fde047" stop-opacity="0.9"/>
-      <stop offset="55%" stop-color="#fb923c" stop-opacity="0.6"/>
-      <stop offset="100%" stop-color="#ef4444" stop-opacity="0.1"/>
+    <radialGradient id="emberCore" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fde047" stop-opacity="0.95"/>
+      <stop offset="45%" stop-color="#fb923c" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#ef4444" stop-opacity="0.2"/>
+    </radialGradient>
+    <radialGradient id="emberOuter" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#f97316" stop-opacity="0.1"/>
     </radialGradient>
   </defs>
-  <circle cx="160" cy="160" r="108" fill="none" stroke="url(#ember)" stroke-width="18"/>
-  <circle cx="160" cy="160" r="72" fill="none" stroke="#fbbf24" stroke-opacity="0.5" stroke-width="6"/>
+  <!-- Outer glow ring -->
+  <circle cx="160" cy="160" r="120" fill="none" stroke="url(#emberOuter)" stroke-width="24">
+    <animate attributeName="r" values="120;125;120" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Main ember ring -->
+  <circle cx="160" cy="160" r="90" fill="none" stroke="url(#emberCore)" stroke-width="20">
+    <animate attributeName="r" values="90;95;90" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Inner glow -->
+  <circle cx="160" cy="160" r="60" fill="none" stroke="#fbbf24" stroke-opacity="0.5" stroke-width="8">
+    <animate attributeName="stroke-opacity" values="0.3;0.7;0.3" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Floating sparks -->
+  <circle cx="100" cy="100" r="5" fill="#fde047">
+    <animate attributeName="cy" values="100;85;100" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="220" cy="90" r="4" fill="#fbbf24">
+    <animate attributeName="cy" values="90;75;90" dur="2.5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.4;0.9;0.4" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="80" cy="200" r="4" fill="#f97316">
+    <animate attributeName="cy" values="200;185;200" dur="2.2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="2.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="240" cy="210" r="5" fill="#fde047">
+    <animate attributeName="cy" values="210;195;210" dur="1.8s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.4;0.9;0.4" dur="1.8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="160" cy="70" r="3" fill="#fcd34d">
+    <animate attributeName="cy" values="70;55;70" dur="2.8s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.8s" repeatCount="indefinite"/>
+  </circle>
 </svg>

@@ -277,6 +277,40 @@ export async function initDb() {
     });
   }
 
+  const { rows: auraInfernoRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'aura_inferno';");
+  if (auraInfernoRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO shop_items (id, name, description, cost, type, preview_image, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+      args: [
+        'aura_inferno',
+        'Inferno Blaze',
+        'Engulf your phoenix in dancing flames that rise and flicker with intensity.',
+        25000,
+        'phoenix_aura',
+        '/img/auras/inferno-blaze.svg',
+        true,
+        63
+      ],
+    });
+  }
+
+  const { rows: auraSolarRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'aura_solar';");
+  if (auraSolarRows.length === 0) {
+    await client.execute({
+      sql: "INSERT INTO shop_items (id, name, description, cost, type, preview_image, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?);",
+      args: [
+        'aura_solar',
+        'Cosmic Orbit',
+        'Planets and moons orbit around your phoenix like a miniature solar system.',
+        30000,
+        'phoenix_aura',
+        '/img/auras/cosmic-orbit.svg',
+        true,
+        64
+      ],
+    });
+  }
+
   const { rows: potionRows } = await client.execute("SELECT id FROM shop_items WHERE id = 'phoenix_guard_potion';");
   if (potionRows.length === 0) {
     await client.execute({
