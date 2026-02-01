@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../App';
 import { buyItem, equipItem } from '../api';
 import Modal from '../components/Modal';
+import PhoenixImage from '../components/PhoenixImage';
 
 function ShopPage() {
-    const { state, shopItems, totalCoins, refetchData, setPreviewThemeId, setPreviewAuraId } = useContext(AppContext);
+    const { state, shopItems, totalCoins, refetchData, setPreviewThemeId, setPreviewAuraId, currentRank, previewAuraId } = useContext(AppContext);
     const [modal, setModal] = useState({ isOpen: false, title: '', message: '' });
     const navigate = useNavigate();
 
@@ -79,9 +80,9 @@ function ShopPage() {
             }
             return equipButton;
         }
-        
+
         if (isOwned && item.type === 'tree_sapling') {
-             return <div className="w-full bg-green-700 text-white px-4 py-2 rounded text-center">Owned</div>;
+            return <div className="w-full bg-green-700 text-white px-4 py-2 rounded text-center">Owned</div>;
         }
 
         const canAfford = totalCoins >= item.cost;
@@ -99,7 +100,7 @@ function ShopPage() {
         }
         return buyButton;
     };
-    
+
     // --- START: CORRECT TREE GALLERY LOGIC ---
     const renderTreeGallery = (item) => {
         if (item.type !== 'tree_sapling' || !item.stages) return null;
@@ -111,11 +112,11 @@ function ShopPage() {
                     {item.stages.map((stage, index) => (
                         <div key={index} className="text-center">
                             <img
-                              src={stage.image}
-                              alt={stage.status}
-                              loading="lazy"
-                              decoding="async"
-                              className="w-12 h-12 object-contain rounded bg-black/20 mx-auto"
+                                src={stage.image}
+                                alt={stage.status}
+                                loading="lazy"
+                                decoding="async"
+                                className="w-12 h-12 object-contain rounded bg-black/20 mx-auto"
                             />
                             <p className="text-xs text-gray-400 mt-1">{stage.hours}h</p>
                         </div>
@@ -149,11 +150,11 @@ function ShopPage() {
                             className="bg-gray-800 p-4 rounded-lg border border-gray-700 flex flex-col cursor-pointer hover:border-yellow-300/60 transition-colors"
                         >
                             <img
-                              src={item.preview_image || '/img/placeholder.png'}
-                              alt={item.name}
-                              loading="lazy"
-                              decoding="async"
-                              className="w-full h-40 object-contain rounded mb-3"
+                                src={item.preview_image || '/img/placeholder.png'}
+                                alt={item.name}
+                                loading="lazy"
+                                decoding="async"
+                                className="w-full h-40 object-contain rounded mb-3"
                             />
                             <div className="flex-grow">
                                 <h3 className="text-lg font-semibold text-white mb-2">{item.name}</h3>
@@ -173,6 +174,19 @@ function ShopPage() {
     return (
         <>
             <section id="shop">
+                {/* Live aura preview panel */}
+                {previewAuraId && (
+                    <div className="mb-8 flex flex-col items-center p-6 rounded-xl border border-purple-500/30 bg-purple-900/20 backdrop-blur-sm">
+                        <p className="text-lg text-purple-300 mb-4 font-semibold">Aura Preview</p>
+                        <PhoenixImage
+                            rankLevel={currentRank?.level ?? 0}
+                            equippedUpgrades={state?.equipped_upgrades || {}}
+                            className="w-48 h-48"
+                            allowPreview={true}
+                        />
+                        <p className="text-sm text-gray-400 mt-4">This is how the aura will appear behind your phoenix</p>
+                    </div>
+                )}
                 {renderShopSection('Phoenix Skins', 'phoenix_skin')}
                 {renderShopSection('Background Themes', 'background_theme')}
                 {renderShopSection('Forest Themes', 'forest_theme')}

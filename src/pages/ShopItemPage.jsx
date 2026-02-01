@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { AppContext } from '../App.jsx';
 import { buyItem, equipItem } from '../api.js';
 import Modal from '../components/Modal.jsx';
+import PhoenixImage from '../components/PhoenixImage.jsx';
 
 const buildDescription = (item) => {
   if (!item) return '';
@@ -33,7 +34,7 @@ const formatDate = (isoDate) => {
 function ShopItemPage() {
   const { itemId } = useParams();
   const navigate = useNavigate();
-  const { state, shopItems, totalCoins, refetchData, setPreviewThemeId, setPreviewAuraId } = useContext(AppContext);
+  const { state, shopItems, totalCoins, refetchData, setPreviewThemeId, setPreviewAuraId, currentRank, previewAuraId } = useContext(AppContext);
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '' });
 
   const item = useMemo(() => shopItems.find((entry) => entry.id === itemId), [shopItems, itemId]);
@@ -184,6 +185,18 @@ function ShopItemPage() {
               loading="lazy"
               decoding="async"
             />
+            {/* Live aura preview section */}
+            {isAura && previewAuraId === item.id && (
+              <div className="mt-6 flex flex-col items-center p-4 rounded-lg border border-purple-500/30 bg-purple-900/20">
+                <p className="text-sm text-purple-300 mb-3">Live Preview</p>
+                <PhoenixImage
+                  rankLevel={currentRank?.level ?? 0}
+                  equippedUpgrades={state?.equipped_upgrades || {}}
+                  className="w-40 h-40"
+                  allowPreview={true}
+                />
+              </div>
+            )}
             <div className="mt-6 space-y-3">
               {actionButtons()}
             </div>
