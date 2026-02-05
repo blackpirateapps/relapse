@@ -398,6 +398,88 @@ export async function initDb() {
       });
     }
   }
+
+  // --- Initialize Tree Saplings ---
+  const treesToInit = [
+    {
+      id: 'aurora_tree',
+      name: 'Aurora Tree',
+      description: 'A magical tree that glows with the lights of the north.',
+      cost: 500,
+      growth_hours: 24,
+      folder: 'aurora',
+      sort_order: 10
+    },
+    {
+      id: 'ember_tree',
+      name: 'Ember Tree',
+      description: 'Born from ashes, this tree radiates a warm, fiery glow.',
+      cost: 800,
+      growth_hours: 36,
+      folder: 'ember',
+      sort_order: 11
+    },
+    {
+      id: 'verdant_tree',
+      name: 'Verdant Tree',
+      description: 'The embodiment of life, rich with emerald foliage.',
+      cost: 1200,
+      growth_hours: 48,
+      folder: 'verdant',
+      sort_order: 12
+    },
+    {
+      id: 'cactus_tree',
+      name: 'Desert Cactus',
+      description: 'Resilient and prickly, it thrives in the harshest conditions.',
+      cost: 1500,
+      growth_hours: 12,
+      folder: 'cactus',
+      sort_order: 13
+    }
+  ];
+
+  for (const tree of treesToInit) {
+    const { rows: existingRows } = await client.execute({
+      sql: "SELECT id FROM shop_items WHERE id = ?;",
+      args: [tree.id]
+    });
+    if (existingRows.length === 0) {
+      await client.execute({
+        sql: `INSERT INTO shop_items (id, name, description, cost, type, preview_image, growth_hours, withered_image, is_active, sort_order)
+              VALUES (?, ?, ?, ?, 'tree_sapling', ?, ?, ?, true, ?);`,
+        args: [
+          tree.id,
+          tree.name,
+          tree.description,
+          tree.cost,
+          `/img/trees/${tree.folder}/seedling.svg`,
+          tree.growth_hours,
+          `/img/trees/${tree.folder}/withered.svg`,
+          tree.sort_order
+        ]
+      });
+      // Add growth stage images
+      const stages = [
+        { name: 'seedling', hours: 0 },
+        { name: 'young', hours: Math.floor(tree.growth_hours * 0.5) },
+        { name: 'mature', hours: tree.growth_hours }
+      ];
+      for (let i = 0; i < stages.length; i++) {
+        await client.execute({
+          sql: `INSERT INTO shop_item_images (item_id, image_url, image_type, stage_name, stage_hours, sort_order)
+                VALUES (?, ?, 'growth_stage', ?, ?, ?);`,
+          args: [
+            tree.id,
+            `/img/trees/${tree.folder}/${stages[i].name}.svg`,
+            stages[i].name,
+            stages[i].hours,
+            i
+          ]
+        });
+      }
+    }
+  }
 }
 
 export default client;
