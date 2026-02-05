@@ -1,9 +1,57 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" role="img" aria-label="Verdant Mature Tree">
-  <rect width="140" height="140" rx="20" fill="transparent"/>
-  <ellipse cx="70" cy="112" rx="34" ry="10" fill="#0b0f14" opacity="0.5"/>
-  <rect x="63" y="64" width="14" height="46" rx="7" fill="#7c4a2a"/>
-  <circle cx="44" cy="64" r="26" fill="#10b981"/>
-  <circle cx="96" cy="64" r="26" fill="#34d399"/>
-  <circle cx="70" cy="44" r="32" fill="#6ee7b7"/>
-  <circle cx="58" cy="38" r="14" fill="#bbf7d0" opacity="0.7"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Verdant Mature Tree">
+  <defs>
+    <linearGradient id="verdantCanopy" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#bef264"/>
+      <stop offset="30%" stop-color="#84cc16"/>
+      <stop offset="70%" stop-color="#65a30d"/>
+      <stop offset="100%" stop-color="#3f6212"/>
+    </linearGradient>
+    <linearGradient id="verdantBark" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#44403c"/>
+      <stop offset="30%" stop-color="#78716c"/>
+      <stop offset="70%" stop-color="#78716c"/>
+      <stop offset="100%" stop-color="#44403c"/>
+    </linearGradient>
+    <radialGradient id="verdantHighlight" cx="50%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="#ecfccb"/>
+      <stop offset="100%" stop-color="#a3e635"/>
+    </radialGradient>
+  </defs>
+  <!-- Ground shadow -->
+  <ellipse cx="64" cy="122" rx="40" ry="7" fill="#0a0a0a" opacity="0.4"/>
+  <!-- Massive trunk -->
+  <path d="M52 120 Q46 100 50 80 L54 55 Q64 48 74 55 L78 80 Q82 100 76 120 Z" fill="url(#verdantBark)"/>
+  <!-- Deep bark texture -->
+  <path d="M56 115 Q52 100 56 85" fill="none" stroke="#292524" stroke-width="2" opacity="0.5"/>
+  <path d="M72 112 Q76 98 72 82" fill="none" stroke="#292524" stroke-width="2" opacity="0.5"/>
+  <path d="M64 118 L64 90" fill="none" stroke="#1c1917" stroke-width="1.5" opacity="0.3"/>
+  <!-- Roots visible -->
+  <path d="M52 120 Q42 122 35 118" fill="none" stroke="#57534e" stroke-width="4" stroke-linecap="round"/>
+  <path d="M76 120 Q86 122 93 118" fill="none" stroke="#57534e" stroke-width="4" stroke-linecap="round"/>
+  <!-- Major branches -->
+  <path d="M50 70 Q32 62 22 68" fill="none" stroke="url(#verdantBark)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M78 65 Q96 58 106 62" fill="none" stroke="url(#verdantBark)" stroke-width="6" stroke-linecap="round"/>
+  <!-- Massive round canopy -->
+  <ellipse cx="64" cy="45" rx="48" ry="38" fill="#3f6212" opacity="0.5"/>
+  <ellipse cx="64" cy="40" rx="44" ry="34" fill="url(#verdantCanopy)"/>
+  <ellipse cx="64" cy="32" rx="36" ry="26" fill="url(#verdantHighlight)"/>
+  <!-- Side foliage clusters -->
+  <ellipse cx="28" cy="55" rx="18" ry="14" fill="#65a30d"/>
+  <ellipse cx="28" cy="52" rx="14" ry="11" fill="#84cc16"/>
+  <ellipse cx="100" cy="52" rx="16" ry="13" fill="#65a30d"/>
+  <ellipse cx="100" cy="49" rx="12" ry="10" fill="#84cc16"/>
+  <!-- Leaf texture -->
+  <circle cx="50" cy="28" r="8" fill="#a3e635"/>
+  <circle cx="78" cy="25" r="7" fill="#a3e635"/>
+  <circle cx="64" cy="20" r="10" fill="#bef264"/>
+  <circle cx="38" cy="38" r="6" fill="#84cc16"/>
+  <circle cx="90" cy="35" r="6" fill="#84cc16"/>
+  <!-- Flowers -->
+  <circle cx="55" cy="18" r="2.5" fill="#fef9c3"/>
+  <circle cx="73" cy="16" r="2" fill="#fef9c3"/>
+  <circle cx="45" cy="25" r="1.5" fill="#fef9c3" opacity="0.8"/>
+  <circle cx="83" cy="22" r="1.5" fill="#fef9c3" opacity="0.8"/>
+  <!-- Hanging vines/detail -->
+  <path d="M42 58 Q40 68 44 78" fill="none" stroke="#4d7c0f" stroke-width="1.5" opacity="0.5"/>
+  <path d="M86 55 Q88 65 84 75" fill="none" stroke="#4d7c0f" stroke-width="1.5" opacity="0.5"/>
 </svg>

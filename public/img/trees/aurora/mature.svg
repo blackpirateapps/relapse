@@ -1,9 +1,53 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" role="img" aria-label="Aurora Mature Tree">
-  <rect width="140" height="140" rx="20" fill="transparent"/>
-  <ellipse cx="70" cy="112" rx="34" ry="10" fill="#0b0f14" opacity="0.5"/>
-  <rect x="63" y="64" width="14" height="46" rx="7" fill="#8b5a2b"/>
-  <circle cx="44" cy="64" r="26" fill="#22c55e"/>
-  <circle cx="96" cy="64" r="26" fill="#22c55e"/>
-  <circle cx="70" cy="44" r="32" fill="#4ade80"/>
-  <circle cx="60" cy="38" r="14" fill="#86efac" opacity="0.7"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Aurora Mature Tree">
+  <defs>
+    <linearGradient id="auroraCanopy" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6ee7b7"/>
+      <stop offset="40%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="auroraBark" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4a3422"/>
+      <stop offset="30%" stop-color="#6b4a2a"/>
+      <stop offset="70%" stop-color="#6b4a2a"/>
+      <stop offset="100%" stop-color="#4a3422"/>
+    </linearGradient>
+    <filter id="aurGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>
+    </filter>
+    <radialGradient id="auroraCenter" cx="50%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#a7f3d0"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </radialGradient>
+  </defs>
+  <!-- Ground shadow -->
+  <ellipse cx="64" cy="122" rx="38" ry="7" fill="#0a0a0a" opacity="0.4"/>
+  <!-- Trunk -->
+  <path d="M56 120 Q52 100 54 85 L58 60 Q64 55 70 60 L74 85 Q76 100 72 120 Z" fill="url(#auroraBark)"/>
+  <!-- Trunk texture -->
+  <path d="M58 110 Q56 100 58 90" fill="none" stroke="#3d2515" stroke-width="1.5" opacity="0.5"/>
+  <path d="M70 108 Q72 98 70 88" fill="none" stroke="#3d2515" stroke-width="1.5" opacity="0.5"/>
+  <!-- Branch left -->
+  <path d="M54 75 Q42 70 35 78" fill="none" stroke="url(#auroraBark)" stroke-width="5" stroke-linecap="round"/>
+  <!-- Branch right -->
+  <path d="M74 72 Q86 68 92 75" fill="none" stroke="url(#auroraBark)" stroke-width="5" stroke-linecap="round"/>
+  <!-- Canopy layers -->
+  <ellipse cx="64" cy="48" rx="42" ry="35" fill="#047857" opacity="0.5"/>
+  <ellipse cx="64" cy="42" rx="38" ry="32" fill="url(#auroraCanopy)"/>
+  <ellipse cx="64" cy="35" rx="30" ry="25" fill="url(#auroraCenter)"/>
+  <!-- Left foliage -->
+  <ellipse cx="38" cy="58" rx="18" ry="14" fill="#10b981"/>
+  <ellipse cx="38" cy="55" rx="14" ry="11" fill="#34d399"/>
+  <!-- Right foliage -->
+  <ellipse cx="90" cy="55" rx="16" ry="13" fill="#10b981"/>
+  <ellipse cx="90" cy="52" rx="12" ry="10" fill="#34d399"/>
+  <!-- Aurora glow effects -->
+  <circle cx="64" cy="28" r="8" fill="#a7f3d0" filter="url(#aurGlow)" opacity="0.7"/>
+  <circle cx="45" cy="35" r="4" fill="#6ee7b7" filter="url(#aurGlow)" opacity="0.6"/>
+  <circle cx="83" cy="32" r="5" fill="#6ee7b7" filter="url(#aurGlow)" opacity="0.6"/>
+  <!-- Sparkle details -->
+  <circle cx="55" cy="22" r="2" fill="#d1fae5"/>
+  <circle cx="73" cy="20" r="1.5" fill="#d1fae5"/>
+  <circle cx="64" cy="18" r="2.5" fill="#ecfdf5"/>
+  <circle cx="35" cy="45" r="1.5" fill="#a7f3d0" opacity="0.7"/>
+  <circle cx="93" cy="42" r="1.5" fill="#a7f3d0" opacity="0.7"/>
 </svg>

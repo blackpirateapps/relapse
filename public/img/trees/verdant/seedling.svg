@@ -1,7 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Verdant Seedling">
-  <rect width="120" height="120" rx="18" fill="transparent"/>
-  <ellipse cx="60" cy="92" rx="22" ry="8" fill="#0b0f14" opacity="0.45"/>
-  <path d="M60 78c2-12 8-20 16-26" fill="none" stroke="#a7f3d0" stroke-width="6" stroke-linecap="round"/>
-  <path d="M60 78c-3-10-12-16-22-20" fill="none" stroke="#34d399" stroke-width="6" stroke-linecap="round"/>
-  <circle cx="60" cy="70" r="8" fill="#10b981"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Verdant Seedling">
+  <defs>
+    <linearGradient id="verdantLeaf" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#84cc16"/>
+      <stop offset="50%" stop-color="#65a30d"/>
+      <stop offset="100%" stop-color="#4d7c0f"/>
+    </linearGradient>
+    <linearGradient id="verdantStem" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#365314"/>
+      <stop offset="50%" stop-color="#3f6212"/>
+      <stop offset="100%" stop-color="#365314"/>
+    </linearGradient>
+  </defs>
+  <!-- Ground shadow -->
+  <ellipse cx="64" cy="112" rx="26" ry="7" fill="#0a0a0a" opacity="0.4"/>
+  <!-- Rich earth mound -->
+  <ellipse cx="64" cy="108" rx="22" ry="6" fill="#3d2817"/>
+  <ellipse cx="64" cy="106" rx="18" ry="4" fill="#5c3d2a"/>
+  <!-- Soil details -->
+  <circle cx="55" cy="106" r="2" fill="#4a3622" opacity="0.6"/>
+  <circle cx="72" cy="107" r="1.5" fill="#4a3622" opacity="0.5"/>
+  <!-- Sturdy stem -->
+  <path d="M64 105 Q62 90 64 75" fill="none" stroke="url(#verdantStem)" stroke-width="7" stroke-linecap="round"/>
+  <!-- Leaf veins visible -->
+  <path d="M64 95 L64 80" fill="none" stroke="#4d7c0f" stroke-width="1" opacity="0.5"/>
+  <!-- Left broad leaf -->
+  <path d="M64 85 Q45 78 38 62 Q42 58 48 62 Q44 72 64 85" fill="url(#verdantLeaf)"/>
+  <path d="M50 68 L45 64" fill="none" stroke="#a3e635" stroke-width="1" opacity="0.6"/>
+  <!-- Right broad leaf -->
+  <path d="M64 85 Q83 78 90 62 Q86 58 80 62 Q84 72 64 85" fill="url(#verdantLeaf)"/>
+  <path d="M78 68 L83 64" fill="none" stroke="#a3e635" stroke-width="1" opacity="0.6"/>
+  <!-- Center unfurling leaf -->
+  <path d="M64 78 Q60 68 64 58 Q68 68 64 78" fill="#84cc16"/>
+  <path d="M64 75 L64 62" fill="none" stroke="#bef264" stroke-width="1.5"/>
+  <!-- Dewdrop -->
+  <ellipse cx="52" cy="70" rx="2.5" ry="3" fill="#ecfccb" opacity="0.7"/>
+  <circle cx="51" cy="69" r="1" fill="#fff" opacity="0.9"/>
 </svg>

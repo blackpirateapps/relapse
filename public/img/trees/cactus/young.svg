@@ -1,25 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Young Cactus">
-  <g transform="translate(512 512) scale(0.7) translate(-512 -512)">
-    <path d="M513.92 68.71h12A116.59 116.59 0 0 1 642.5 185.3v728.84a41.15 41.15 0 0 1-41.15 41.15H438.48a41.15 41.15 0 0 1-41.15-41.15V185.3A116.59 116.59 0 0 1 513.92 68.71z" fill="#4C9589"/>
-    <path d="M424 752c-53.89 0-131.52-8.8-183.29-84.94-41.15-60.51-60.32-156.89-60.32-303.31a57.1 57.1 0 1 1 114.19 0c0 119.08 13.64 199.53 40.55 239.1 14.68 21.58 34.66 35 88.86 35A57.1 57.1 0 1 1 424 752zM603.83 584.48a57.1 57.1 0 0 1 0-114.19c50.76 0 78.59-8.07 96-27.86 24.69-28 37.2-87.16 37.2-175.79a57.1 57.1 0 1 1 114.19 0c0 120.56-20.88 200.4-65.72 251.29-51.96 58.98-124.38 66.55-181.67 66.55z" fill="#4C9589"/>
-    <path d="M438.25 175.29l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF"/>
-    <path d="M232.017583 381.607965l33.493777-2.10725 5.270637 83.774363-33.493777 2.10725-5.270637-83.774363Z" fill="#FFFFFF"/>
-    <path d="M220.695979 523.146565l32.46596-8.499119 21.257927 81.203597-32.46596 8.499118-21.257927-81.203596Z" fill="#FFFFFF"/>
-    <path d="M290.392718 653.891246l16.78-29.063813 72.694172 41.97-16.78 29.063813-72.694172-41.97Z" fill="#FFFFFF"/>
-    <path d="M733.163193 472.110713l15.584539 29.721975-74.340361 38.979922-15.584539-29.721974 74.340361-38.979923Z" fill="#FFFFFF"/>
-    <path d="M788.434288 373.40643l31.341442 11.999483-30.013008 78.390962-31.341443-11.999482 30.013009-78.390963Z" fill="#FFFFFF"/>
-    <path d="M763.93801 259.133152l33.412708 3.140781-7.855695 83.571596-33.412708-3.140781 7.855695-83.571596Z" fill="#FFFFFF"/>
-    <path d="M438.25 386.54l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF"/>
-    <path d="M438.25 599.7l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF"/>
-    <path d="M438.25 810.96l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF"/>
-    <path d="M507.72 110.58l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF"/>
-    <path d="M507.72 321.84l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF"/>
-    <path d="M507.72 534.99l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF"/>
-    <path d="M507.72 746.25l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF"/>
-    <path d="M568.62 194.32l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF"/>
-    <path d="M568.62 405.58l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF"/>
-    <path d="M568.62 618.74l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF"/>
-    <path d="M568.62 829.99l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF"/>
-    <path d="M183.54 250.68S200 328 239.21 328 299 263 299 263l-35.05 22.68-28.87-68-14.43 59.79z" fill="#D77A88"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Cactus Young">
+  <defs>
+    <linearGradient id="cactusGreen" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#166534"/>
+      <stop offset="25%" stop-color="#22c55e"/>
+      <stop offset="75%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#166534"/>
+    </linearGradient>
+  </defs>
+  <!-- Ground shadow -->
+  <ellipse cx="64" cy="116" rx="28" ry="6" fill="#0a0a0a" opacity="0.35"/>
+  <!-- Sandy ground -->
+  <ellipse cx="64" cy="112" rx="32" ry="6" fill="#d4a574"/>
+  <ellipse cx="64" cy="110" rx="28" ry="4" fill="#e5c9a8"/>
+  <!-- Rocks -->
+  <ellipse cx="42" cy="112" rx="4" ry="2.5" fill="#a8a29e"/>
+  <ellipse cx="86" cy="111" rx="3" ry="2" fill="#a8a29e"/>
+  <!-- Main cactus body -->
+  <path d="M52 108 Q48 85 52 55 Q64 45 76 55 Q80 85 76 108 Z" fill="url(#cactusGreen)"/>
+  <!-- Ridges on main body -->
+  <path d="M54 105 Q50 80 54 58" fill="none" stroke="#15803d" stroke-width="2" opacity="0.6"/>
+  <path d="M64 108 L64 52" fill="none" stroke="#15803d" stroke-width="1.5" opacity="0.5"/>
+  <path d="M74 105 Q78 80 74 58" fill="none" stroke="#15803d" stroke-width="2" opacity="0.6"/>
+  <!-- Left arm bud -->
+  <ellipse cx="42" cy="78" rx="10" ry="8" fill="url(#cactusGreen)"/>
+  <path d="M52 78 Q46 78 38 78" fill="none" stroke="#166534" stroke-width="3"/>
+  <!-- Right arm bud -->
+  <ellipse cx="86" cy="72" rx="9" ry="7" fill="url(#cactusGreen)"/>
+  <path d="M76 72 Q82 72 90 72" fill="none" stroke="#166534" stroke-width="3"/>
+  <!-- Spines -->
+  <line x1="48" y1="65" x2="42" y2="62" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="48" y1="80" x2="42" y2="80" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="48" y1="95" x2="43" y2="96" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="80" y1="62" x2="86" y2="60" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="80" y1="75" x2="86" y2="75" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="80" y1="92" x2="85" y2="93" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="64" y1="50" x2="64" y2="42" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Arm spines -->
+  <line x1="34" y1="76" x2="30" y2="74" stroke="#fef3c7" stroke-width="1" stroke-linecap="round"/>
+  <line x1="92" y1="70" x2="96" y2="68" stroke="#fef3c7" stroke-width="1" stroke-linecap="round"/>
+  <!-- Highlight -->
+  <ellipse cx="58" cy="75" rx="4" ry="15" fill="#4ade80" opacity="0.3"/>
 </svg>

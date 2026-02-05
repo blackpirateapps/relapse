@@ -1,7 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Ember Seedling">
-  <rect width="120" height="120" rx="18" fill="transparent"/>
-  <ellipse cx="60" cy="92" rx="22" ry="8" fill="#0b0f14" opacity="0.45"/>
-  <path d="M60 78c3-12 10-20 18-26" fill="none" stroke="#fdba74" stroke-width="6" stroke-linecap="round"/>
-  <path d="M60 78c-3-10-12-16-22-20" fill="none" stroke="#f97316" stroke-width="6" stroke-linecap="round"/>
-  <circle cx="60" cy="70" r="8" fill="#fb923c"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Ember Seedling">
+  <defs>
+    <linearGradient id="emberGlow" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="50%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+    <linearGradient id="emberStem" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7c2d12"/>
+      <stop offset="50%" stop-color="#9a3412"/>
+      <stop offset="100%" stop-color="#7c2d12"/>
+    </linearGradient>
+    <filter id="emberBlur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+    </filter>
+  </defs>
+  <!-- Ground shadow -->
+  <ellipse cx="64" cy="112" rx="26" ry="7" fill="#0a0a0a" opacity="0.4"/>
+  <!-- Ash-touched soil -->
+  <ellipse cx="64" cy="108" rx="20" ry="5" fill="#4a3728"/>
+  <ellipse cx="64" cy="106" rx="16" ry="3.5" fill="#5c4033"/>
+  <!-- Ember cracks in soil -->
+  <path d="M52 107 L55 105 L53 103" fill="none" stroke="#f97316" stroke-width="1" opacity="0.5"/>
+  <path d="M74 106 L72 104" fill="none" stroke="#dc2626" stroke-width="1" opacity="0.4"/>
+  <!-- Stem -->
+  <path d="M64 104 Q63 88 64 72" fill="none" stroke="url(#emberStem)" stroke-width="6" stroke-linecap="round"/>
+  <!-- Left flame-leaf -->
+  <path d="M64 85 Q50 75 48 58 Q52 55 56 60 Q52 72 64 85" fill="url(#emberGlow)"/>
+  <!-- Right flame-leaf -->
+  <path d="M64 85 Q78 75 80 58 Q76 55 72 60 Q76 72 64 85" fill="url(#emberGlow)"/>
+  <!-- Center ember bud -->
+  <ellipse cx="64" cy="68" rx="7" ry="9" fill="#ef4444"/>
+  <ellipse cx="64" cy="65" rx="4" ry="5" fill="#fbbf24"/>
+  <!-- Fire glow -->
+  <circle cx="64" cy="62" r="5" fill="#fbbf24" filter="url(#emberBlur)" opacity="0.6"/>
+  <!-- Sparks -->
+  <circle cx="56" cy="54" r="1.5" fill="#fef3c7"/>
+  <circle cx="72" cy="52" r="1.2" fill="#fef3c7"/>
+  <circle cx="64" cy="48" r="1" fill="#fef3c7" opacity="0.8"/>
 </svg>

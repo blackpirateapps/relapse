@@ -1,8 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Ember Young Tree">
-  <rect width="120" height="120" rx="18" fill="transparent"/>
-  <ellipse cx="60" cy="96" rx="28" ry="9" fill="#0b0f14" opacity="0.45"/>
-  <rect x="54" y="58" width="12" height="32" rx="6" fill="#8b4a1f"/>
-  <circle cx="44" cy="58" r="18" fill="#fb923c"/>
-  <circle cx="76" cy="56" r="20" fill="#f97316"/>
-  <circle cx="60" cy="44" r="22" fill="#fdba74"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Ember Young Tree">
+  <defs>
+    <linearGradient id="emberLeaf" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#b91c1c"/>
+      <stop offset="40%" stop-color="#dc2626"/>
+      <stop offset="70%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+    <linearGradient id="emberTrunk" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#5c2e15"/>
+      <stop offset="50%" stop-color="#7c3a1d"/>
+      <stop offset="100%" stop-color="#5c2e15"/>
+    </linearGradient>
+    <filter id="fireGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
+    </filter>
+  </defs>
+  <!-- Ground shadow -->
+  <ellipse cx="64" cy="118" rx="30" ry="7" fill="#0a0a0a" opacity="0.35"/>
+  <!-- Trunk with ember veins -->
+  <path d="M64 116 Q58 98 60 78 Q64 72 68 78 Q70 98 64 116" fill="url(#emberTrunk)"/>
+  <!-- Ember veins on trunk -->
+  <path d="M62 105 L60 95 L62 88" fill="none" stroke="#f97316" stroke-width="1" opacity="0.4"/>
+  <path d="M66 100 L68 92" fill="none" stroke="#dc2626" stroke-width="1" opacity="0.3"/>
+  <!-- Branch -->
+  <path d="M60 88 Q50 82 45 88" fill="none" stroke="#7c3a1d" stroke-width="3" stroke-linecap="round"/>
+  <!-- Flame-shaped foliage -->
+  <path d="M64 72 Q40 60 35 40 Q55 35 64 50 Q73 35 93 40 Q88 60 64 72" fill="#b91c1c"/>
+  <path d="M64 68 Q45 58 42 42 Q58 38 64 52 Q70 38 86 42 Q83 58 64 68" fill="url(#emberLeaf)"/>
+  <path d="M64 58 Q52 50 50 38 Q60 35 64 45 Q68 35 78 38 Q76 50 64 58" fill="#fbbf24"/>
+  <!-- Fire glow effect -->
+  <circle cx="64" cy="42" r="10" fill="#fbbf24" filter="url(#fireGlow)" opacity="0.5"/>
+  <!-- Sparks -->
+  <circle cx="50" cy="32" r="2" fill="#fef3c7"/>
+  <circle cx="78" cy="30" r="1.5" fill="#fef3c7"/>
+  <circle cx="64" cy="25" r="2" fill="#fff7ed"/>
+  <circle cx="55" cy="45" r="1" fill="#fef3c7" opacity="0.7"/>
+  <circle cx="73" cy="48" r="1" fill="#fef3c7" opacity="0.7"/>
 </svg>

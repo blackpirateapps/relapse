@@ -1,7 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Aurora Seedling">
-  <rect width="120" height="120" rx="18" fill="transparent"/>
-  <ellipse cx="60" cy="92" rx="22" ry="8" fill="#0b0f14" opacity="0.45"/>
-  <path d="M60 78c2-12 8-20 16-26" fill="none" stroke="#7dd3a7" stroke-width="6" stroke-linecap="round"/>
-  <path d="M60 78c-3-10-10-16-20-20" fill="none" stroke="#4ade80" stroke-width="6" stroke-linecap="round"/>
-  <circle cx="60" cy="70" r="8" fill="#22c55e"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Aurora Seedling">
+  <defs>
+    <linearGradient id="auroraGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a7f3d0"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="auroraStem" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#065f46"/>
+      <stop offset="50%" stop-color="#047857"/>
+      <stop offset="100%" stop-color="#065f46"/>
+    </linearGradient>
+    <filter id="auroraBlur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+    </filter>
+  </defs>
+  <!-- Ground shadow -->
+  <ellipse cx="64" cy="112" rx="28" ry="8" fill="#0a0a0a" opacity="0.4"/>
+  <!-- Soil mound -->
+  <ellipse cx="64" cy="108" rx="22" ry="6" fill="#3d2817"/>
+  <ellipse cx="64" cy="106" rx="18" ry="4" fill="#5c3d2a"/>
+  <!-- Stem -->
+  <path d="M64 105 Q62 85 64 70" fill="none" stroke="url(#auroraStem)" stroke-width="5" stroke-linecap="round"/>
+  <!-- Left leaf -->
+  <path d="M64 82 Q48 70 42 55 Q50 52 58 60 Q54 70 64 82" fill="url(#auroraGlow)" opacity="0.9"/>
+  <!-- Right leaf -->
+  <path d="M64 82 Q80 70 86 55 Q78 52 70 60 Q74 70 64 82" fill="url(#auroraGlow)" opacity="0.9"/>
+  <!-- Center bud -->
+  <ellipse cx="64" cy="68" rx="8" ry="10" fill="#34d399"/>
+  <ellipse cx="64" cy="65" rx="5" ry="6" fill="#6ee7b7"/>
+  <!-- Sparkle glow -->
+  <circle cx="64" cy="62" r="3" fill="#a7f3d0" filter="url(#auroraBlur)"/>
+  <circle cx="58" cy="56" r="2" fill="#a7f3d0" opacity="0.6"/>
+  <circle cx="70" cy="54" r="1.5" fill="#a7f3d0" opacity="0.5"/>
 </svg>

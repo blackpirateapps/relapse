@@ -1,8 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Aurora Young Tree">
-  <rect width="120" height="120" rx="18" fill="transparent"/>
-  <ellipse cx="60" cy="96" rx="28" ry="9" fill="#0b0f14" opacity="0.45"/>
-  <rect x="54" y="58" width="12" height="32" rx="6" fill="#8b5a2b"/>
-  <circle cx="44" cy="58" r="18" fill="#34d399"/>
-  <circle cx="76" cy="56" r="20" fill="#22c55e"/>
-  <circle cx="60" cy="44" r="22" fill="#4ade80"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Aurora Young Tree">
+  <defs>
+    <linearGradient id="auroraLeaf" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6ee7b7"/>
+      <stop offset="50%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="auroraTrunk" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#5c3d2a"/>
+      <stop offset="50%" stop-color="#8b6914"/>
+      <stop offset="100%" stop-color="#5c3d2a"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
+    </filter>
+  </defs>
+  <!-- Ground shadow -->
+  <ellipse cx="64" cy="118" rx="32" ry="8" fill="#0a0a0a" opacity="0.35"/>
+  <!-- Trunk -->
+  <path d="M64 115 Q60 95 62 75 Q64 70 66 75 Q68 95 64 115" fill="url(#auroraTrunk)"/>
+  <path d="M62 90 Q55 85 50 92" fill="none" stroke="#5c3d2a" stroke-width="3" stroke-linecap="round"/>
+  <!-- Foliage layers -->
+  <ellipse cx="64" cy="55" rx="30" ry="25" fill="#059669" opacity="0.6"/>
+  <ellipse cx="64" cy="50" rx="26" ry="22" fill="url(#auroraLeaf)"/>
+  <ellipse cx="64" cy="42" rx="20" ry="16" fill="#6ee7b7"/>
+  <!-- Leaf highlights -->
+  <path d="M48 45 Q55 35 64 38 Q73 35 80 45" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.7"/>
+  <!-- Aurora sparkles -->
+  <circle cx="55" cy="35" r="3" fill="#a7f3d0" filter="url(#glow)"/>
+  <circle cx="73" cy="38" r="2" fill="#a7f3d0" filter="url(#glow)"/>
+  <circle cx="64" cy="30" r="2.5" fill="#d1fae5" filter="url(#glow)"/>
+  <circle cx="50" cy="50" r="1.5" fill="#a7f3d0" opacity="0.6"/>
+  <circle cx="78" cy="48" r="1.5" fill="#a7f3d0" opacity="0.6"/>
 </svg>

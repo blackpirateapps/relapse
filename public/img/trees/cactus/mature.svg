@@ -1,3 +1,62 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
-<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon"  version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M513.92 68.71h12A116.59 116.59 0 0 1 642.5 185.3v728.84a41.15 41.15 0 0 1-41.15 41.15H438.48a41.15 41.15 0 0 1-41.15-41.15V185.3A116.59 116.59 0 0 1 513.92 68.71z" fill="#4C9589" /><path d="M424 752c-53.89 0-131.52-8.8-183.29-84.94-41.15-60.51-60.32-156.89-60.32-303.31a57.1 57.1 0 1 1 114.19 0c0 119.08 13.64 199.53 40.55 239.1 14.68 21.58 34.66 35 88.86 35A57.1 57.1 0 1 1 424 752zM603.83 584.48a57.1 57.1 0 0 1 0-114.19c50.76 0 78.59-8.07 96-27.86 24.69-28 37.2-87.16 37.2-175.79a57.1 57.1 0 1 1 114.19 0c0 120.56-20.88 200.4-65.72 251.29-51.96 58.98-124.38 66.55-181.67 66.55z" fill="#4C9589" /><path d="M438.25 175.29l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF" /><path d="M232.017583 381.607965l33.493777-2.10725 5.270637 83.774363-33.493777 2.10725-5.270637-83.774363Z" fill="#FFFFFF" /><path d="M220.695979 523.146565l32.46596-8.499119 21.257927 81.203597-32.46596 8.499118-21.257927-81.203596Z" fill="#FFFFFF" /><path d="M290.392718 653.891246l16.78-29.063813 72.694172 41.97-16.78 29.063813-72.694172-41.97Z" fill="#FFFFFF" /><path d="M733.163193 472.110713l15.584539 29.721975-74.340361 38.979922-15.584539-29.721974 74.340361-38.979923Z" fill="#FFFFFF" /><path d="M788.434288 373.40643l31.341442 11.999483-30.013008 78.390962-31.341443-11.999482 30.013009-78.390963Z" fill="#FFFFFF" /><path d="M763.93801 259.133152l33.412708 3.140781-7.855695 83.571596-33.412708-3.140781 7.855695-83.571596Z" fill="#FFFFFF" /><path d="M438.25 386.54l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF" /><path d="M438.25 599.7l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF" /><path d="M438.25 810.96l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF" /><path d="M507.72 110.58l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF" /><path d="M507.72 321.84l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF" /><path d="M507.72 534.99l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF" /><path d="M507.72 746.25l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF" /><path d="M568.62 194.32l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF" /><path d="M568.62 405.58l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF" /><path d="M568.62 618.74l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF" /><path d="M568.62 829.99l33.56 0 0 83.94-33.56 0 0-83.94Z" fill="#FFFFFF" /><path d="M183.54 250.68S200 328 239.21 328 299 263 299 263l-35.05 22.68-28.87-68-14.43 59.79z" fill="#D77A88" /></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Cactus Mature">
+  <defs>
+    <linearGradient id="cactusMature" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#14532d"/>
+      <stop offset="20%" stop-color="#22c55e"/>
+      <stop offset="80%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#14532d"/>
+    </linearGradient>
+    <linearGradient id="cactusArm" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#166534"/>
+      <stop offset="50%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#166534"/>
+    </linearGradient>
+  </defs>
+  <!-- Ground shadow -->
+  <ellipse cx="64" cy="120" rx="35" ry="6" fill="#0a0a0a" opacity="0.4"/>
+  <!-- Sandy ground -->
+  <ellipse cx="64" cy="116" rx="40" ry="7" fill="#d4a574"/>
+  <ellipse cx="64" cy="114" rx="36" ry="5" fill="#e5c9a8"/>
+  <!-- Rocks -->
+  <ellipse cx="35" cy="116" rx="5" ry="3" fill="#a8a29e"/>
+  <ellipse cx="92" cy="115" rx="4" ry="2.5" fill="#a8a29e"/>
+  <circle cx="50" cy="117" r="2" fill="#78716c"/>
+  <!-- Main body -->
+  <path d="M50 114 Q44 85 48 45 Q64 32 80 45 Q84 85 78 114 Z" fill="url(#cactusMature)"/>
+  <!-- Main body ridges -->
+  <path d="M52 112 Q46 80 50 48" fill="none" stroke="#15803d" stroke-width="2.5" opacity="0.6"/>
+  <path d="M60 114 Q58 80 60 42" fill="none" stroke="#15803d" stroke-width="2" opacity="0.5"/>
+  <path d="M68 114 Q70 80 68 42" fill="none" stroke="#15803d" stroke-width="2" opacity="0.5"/>
+  <path d="M76 112 Q82 80 78 48" fill="none" stroke="#15803d" stroke-width="2.5" opacity="0.6"/>
+  <!-- Left arm (lower) -->
+  <path d="M48 85 Q30 85 25 85 Q20 75 25 55 Q30 48 35 55" fill="url(#cactusArm)"/>
+  <path d="M30 80 Q25 70 30 58" fill="none" stroke="#15803d" stroke-width="1.5" opacity="0.6"/>
+  <!-- Left arm (upper) -->
+  <path d="M35 55 Q35 42 42 32" fill="url(#cactusArm)"/>
+  <!-- Right arm (lower) -->
+  <path d="M80 78 Q98 78 103 78 Q108 68 103 50 Q98 42 93 50" fill="url(#cactusArm)"/>
+  <path d="M98 74 Q103 62 98 52" fill="none" stroke="#15803d" stroke-width="1.5" opacity="0.6"/>
+  <!-- Right arm (upper) -->
+  <path d="M93 50 Q93 38 86 28" fill="url(#cactusArm)"/>
+  <!-- Main spines -->
+  <line x1="44" y1="60" x2="36" y2="56" stroke="#fef3c7" stroke-width="2" stroke-linecap="round"/>
+  <line x1="44" y1="78" x2="36" y2="78" stroke="#fef3c7" stroke-width="2" stroke-linecap="round"/>
+  <line x1="44" y1="95" x2="38" y2="98" stroke="#fef3c7" stroke-width="2" stroke-linecap="round"/>
+  <line x1="84" y1="55" x2="92" y2="52" stroke="#fef3c7" stroke-width="2" stroke-linecap="round"/>
+  <line x1="84" y1="72" x2="92" y2="72" stroke="#fef3c7" stroke-width="2" stroke-linecap="round"/>
+  <line x1="84" y1="92" x2="90" y2="95" stroke="#fef3c7" stroke-width="2" stroke-linecap="round"/>
+  <line x1="64" y1="36" x2="64" y2="26" stroke="#fef3c7" stroke-width="2" stroke-linecap="round"/>
+  <!-- Arm spines -->
+  <line x1="22" y1="72" x2="16" y2="70" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="22" y1="60" x2="16" y2="58" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="38" y1="35" x2="34" y2="28" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="106" y1="65" x2="112" y2="63" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="106" y1="55" x2="112" y2="52" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="90" y1="32" x2="94" y2="25" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Flower on top -->
+  <circle cx="64" cy="30" r="6" fill="#ec4899"/>
+  <circle cx="64" cy="30" r="3.5" fill="#f472b6"/>
+  <circle cx="64" cy="30" r="1.5" fill="#fef9c3"/>
+  <!-- Highlight -->
+  <ellipse cx="58" cy="70" rx="5" ry="20" fill="#4ade80" opacity="0.25"/>
+</svg>

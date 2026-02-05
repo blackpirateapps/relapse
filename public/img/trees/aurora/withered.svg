@@ -1,9 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140" role="img" aria-label="Aurora Withered Tree">
-  <rect width="140" height="140" rx="20" fill="transparent"/>
-  <ellipse cx="70" cy="112" rx="32" ry="10" fill="#0b0f14" opacity="0.5"/>
-  <rect x="64" y="66" width="12" height="44" rx="6" fill="#6b4423"/>
-  <path d="M70 68c-10-16-22-18-30-18" fill="none" stroke="#855d3b" stroke-width="6" stroke-linecap="round"/>
-  <path d="M70 68c10-16 22-18 30-18" fill="none" stroke="#855d3b" stroke-width="6" stroke-linecap="round"/>
-  <circle cx="50" cy="50" r="12" fill="#6b7280"/>
-  <circle cx="90" cy="50" r="12" fill="#7c6f63"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Aurora Withered Tree">
+  <defs>
+    <linearGradient id="deadBark" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3d3d3d"/>
+      <stop offset="50%" stop-color="#5c5c5c"/>
+      <stop offset="100%" stop-color="#3d3d3d"/>
+    </linearGradient>
+  </defs>
+  <!-- Ground shadow -->
+  <ellipse cx="64" cy="120" rx="35" ry="7" fill="#0a0a0a" opacity="0.3"/>
+  <!-- Dead trunk -->
+  <path d="M58 118 Q54 100 56 80 L60 55 Q64 48 68 55 L72 80 Q74 100 70 118 Z" fill="url(#deadBark)"/>
+  <!-- Cracks -->
+  <path d="M60 100 L58 85 L62 70" fill="none" stroke="#2a2a2a" stroke-width="1.5"/>
+  <path d="M68 105 L70 90 L66 75" fill="none" stroke="#2a2a2a" stroke-width="1.5"/>
+  <!-- Dead branches -->
+  <path d="M56 70 Q42 60 35 55" fill="none" stroke="#4a4a4a" stroke-width="4" stroke-linecap="round"/>
+  <path d="M72 65 Q88 55 95 52" fill="none" stroke="#4a4a4a" stroke-width="4" stroke-linecap="round"/>
+  <path d="M60 55 Q50 40 45 30" fill="none" stroke="#4a4a4a" stroke-width="3" stroke-linecap="round"/>
+  <path d="M68 52 Q78 38 85 28" fill="none" stroke="#4a4a4a" stroke-width="3" stroke-linecap="round"/>
+  <!-- Small dead twigs -->
+  <path d="M35 55 Q30 50 28 45" fill="none" stroke="#3d3d3d" stroke-width="2" stroke-linecap="round"/>
+  <path d="M95 52 Q100 48 103 42" fill="none" stroke="#3d3d3d" stroke-width="2" stroke-linecap="round"/>
+  <!-- Faded leaf remnants -->
+  <circle cx="45" cy="28" r="4" fill="#4a5a4a" opacity="0.4"/>
+  <circle cx="85" cy="26" r="3" fill="#4a5a4a" opacity="0.3"/>
+  <!-- Subtle faded glow (ghost of aurora) -->
+  <circle cx="64" cy="45" r="15" fill="#34d399" opacity="0.08"/>
 </svg>

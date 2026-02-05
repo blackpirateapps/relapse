@@ -391,9 +391,23 @@ function ForestPage() {
     };
     window.addEventListener('resize', handleResize);
 
+    // Pause when page is hidden (mobile battery optimization)
+    const handleVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(gs.animationFrameId);
+        gs.animationFrameId = null;
+      } else if (!gs.animationFrameId) {
+        gs.lastTime = performance.now();
+        gs.accumulator = 0;
+        gs.animationFrameId = requestAnimationFrame(gameLoop);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     return () => {
       cancelAnimationFrame(gs.animationFrameId);
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [assetsLoaded, setCanvasSize, render]);
 
@@ -537,6 +551,7 @@ function ForestPage() {
           <canvas
             ref={canvasRef}
             className="w-full h-full rounded-xl cursor-crosshair"
+            style={{ touchAction: 'none' }}
             aria-label="Mystical Forest"
           />
           {!assetsLoaded && (
@@ -620,8 +635,8 @@ function ForestPage() {
                     setIsShopExpanded(false);
                   }}
                   className={`group relative text-left p-3 rounded-xl border transition-all duration-200 ${selected
-                      ? 'border-emerald-400/60 bg-emerald-500/15 ring-1 ring-emerald-400/30'
-                      : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20'
+                    ? 'border-emerald-400/60 bg-emerald-500/15 ring-1 ring-emerald-400/30'
+                    : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20'
                     }`}
                 >
                   <div className="flex flex-col items-center gap-2 text-center">
