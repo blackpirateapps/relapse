@@ -1,0 +1,9 @@
+{
+  "appId": "com.relapse.phoenix",
+  "appName": "Phoenix Journey",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}

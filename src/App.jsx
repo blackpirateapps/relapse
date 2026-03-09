@@ -7,6 +7,9 @@ import LoadingSpinner from './components/LoadingSpinner.jsx';
 
 import { ranks } from './data/ranks.js';
 import { fetchState, fetchShopData } from './api.js';
+import { isAndroidApp } from './platform/runtime.js';
+import { ANDROID_ALLOWED_ROUTES } from './mobile/navigation.js';
+import { useStreakNotification } from './mobile/useStreakNotification.js';
 
 export const AppContext = React.createContext();
 
@@ -42,11 +45,12 @@ const BackgroundFallback = () => (
   <div className="fixed inset-0 -z-10 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950" />
 );
 
-// This component handles the main layout and conditional background rendering
 const AppLayout = () => {
   const location = useLocation();
-  const isForestPage = location.pathname === '/forest';
+  const androidMode = isAndroidApp();
+  const isForestPage = !androidMode && location.pathname === '/forest';
   const { state, previewThemeId, setPreviewThemeId, previewAuraId, setPreviewAuraId } = React.useContext(AppContext);
+
   const backgroundThemes = {
     burning_fire_bg: FireBackground,
     phoenix_constellation_bg: PhoenixConstellationBackground,
@@ -54,9 +58,8 @@ const AppLayout = () => {
     kawaii_city_bg: KawaiiCityBackground,
     starfield_warp_bg: StarfieldWarpBackground
   };
-  const forestThemes = {
-    dark_forest_bg: DarkForestBackground
-  };
+  const forestThemes = { dark_forest_bg: DarkForestBackground };
+
   const equippedThemeId = Object.keys(backgroundThemes).find((id) => state?.equipped_upgrades?.[id]);
   const equippedForestThemeId = Object.keys(forestThemes).find((id) => state?.equipped_upgrades?.[id]);
   const isPreviewForest = previewThemeId && forestThemes[previewThemeId];
@@ -64,7 +67,6 @@ const AppLayout = () => {
   const activeThemeId = isForestPage ? null : (isPreviewGlobal ? previewThemeId : equippedThemeId);
   const ForestBg = isPreviewForest ? forestThemes[previewThemeId] : (equippedForestThemeId ? forestThemes[equippedForestThemeId] : ForestBackground);
   const Background = isForestPage ? ForestBg : (activeThemeId ? backgroundThemes[activeThemeId] : Starfield);
-
   const isPreviewActive = previewThemeId || previewAuraId;
 
   return (
@@ -72,7 +74,7 @@ const AppLayout = () => {
       <React.Suspense fallback={<BackgroundFallback />}>
         <Background />
       </React.Suspense>
-      {isPreviewActive && (
+      {isPreviewActive && !androidMode && (
         <div className="fixed top-0 left-0 right-0 z-50">
           <div className="mx-4 sm:mx-8 mt-4 rounded-xl border border-amber-400/40 bg-gradient-to-r from-amber-500/20 via-pink-500/10 to-cyan-500/20 backdrop-blur-md px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
             <span className="text-amber-200">
@@ -82,7 +84,10 @@ const AppLayout = () => {
               <Link to="/shop" className="px-3 py-1.5 rounded-md bg-yellow-500 text-gray-900 font-semibold hover:bg-yellow-400">Purchase</Link>
               <button
                 type="button"
-                onClick={() => { setPreviewThemeId(null); setPreviewAuraId(null); }}
+                onClick={() => {
+                  setPreviewThemeId(null);
+                  setPreviewAuraId(null);
+                }}
                 className="px-3 py-1.5 rounded-md bg-gray-800 text-gray-200 hover:bg-gray-700"
               >
                 Exit
@@ -98,17 +103,20 @@ const AppLayout = () => {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/progression" element={<ProgressionPage />} />
-            <Route path="/forest" element={<ForestPage />} />
-            <Route path="/aviary" element={<AviaryPage />} />
-            <Route path="/shop" element={<ShopPage />} />
-            <Route path="/shop/:itemId" element={<ShopItemPage />} />
-            <Route path="/inventory" element={<InventoryPage />} />
-            <Route path="/phoenix-flight" element={<PhoenixFlightPage />} />
-            <Route path="/progression/levels" element={<LevelShowcasePage />} />
-            <Route path="*" element={<Navigate to="/" />} />
-            <Route path="/minigame/asteroid-shooter" element={<AsteroidShooterPage />} />
-            <Route path="/journey/urge" element={<UrgeTasksPage />} />
-            <Route path="/journey/urge/pushups" element={<PushupSessionPage />} />
+
+            {!androidMode && <Route path="/forest" element={<ForestPage />} />}
+            {!androidMode && <Route path="/aviary" element={<AviaryPage />} />}
+            {!androidMode && <Route path="/shop" element={<ShopPage />} />}
+            {!androidMode && <Route path="/shop/:itemId" element={<ShopItemPage />} />}
+            {!androidMode && <Route path="/inventory" element={<InventoryPage />} />}
+            {!androidMode && <Route path="/phoenix-flight" element={<PhoenixFlightPage />} />}
+            {!androidMode && <Route path="/progression/levels" element={<LevelShowcasePage />} />}
+            {!androidMode && <Route path="/minigame/asteroid-shooter" element={<AsteroidShooterPage />} />}
+            {!androidMode && <Route path="/journey/urge" element={<UrgeTasksPage />} />}
+            {!androidMode && <Route path="/journey/urge/pushups" element={<PushupSessionPage />} />}
+
+            {androidMode && <Route path="*" element={<Navigate to="/" replace />} />}
+            {!androidMode && <Route path="*" element={<Navigate to="/" />} />}
           </Routes>
         </React.Suspense>
       </main>
@@ -125,6 +133,8 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [previewThemeId, setPreviewThemeId] = React.useState(null);
   const [previewAuraId, setPreviewAuraId] = React.useState(null);
+
+  useStreakNotification(state?.lastRelapse || null);
 
   const refetchData = async () => {
     try {
@@ -143,13 +153,13 @@ function App() {
         setTreeTypes(shopData.treeTypes || {});
       }
     } catch (error) {
-      console.error("Refetch failed:", error);
+      console.error('Refetch failed:', error);
       setIsAuthenticated(false);
     } finally {
       setLoading(false);
     }
   };
-  
+
   React.useEffect(() => {
     refetchData();
   }, []);
@@ -161,7 +171,7 @@ function App() {
   if (!isAuthenticated || !state) {
     return <LoginPage refetchData={refetchData} />;
   }
-  
+
   const totalHours = state.lastRelapse ? (Date.now() - new Date(state.lastRelapse).getTime()) / (1000 * 60 * 60) : 0;
   const streakCoins = Math.floor(10 * Math.pow(totalHours > 0 ? totalHours : 0, 1.2));
   const totalCoins = (state.coinsAtLastRelapse || 0) + streakCoins;
@@ -169,7 +179,7 @@ function App() {
 
   const getRank = (hours) => {
     for (let i = ranks.length - 1; i >= 0; i--) {
-        if (hours >= ranks[i].hours) return { ...ranks[i], level: i };
+      if (hours >= ranks[i].hours) return { ...ranks[i], level: i };
     }
     return { ...ranks[0], level: 0 };
   };
@@ -192,7 +202,9 @@ function App() {
     previewThemeId,
     setPreviewThemeId,
     previewAuraId,
-    setPreviewAuraId
+    setPreviewAuraId,
+    androidMode: isAndroidApp(),
+    androidAllowedRoutes: ANDROID_ALLOWED_ROUTES
   };
 
   return (

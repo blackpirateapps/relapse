@@ -1,0 +1,295 @@
+# AI Handoff Document
+
+## Purpose
+This document is the operational handoff for AI agents working on this codebase. It captures architecture, feature behavior, API/data contracts, and required delivery workflow.
+
+## Mandatory Agent Workflow
+For every non-trivial code/task update, the AI agent must:
+
+1. Implement the requested change.
+2. Update this `AI_HANDOFF.md` if behavior, API, schema, flows, tooling, or project conventions changed.
+3. Run relevant verification (`npm run build` at minimum when feasible; targeted checks for touched areas).
+4. Commit with a clear message.
+5. Push to remote.
+
+Required git routine:
+
+```bash
+git add -A
+git commit -m "<clear, scoped message>"
+git push
+```
+
+If push is blocked (no remote/permissions), the agent must document the exact blocker in its final response.
+
+## Project Snapshot
+- Stack: Vite + React frontend, Vercel-style serverless APIs in `api/`.
+- Datastore: Turso/SQLite via `@libsql/client`.
+- Auth: simple cookie gate (`phoenix_auth=true`) from `/api/login`.
+- Routing: SPA via `react-router-dom`; Vercel rewrite sends non-API routes to `index.html`.
+- App model: streak progression game with rank evolution, coin economy, shop/inventory, forest simulation, minigames, urge tasks, and relapse lifecycle.
+- Mobile shell: Capacitor Android support with focused route mode and native streak notification bridge.
+
+## Core Runtime Flow
+1. `src/App.jsx` boots and calls `refetchData()`.
+2. `refetchData()` loads:
+   - `GET /api/state` -> user state + forest
+   - `GET /api/shop` -> shop items + tree type metadata
+3. State hydration parses `upgrades` and `equipped_upgrades` JSON.
+4. App computes:
+   - `totalHours` since `lastRelapse`
+   - `streakCoins = floor(10 * hours^1.2)`
+   - `totalCoins = coinsAtLastRelapse + streakCoins`
+   - `coinRatePerHour = 12 * hours^0.2`
+5. Routes render with context (`AppContext`) and global/forest backgrounds.
+
+## Frontend Features
+
+### Global App/Navigation
+- `src/App.jsx`: route table, lazy loading, preview mode banner.
+- `src/components/Sidebar.jsx`: nav + mobile drawer; special skinning when `kawaii_city_bg` equipped/previewed.
+- `src/components/Header.jsx`: page title + live coin panel.
+- Android mode (`Capacitor` native Android):
+  - Limits accessible routes to `"/"` (Journey) and `"/progression"`.
+  - Sidebar only shows Journey + Progression.
+  - Journey page hides the urge-task CTA, keeps relapse CTA active.
+  - Unsupported paths redirect to Journey.
+
+### Journey (Home)
+- `src/pages/HomePage.jsx`
+- Shows current phoenix image/rank and live streak timer.
+- CTA: `I Feel an Urge` and `I Relapsed`.
+- Relapse triggers `POST /api/relapse` and refetches state.
+- In Android mode, only `I Relapsed` is shown to preserve the focused app surface.
+
+### Android Streak Notification
+- JS bridge:
+  - `src/mobile/useStreakNotification.js`
+  - `src/mobile/streakNotification.js`
+  - Starts/updates a native Android foreground service when `state.lastRelapse` changes.
+- Native Android sources (copied into generated Capacitor Android project by script):
+  - `mobile/android/com/relapse/phoenix/StreakNotificationPlugin.java`
+  - `mobile/android/com/relapse/phoenix/StreakNotificationService.java`
+  - `mobile/android/com/relapse/phoenix/MainActivity.java`
+- Service behavior:
+  - Ongoing notification (`IMPORTANCE_LOW`) with live streak timer (`d h m s`) updated every second.
+  - Notification remains persistent while the service is running.
+
+### Progression + Level Showcase
+- `src/pages/ProgressionPage.jsx`: timeline of ranks, unlocks, rewards, and avg coins/hour per level.
+- `src/pages/LevelShowcasePage.jsx`: animated rank detail page with next/previous browsing.
+
+### Forest
+- `src/pages/ForestPage.jsx`
+- Canvas-based interactive forest:
+  - Buy saplings by clicking placement point.
+  - Drag existing trees to move (`POST /api/shop` with `action=move_tree`).
+  - Growth/mature/wither visuals.
+  - Particle effects and responsive game loop.
+
+### Aviary
+- `src/pages/AviaryPage.jsx`
+- Displays current phoenix + archived phoenix history (`GET /api/history`).
+- Detail modal includes timeline and equipped upgrades at archive time.
+
+### Shop + Item Details
+- `src/pages/ShopPage.jsx` and `src/pages/ShopItemPage.jsx`
+- Supports item categories:
+  - `phoenix_skin`
+  - `background_theme`
+  - `forest_theme`
+  - `phoenix_aura`
+  - `potion`
+  - `tree_sapling`
+- Buy/equip/unequip flows, preview support for themes/auras.
+
+### Inventory
+- `src/pages/InventoryPage.jsx`
+- Potion management (`POST /api/potion`) and active timer display.
+
+### Urge Tasks
+- `src/pages/UrgeTasksPage.jsx`
+- Task list from `GET /api/urge`.
+- Supports start and claim actions.
+
+### Pushup Session
+- `src/pages/PushupSessionPage.jsx`
+- Session phases: countdown, exercise batches, timed break, extra rest, post-completion continue/end.
+- End session saves rewards; cancel applies penalty.
+
+### Minigames
+- `src/pages/PhoenixFlightPage.jsx`: flappy-style obstacle game.
+- `src/pages/AsteroidShooterPage.jsx`: fullscreen shooter with score->coin conversion.
+- Both use `POST /api/minigame` actions:
+  - `start_game`
+  - `end_game`
+
+### Phoenix Rendering
+- `src/components/PhoenixImage.jsx`
+- Chooses base rank image or equipped skin stage image.
+- Applies equipped or previewed aura visual effects.
+
+## Background/Theme System
+- Theme components in `src/components/`:
+  - `Starfield` (default), `FireBackground`, `PhoenixConstellationBackground`, `SolarSystemBackground`, `KawaiiCityBackground`, `StarfieldWarpBackground`
+  - Forest: `ForestBackground` default + `DarkForestBackground`
+- Mapped in `App.jsx`:
+  - Global `background_theme` map for non-forest routes.
+  - Forest-specific `forest_theme` map for `/forest`.
+- Preview mode via context: `previewThemeId`, `previewAuraId`.
+
+## Backend API Map
+
+### Auth
+- `POST /api/login` (`api/login.js`)
+  - Validates `APP_PASSWORD`.
+  - Sets `phoenix_auth` cookie.
+- `checkAuth(req)` in `api/auth.js` reads cookie.
+
+### State
+- `GET /api/state` (`api/state.js`)
+  - Calls `initDb()`
+  - Matures trees by `matureDate`
+  - Auto-claims pending rank rewards into `coinsAtLastRelapse`
+  - Returns user state + `forest` rows
+
+### Shop
+- `GET /api/shop` (`api/shop.js`)
+  - Returns active `shopItems` and normalized `treeTypes` (with stages)
+- `POST /api/shop`
+  - `action=buy`: purchase item (coin checks, ownership checks, potion rules, tree planting)
+  - `action=equip`: toggle equipment with same-type exclusivity
+  - `action=move_tree`: persist tree x/y
+
+### Relapse
+- `POST /api/relapse` (`api/relapse.js`)
+  - Potion protection path (shielded relapse archive)
+  - Normal relapse path:
+    - archive phoenix history
+    - bank streak+unclaimed coins into base
+    - wither growing trees
+    - remove scarlet skin + apply cumulative 1% discount to scarlet cost
+    - reset streak timestamp and potion streak counters
+
+### Urge Tasks
+- `GET /api/urge` (`api/urge.js`): returns tasks with computed `is_complete`
+- `POST /api/urge`
+  - `action=start`
+  - `action=end_session`
+  - `action=claim`
+  - `action=cancel` (pushup task penalty: -200 coins)
+
+### Potion
+- `POST /api/potion` (`api/potion.js`)
+  - Consumes one inventory potion.
+  - Activates 12-hour protection window.
+
+### Minigames
+- `POST /api/minigame` (`api/minigame.js`)
+  - `start_game`: charges entry cost, creates play row
+  - `end_game`: finalizes score, awards `floor(score / 5)` coins
+
+### History
+- `GET /api/history` (`api/history.js`): archived phoenix entries.
+
+### Admin
+- `GET/POST /api/admin` (`api/admin.js`): currently preview-oriented helper for asset path conventions.
+
+## Data Model (Turso/SQLite)
+Defined/initialized in `api/db.js`:
+
+- `user_state`
+  - Core streak/coin/rank progression
+  - JSON fields: `upgrades`, `equipped_upgrades`
+  - Potion columns:
+    - `potion_inventory`
+    - `potion_last_purchase_at`
+    - `potion_purchases_this_streak`
+    - `potion_active_until`
+    - `potion_relapse_used_at`
+    - `potion_protected_uses_this_streak`
+- `phoenix_history`
+- `forest`
+- `shop_items`
+- `shop_item_images`
+- `minigames`
+- `minigame_plays`
+- `urge_tasks`
+
+`initDb()` also seeds:
+- Default user row (`id=1`)
+- Minigames: `phoenix_flight`, `asteroid_shooter`
+- Themes, auras, potion, scarlet skin + scarlet progression images
+- Urge tasks (`read_newspaper`, `pushup_45`)
+- Tree saplings + growth-stage images
+
+## Economy and Rule Logic
+- Streak coins formula: `floor(10 * hours^1.2)`
+- Coin rate display: `12 * hours^0.2`
+- Rank rewards can be auto-claimed in `/api/state`.
+- Potions:
+  - Max 2 purchases per streak.
+  - 1 purchase per 2 days.
+  - 12-hour active effect.
+  - Relapse shield usable under active constraints.
+- Urge rewards:
+  - Newspaper: +200 coins, +1 hour.
+  - Pushup: +1 coin per 2 seconds, +4x session duration as streak hours.
+  - Cancel pushup session: -200 coins.
+- Relapse:
+  - Banks unclaimed level rewards + streak coins into base.
+  - Resets progress clock (`lastRelapse`) and claimed level.
+  - Withers growing trees.
+
+## Assets and Content Conventions
+- Phoenix skins: `public/img/skins/<skin-id>/` with 16 stage files.
+- Tree art: `public/img/trees/<variant>/`.
+- Auras: `public/img/auras/`.
+- Theme previews in `shop_items.preview_image`.
+- Adding new background/forest theme requires:
+  1. component under `src/components/`
+  2. theme map entry in `src/App.jsx`
+  3. seed row in `api/db.js`
+  4. optional preview asset in `public/img/`
+
+## Local Dev and Deployment
+- Frontend: `npm run dev` (Vite)
+- API local proxy target: `http://localhost:3001` (see `vite.config.js`)
+- API dev server: `node dev-server.js`
+- Deploy model: Vercel rewrites in `vercel.json`
+- Capacitor/Android:
+  - Config: `capacitor.config.json`
+  - If `CAP_SERVER_URL` env is provided, it is injected into Capacitor config via `scripts/set-cap-server-url.mjs`.
+  - API calls now include `credentials: 'include'` and can use `VITE_MOBILE_API_BASE_URL`/`VITE_API_BASE_URL` override if needed.
+  - Prepare Android project: `npm run android:prepare`
+  - Build debug APK: `npm run android:ci:apk`
+
+## CI Workflow (APK)
+- Workflow file: `.github/workflows/android-apk.yml`
+- Trigger:
+  - `workflow_dispatch` (optional `server_url` input)
+  - Push to `main`
+- Build flow:
+  1. `npm ci`
+  2. `npm run android:ci:apk` (build web, prepare Capacitor Android, assemble debug APK)
+  3. Upload artifact: `android/app/build/outputs/apk/debug/app-debug.apk`
+
+## Known Gaps / Risks
+- `api/history.js` does not check auth currently.
+- `api/admin.js` imports `checkAuth` but does not enforce it.
+- `api/minigame.js` does not call `initDb()` directly (depends on prior initialization via other routes).
+- Asteroid shooter UI says `START GAME (100 Coins)`, seeded backend entry cost is `20`.
+- Repo contains legacy `.bak` and `.txt` API files; avoid editing backups by mistake.
+
+## AI Agent Editing Guidance
+- Preserve existing patterns (Tailwind + inline style blocks + serverless handlers).
+- Keep coin economy formulas consistent unless explicitly requested.
+- When touching shop types or progression IDs, ensure parity across:
+  - DB seed data
+  - frontend rendering logic
+  - equip/preview logic
+  - asset folder naming
+- After any behavior change:
+  - update this handoff doc,
+  - commit,
+  - push.
