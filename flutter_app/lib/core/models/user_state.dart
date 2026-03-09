@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class UserState {
   UserState({
     required this.lastRelapse,
@@ -55,8 +57,7 @@ class UserState {
       if (value is Map<String, dynamic>) return value;
       if (value is String && value.isNotEmpty) {
         try {
-          final decoded = value;
-          // Already decoded by jsonDecode in api_client
+          final decoded = jsonDecode(value);
           if (decoded is Map<String, dynamic>) return decoded;
         } catch (_) {}
       }
