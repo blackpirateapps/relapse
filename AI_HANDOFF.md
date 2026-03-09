@@ -262,7 +262,7 @@ Defined/initialized in `api/db.js`:
   - If `CAP_SERVER_URL` env is provided, it is injected into Capacitor config via `scripts/set-cap-server-url.mjs`.
   - API calls now include `credentials: 'include'` and can use `VITE_MOBILE_API_BASE_URL`/`VITE_API_BASE_URL` override if needed.
   - Prepare Android project: `npm run android:prepare`
-  - Build debug APK: `npm run android:ci:apk`
+  - Build release APK: `npm run android:ci:apk`
 
 ## CI Workflow (APK)
 - Workflow file: `.github/workflows/android-apk.yml`
@@ -271,8 +271,8 @@ Defined/initialized in `api/db.js`:
   - Push to `main`
 - Build flow:
   1. `npm ci`
-  2. `npm run android:ci:apk` (build web, prepare Capacitor Android, assemble debug APK)
-  3. Upload artifact: `android/app/build/outputs/apk/debug/app-debug.apk`
+  2. `npm run android:ci:apk` (build web, prepare Capacitor Android, assemble release APK)
+  3. Upload artifact: `android/app/build/outputs/apk/release/app-release-unsigned.apk`
 
 ## Known Gaps / Risks
 - `api/history.js` does not check auth currently.

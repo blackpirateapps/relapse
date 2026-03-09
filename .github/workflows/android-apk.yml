@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       server_url:
-        description: "Optional web app URL to load inside the Android shell (e.g. https://your-app.vercel.app)"
+        description: "Web app URL for Android shell (e.g. https://your-app.vercel.app)"
         required: false
         type: string
   push:
@@ -39,6 +39,9 @@ jobs:
             echo "CAP_SERVER_URL=$INPUT_URL" >> "$GITHUB_ENV"
           elif [ -n "$VAR_URL" ]; then
             echo "CAP_SERVER_URL=$VAR_URL" >> "$GITHUB_ENV"
+          else
+            echo "CAP_SERVER_URL is required. Provide workflow input 'server_url' or repository variable 'CAP_SERVER_URL'." >&2
+            exit 1
           fi
 
       - name: Install dependencies
@@ -47,11 +50,11 @@ jobs:
       - name: Install Capacitor tooling for CI
         run: npm install --no-save @capacitor/cli@6 @capacitor/core@6 @capacitor/android@6 @capacitor/local-notifications@6
 
-      - name: Build debug APK
+      - name: Build release APK
         run: npm run android:ci:apk
 
-      - name: Upload APK artifact
+      - name: Upload release APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: phoenix-journey-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: phoenix-journey-release-apk
+          path: android/app/build/outputs/apk/release/app-release-unsigned.apk

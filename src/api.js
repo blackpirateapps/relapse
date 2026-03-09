@@ -22,18 +22,30 @@ const apiRequest = async (endpoint, options = {}) => {
 };
 
 export const login = async (password) => {
+  let response;
+
   try {
-    const response = await fetch(buildApiUrl('/api/login'), {
+    response = await fetch(buildApiUrl('/api/login'), {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password })
     });
-    const data = await response.json();
-    return data.success;
   } catch (_error) {
+    throw new Error('Unable to reach the server. Check CAP_SERVER_URL and internet connection.');
+  }
+
+  if (response.status === 401) {
     return false;
   }
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: 'Login failed' }));
+    throw new Error(errorData.message || 'Login failed');
+  }
+
+  const data = await response.json().catch(() => ({ success: false }));
+  return !!data.success;
 };
 
 export const fetchState = () => apiRequest('state');

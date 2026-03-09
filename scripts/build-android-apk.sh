@@ -8,4 +8,4 @@ npm run build
 npm run android:prepare
 
 cd android
-./gradlew --no-daemon assembleDebug
+./gradlew --no-daemon assembleRelease
