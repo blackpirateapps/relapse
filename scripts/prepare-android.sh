@@ -20,6 +20,11 @@ cp mobile/android/com/relapse/phoenix/StreakNotificationService.java "$ANDROID_J
 
 MANIFEST_PATH="android/app/src/main/AndroidManifest.xml"
 
+if ! grep -q 'android.permission.INTERNET' "$MANIFEST_PATH"; then
+  sed -i '/<manifest[^>]*>/a\
+    <uses-permission android:name="android.permission.INTERNET" />' "$MANIFEST_PATH"
+fi
+
 if ! grep -q 'android.permission.POST_NOTIFICATIONS' "$MANIFEST_PATH"; then
   sed -i '/<manifest[^>]*>/a\
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\

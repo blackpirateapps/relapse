@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_DIR="$ROOT_DIR/flutter_app"
+MANIFEST_PATH="$APP_DIR/android/app/src/main/AndroidManifest.xml"
 
 KEYSTORE_DIR="$APP_DIR/android/keystore"
 KEYSTORE_PATH="$KEYSTORE_DIR/upload-keystore.jks"
@@ -17,6 +18,11 @@ keytool -genkeypair -v \
   -storepass android \
   -keypass android \
   -dname "CN=Phoenix Journey, OU=Mobile, O=BlackPirateApps, L=NA, S=NA, C=US"
+
+if ! grep -q 'android.permission.INTERNET' "$MANIFEST_PATH"; then
+  sed -i '/<manifest[^>]*>/a\
+    <uses-permission android:name="android.permission.INTERNET" />' "$MANIFEST_PATH"
+fi
 
 cd "$APP_DIR/android"
 ./gradlew --no-daemon assembleRelease \

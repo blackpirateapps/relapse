@@ -276,6 +276,7 @@ Defined/initialized in `api/db.js`:
   - App code: `flutter_app/`
   - CI build script: `scripts/flutter-ci-build.sh`
   - Uses `flutter create .` in CI to generate Android wrapper files.
+  - `scripts/flutter-ci-build.sh` enforces `android.permission.INTERNET` in the generated `android/app/src/main/AndroidManifest.xml` before Gradle build.
   - Uses an auto-generated keystore in CI for signed release builds.
 
 ## CI Workflow (APK)
@@ -288,6 +289,7 @@ Defined/initialized in `api/db.js`:
   2. Prepare Flutter Android project (`flutter create . --platforms=android`, `flutter pub get`)
   3. Run `flutter analyze`
   4. Run `bash scripts/flutter-ci-build.sh`
+     - enforce `android.permission.INTERNET` in generated Android manifest
      - generate keystore
      - Gradle `assembleRelease` with injected signing properties
   5. Upload release APK artifact(s)
