@@ -79,12 +79,22 @@ If push is blocked (no remote/permissions), the agent must document the exact bl
 ### Flutter Android App (Native)
 - Location: `flutter_app/`
 - Key modules:
-  - `lib/core/`: config, models, services, app state
-  - `lib/features/journey/`: native Journey screen + relapse action
+  - `lib/core/`: config, models (UserState, ShopItem, Rank), services (ApiClient, LocalCache, SessionStore), app state
+  - `lib/features/journey/`: native Journey screen + relapse action + equipped item visuals
   - `lib/features/progression/`: native Progression timeline
+  - `lib/features/shop/`: native Shop page with buy/equip flows
   - `lib/features/placeholder/`: placeholder pages for non-migrated modules
+  - `lib/widgets/`: StreakTicker (self-contained 1s timer), LoginGate
 - API base URL is hardcoded in Flutter at `https://phoenix.blackpiratex.com`.
 - Graphics are bundled as app assets under `flutter_app/assets/images/phoenix/`.
+- **Offline-first**: `LocalCache` service caches state + shop JSON in SharedPreferences. On launch, app shows cached data instantly and syncs in background. 5-minute periodic background sync.
+- **Persistent login**: Password saved in SharedPreferences via `SessionStore`. If cached state exists, app skips login screen even when offline.
+- **Performance**: The global 1-second `Timer.periodic` was replaced with a dedicated `StreakTicker` widget that only rebuilds itself, not the entire widget tree.
+- **Equipped item visuals**:
+  - **Skins**: If a `phoenix_skin` is equipped, skin progression images load from web server via `Image.network` per rank stage.
+  - **Auras**: If a `phoenix_aura` is equipped, aura image overlays behind the phoenix using a `Stack`.
+  - **Backgrounds**: If a `background_theme` is equipped, a matching gradient is applied to the Journey page scaffold.
+- Dependencies: `http`, `flutter_svg`, `shared_preferences`, `cached_network_image`.
 
 ### Progression + Level Showcase
 - `src/pages/ProgressionPage.jsx`: timeline of ranks, unlocks, rewards, and avg coins/hour per level.

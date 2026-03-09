@@ -5,6 +5,7 @@ import 'core/theme/app_theme.dart';
 import 'features/journey/journey_page.dart';
 import 'features/placeholder/placeholder_page.dart';
 import 'features/progression/progression_page.dart';
+import 'features/shop/shop_page.dart';
 import 'widgets/login_gate.dart';
 
 class PhoenixNativeApp extends StatefulWidget {
@@ -47,7 +48,7 @@ class _PhoenixNativeAppState extends State<PhoenixNativeApp> {
             JourneyPage(appState: _appState),
             ProgressionPage(appState: _appState),
             const PlaceholderPage(title: 'Forest', detail: 'Native forest module is planned.'),
-            const PlaceholderPage(title: 'Shop', detail: 'Native shop module is planned.'),
+            ShopPage(appState: _appState),
             const PlaceholderPage(title: 'Aviary', detail: 'Native aviary module is planned.')
           ];
 
