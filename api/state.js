@@ -1,6 +1,7 @@
 import db, { initDb } from './db.js';
 import { checkAuth } from './auth.js';
 import { ranks } from './ranks.js';
+import { applyMobileCors, handleOptions } from './http.js';
 
 function getRank(totalHours) {
   for (let i = ranks.length - 1; i >= 0; i--) {
@@ -10,6 +11,11 @@ function getRank(totalHours) {
 }
 
 export default async function handler(req, res) {
+  applyMobileCors(req, res);
+  if (handleOptions(req, res)) {
+    return;
+  }
+
   if (!checkAuth(req)) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
@@ -62,4 +68,3 @@ export default async function handler(req, res) {
     res.status(500).json({ message: 'Failed to fetch state from database.', error: error.message });
   }
 }
-

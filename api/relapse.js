@@ -1,8 +1,14 @@
 import db, { initDb } from './db.js';
 import { checkAuth } from './auth.js';
 import { ranks, getRank } from './ranks.js';
+import { applyMobileCors, handleOptions } from './http.js';
 
 export default async function handler(req, res) {
+    applyMobileCors(req, res);
+    if (handleOptions(req, res)) {
+        return;
+    }
+
     if (req.method !== 'POST') {
         return res.status(405).json({ message: 'Method Not Allowed' });
     }

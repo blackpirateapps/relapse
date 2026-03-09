@@ -25,10 +25,10 @@ If push is blocked (no remote/permissions), the agent must document the exact bl
 ## Project Snapshot
 - Stack: Vite + React frontend, Vercel-style serverless APIs in `api/`.
 - Datastore: Turso/SQLite via `@libsql/client`.
-- Auth: simple cookie gate (`phoenix_auth=true`) from `/api/login`.
+- Auth: cookie gate (`phoenix_auth=true`) for web and `X-App-Password`/`Authorization: Bearer` support for native mobile.
 - Routing: SPA via `react-router-dom`; Vercel rewrite sends non-API routes to `index.html`.
 - App model: streak progression game with rank evolution, coin economy, shop/inventory, forest simulation, minigames, urge tasks, and relapse lifecycle.
-- Mobile shell: Capacitor Android support with focused route mode and native streak notification bridge.
+- Native mobile app: Flutter app in `flutter_app/` focused on Journey + Progression (other tabs are placeholders).
 
 ## Core Runtime Flow
 1. `src/App.jsx` boots and calls `refetchData()`.
@@ -45,11 +45,11 @@ If push is blocked (no remote/permissions), the agent must document the exact bl
 
 ## Frontend Features
 
-### Global App/Navigation
+### Global App/Navigation (Web)
 - `src/App.jsx`: route table, lazy loading, preview mode banner.
 - `src/components/Sidebar.jsx`: nav + mobile drawer; special skinning when `kawaii_city_bg` equipped/previewed.
 - `src/components/Header.jsx`: page title + live coin panel.
-- Android mode (`Capacitor` native Android):
+- Android mode (`Capacitor` native Android, legacy path still present):
   - Limits accessible routes to `"/"` (Journey) and `"/progression"`.
   - Sidebar only shows Journey + Progression.
   - Journey page hides the urge-task CTA, keeps relapse CTA active.
@@ -74,6 +74,16 @@ If push is blocked (no remote/permissions), the agent must document the exact bl
 - Service behavior:
   - Ongoing notification (`IMPORTANCE_LOW`) with live streak timer (`d h m s`) updated every second.
   - Notification remains persistent while the service is running.
+
+### Flutter Android App (Native)
+- Location: `flutter_app/`
+- Key modules:
+  - `lib/core/`: config, models, services, app state
+  - `lib/features/journey/`: native Journey screen + relapse action
+  - `lib/features/progression/`: native Progression timeline
+  - `lib/features/placeholder/`: placeholder pages for non-migrated modules
+- API base URL is hardcoded in Flutter at `https://phoenix.blackpiratex.com`.
+- Graphics are bundled as app assets under `flutter_app/assets/images/phoenix/`.
 
 ### Progression + Level Showcase
 - `src/pages/ProgressionPage.jsx`: timeline of ranks, unlocks, rewards, and avg coins/hour per level.
@@ -144,10 +154,14 @@ If push is blocked (no remote/permissions), the agent must document the exact bl
 - `POST /api/login` (`api/login.js`)
   - Validates `APP_PASSWORD`.
   - Sets `phoenix_auth` cookie.
-- `checkAuth(req)` in `api/auth.js` reads cookie.
+- `checkAuth(req)` in `api/auth.js` accepts:
+  - authenticated cookie, or
+  - `X-App-Password: <APP_PASSWORD>`, or
+  - `Authorization: Bearer <APP_PASSWORD>`
 
 ### State
 - `GET /api/state` (`api/state.js`)
+  - Applies mobile-friendly CORS headers and handles `OPTIONS`.
   - Calls `initDb()`
   - Matures trees by `matureDate`
   - Auto-claims pending rank rewards into `coinsAtLastRelapse`
@@ -163,6 +177,7 @@ If push is blocked (no remote/permissions), the agent must document the exact bl
 
 ### Relapse
 - `POST /api/relapse` (`api/relapse.js`)
+  - Applies mobile-friendly CORS headers and handles `OPTIONS`.
   - Potion protection path (shielded relapse archive)
   - Normal relapse path:
     - archive phoenix history
@@ -257,22 +272,26 @@ Defined/initialized in `api/db.js`:
 - API local proxy target: `http://localhost:3001` (see `vite.config.js`)
 - API dev server: `node dev-server.js`
 - Deploy model: Vercel rewrites in `vercel.json`
-- Capacitor/Android:
-  - Config: `capacitor.config.json`
-  - Mobile server URL is hardcoded to `https://phoenix.blackpiratex.com` (can still be overridden by `CAP_SERVER_URL` in CI).
-  - API calls include `credentials: 'include'`; native Android defaults to `https://phoenix.blackpiratex.com`.
-  - Prepare Android project: `npm run android:prepare`
-  - Build release APK: `npm run android:ci:apk`
+- Flutter/Android (native):
+  - App code: `flutter_app/`
+  - CI build script: `scripts/flutter-ci-build.sh`
+  - Uses `flutter create .` in CI to generate Android wrapper files.
+  - Uses an auto-generated keystore in CI for signed release builds.
 
 ## CI Workflow (APK)
 - Workflow file: `.github/workflows/android-apk.yml`
 - Trigger:
-  - `workflow_dispatch` (optional `server_url` input)
+  - `workflow_dispatch`
   - Push to `main`
 - Build flow:
-  1. `npm ci`
-  2. `npm run android:ci:apk` (build web, prepare Capacitor Android, assemble release APK)
-  3. Upload artifact: `android/app/build/outputs/apk/release/app-release-unsigned.apk`
+  1. Set up Java + Flutter
+  2. Run `bash scripts/flutter-ci-build.sh`
+     - `flutter create . --platforms=android`
+     - `flutter pub get`
+     - `flutter analyze`
+     - generate keystore
+     - Gradle `assembleRelease` with injected signing properties
+  3. Upload release APK artifact(s)
 
 ## Known Gaps / Risks
 - `api/history.js` does not check auth currently.
