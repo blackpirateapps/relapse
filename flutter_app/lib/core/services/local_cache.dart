@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LocalCache {
   static const _stateKey = 'cached_state';
   static const _shopKey = 'cached_shop';
+  static const _historyKey = 'cached_history';
 
   Future<void> saveState(Map<String, dynamic> json) async {
     final prefs = await SharedPreferences.getInstance();
@@ -39,9 +40,26 @@ class LocalCache {
     }
   }
 
+  Future<void> saveHistory(List<dynamic> json) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_historyKey, jsonEncode(json));
+  }
+
+  Future<List<dynamic>?> loadHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_historyKey);
+    if (raw == null) return null;
+    try {
+      return jsonDecode(raw) as List<dynamic>;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> clearAll() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_stateKey);
     await prefs.remove(_shopKey);
+    await prefs.remove(_historyKey);
   }
 }

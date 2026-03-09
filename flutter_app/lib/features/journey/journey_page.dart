@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/constants/app_config.dart';
 import '../../core/models/shop_item.dart';
 import '../../core/state/app_state.dart';
+import '../../core/utils/image_urls.dart';
 import '../../widgets/streak_ticker.dart';
 
 /// Maps background theme IDs to gradient color pairs.
@@ -60,63 +61,136 @@ class JourneyPage extends StatelessWidget {
       child: RefreshIndicator(
         onRefresh: appState.refresh,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Text('Current Phoenix', style: TextStyle(color: Colors.white70)),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: 200,
-                      child: _PhoenixDisplay(
-                        rankId: rank.id,
-                        equippedSkin: equippedSkin,
-                        equippedAura: equippedAura,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(rank.name, textAlign: TextAlign.center, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 6),
-                    if (state != null)
-                      StreakTicker(lastRelapse: state.lastRelapse)
-                    else
-                      const Text('--', textAlign: TextAlign.center, style: TextStyle(fontSize: 20, color: Color(0xFF73F0A9))),
-                    const SizedBox(height: 8),
-                    Text(rank.storyline, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70)),
-                  ],
+            // ── Notification toggle ──
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Icon(
+                  appState.notificationEnabled
+                      ? Icons.notifications_active
+                      : Icons.notifications_off_outlined,
+                  size: 18,
+                  color: Colors.white54,
                 ),
+                const SizedBox(width: 4),
+                SizedBox(
+                  height: 28,
+                  child: Switch.adaptive(
+                    value: appState.notificationEnabled,
+                    onChanged: appState.toggleNotification,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            // ── Phoenix graphic (big) ──
+            SizedBox(
+              height: 280,
+              child: _PhoenixDisplay(
+                rankId: rank.id,
+                equippedSkin: equippedSkin,
+                equippedAura: equippedAura,
               ),
             ),
+
+            const SizedBox(height: 20),
+
+            // ── Rank name ──
+            Text(
+              rank.name,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+
+            const SizedBox(height: 4),
+
+            Text(
+              rank.storyline,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white54, fontSize: 13),
+            ),
+
+            const SizedBox(height: 24),
+
+            // ── Streak timer (big) ──
+            if (state != null)
+              StreakTicker(
+                lastRelapse: state.lastRelapse,
+                style: const TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF73F0A9),
+                  letterSpacing: 2,
+                  fontFeatures: [FontFeature.tabularFigures()],
+                ),
+                textAlign: TextAlign.center,
+              )
+            else
+              const Text(
+                '--',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 40, color: Color(0xFF73F0A9)),
+              ),
+
+            const SizedBox(height: 8),
+
+            // Coin balance
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.monetization_on, color: Color(0xFFFFB300), size: 20),
+                const SizedBox(width: 6),
+                Text(
+                  '${appState.totalCoins}',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFFFFB300),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 40),
+
+            // ── Action buttons ──
+            FilledButton.tonal(
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Urge tasks coming soon to the native app.'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+              child: const Text('I Feel an Urge', style: TextStyle(fontSize: 16)),
+            ),
+
             const SizedBox(height: 12),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Text('Coin Balance', style: TextStyle(color: Colors.white70)),
-                    const SizedBox(height: 6),
-                    Text('${appState.totalCoins}', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 14),
-                    FilledButton.tonal(
-                      onPressed: appState.isLoading ? null : appState.refresh,
-                      child: const Text('Refresh State'),
-                    ),
-                    const SizedBox(height: 10),
-                    FilledButton(
-                      style: FilledButton.styleFrom(backgroundColor: const Color(0xFFD14A4A)),
-                      onPressed: appState.isLoading ? null : () => _confirmRelapse(context),
-                      child: const Text('I Relapsed'),
-                    ),
-                  ],
-                ),
+
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFD14A4A),
+                minimumSize: const Size.fromHeight(52),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
+              onPressed: appState.isLoading ? null : () => _confirmRelapse(context),
+              child: const Text('I Relapsed', style: TextStyle(fontSize: 16)),
             ),
-            const SizedBox(height: 10),
+
+            const SizedBox(height: 24),
             TextButton(onPressed: appState.logout, child: const Text('Log out')),
           ],
         ),
@@ -136,7 +210,6 @@ class JourneyPage extends StatelessWidget {
         ],
       ),
     );
-
     if (confirmed == true) {
       await appState.postRelapse();
     }
@@ -160,91 +233,58 @@ class _PhoenixDisplay extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Aura behind phoenix (if equipped)
+        // Aura behind phoenix
         if (equippedAura != null)
-          _buildWebImage(
-            _resolveAuraUrl(equippedAura!),
-            size: 200,
+          Opacity(
             opacity: 0.6,
+            child: CachedNetworkImage(
+              imageUrl: auraImageUrl(equippedAura!.previewImage ?? ''),
+              width: 280,
+              height: 280,
+              fit: BoxFit.contain,
+              errorWidget: (_, __, ___) => const SizedBox.shrink(),
+            ),
           ),
 
-        // Phoenix image: use skin if equipped, else default SVG
+        // Phoenix image: skin or default (from URL)
         if (equippedSkin != null)
           _buildSkinImage(equippedSkin!, rankId)
         else
-          SizedBox(height: 180, child: _DefaultPhoenixArt(rankId)),
+          CachedNetworkImage(
+            imageUrl: phoenixImageUrl(rankId),
+            height: 240,
+            fit: BoxFit.contain,
+            placeholder: (_, __) => const SizedBox(
+              height: 240,
+              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            ),
+            errorWidget: (_, __, ___) => const Icon(Icons.local_fire_department, size: 120, color: Colors.white24),
+          ),
       ],
     );
   }
 
   Widget _buildSkinImage(ShopItem skin, String rankId) {
-    // Find the image matching the current rank stage
     final matchingImage = skin.images.where((img) => img.stageName == rankId).firstOrNull;
     if (matchingImage != null && matchingImage.imageUrl.isNotEmpty) {
-      final url = matchingImage.imageUrl.startsWith('http')
-          ? matchingImage.imageUrl
-          : '${AppConfig.apiBaseUrl}${matchingImage.imageUrl}';
-      return Image.network(
-        url,
-        height: 180,
+      return CachedNetworkImage(
+        imageUrl: skinStageImageUrl(matchingImage.imageUrl),
+        height: 240,
         fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) => SizedBox(height: 180, child: _DefaultPhoenixArt(rankId)),
+        placeholder: (_, __) => const SizedBox(height: 240, child: Center(child: CircularProgressIndicator(strokeWidth: 2))),
+        errorWidget: (_, __, ___) => CachedNetworkImage(
+          imageUrl: phoenixImageUrl(rankId),
+          height: 240,
+          fit: BoxFit.contain,
+        ),
       );
     }
-    // Fallback: use preview image
-    final previewUrl = skin.previewImage;
-    if (previewUrl != null && previewUrl.isNotEmpty) {
-      final url = previewUrl.startsWith('http') ? previewUrl : '${AppConfig.apiBaseUrl}$previewUrl';
-      return Image.network(
-        url,
-        height: 180,
-        fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) => SizedBox(height: 180, child: _DefaultPhoenixArt(rankId)),
-      );
-    }
-    return SizedBox(height: 180, child: _DefaultPhoenixArt(rankId));
-  }
-
-  String _resolveAuraUrl(ShopItem aura) {
-    final preview = aura.previewImage ?? '';
-    if (preview.startsWith('http')) return preview;
-    return '${AppConfig.apiBaseUrl}$preview';
-  }
-
-  Widget _buildWebImage(String url, {double size = 180, double opacity = 1.0}) {
-    return Opacity(
-      opacity: opacity,
-      child: Image.network(
-        url,
-        width: size,
-        height: size,
-        fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-      ),
+    return CachedNetworkImage(
+      imageUrl: phoenixImageUrl(rankId),
+      height: 240,
+      fit: BoxFit.contain,
+      placeholder: (_, __) => const SizedBox(height: 240, child: Center(child: CircularProgressIndicator(strokeWidth: 2))),
+      errorWidget: (_, __, ___) => const Icon(Icons.local_fire_department, size: 120, color: Colors.white24),
     );
-  }
-}
-
-class _DefaultPhoenixArt extends StatelessWidget {
-  const _DefaultPhoenixArt(this.rankId);
-
-  final String rankId;
-
-  @override
-  Widget build(BuildContext context) {
-    return SvgPicture.asset(_assetPath(rankId), fit: BoxFit.contain);
-  }
-
-  String _assetPath(String id) {
-    const fallback = 'assets/images/phoenix/celestial-phoenix.svg';
-    if (id.startsWith('egg-')) return 'assets/images/phoenix/$id.svg';
-    if (id == 'hatchling-1') return 'assets/images/phoenix/hatchling-1.svg';
-    if (id == 'hatchling-2') return 'assets/images/phoenix/hatchling-1.svg';
-    if (id == 'hatchling-3') return 'assets/images/phoenix/hatchling-3.svg';
-    if (id == 'chick-1') return 'assets/images/phoenix/chick-1.svg';
-    if (id == 'chick-2') return 'assets/images/phoenix/chick-2.svg';
-    if (id == 'youngling-1' || id == 'youngling-2') return 'assets/images/phoenix/youngling.svg';
-    if (id == 'celestial-phoenix') return 'assets/images/phoenix/celestial-phoenix.svg';
-    return fallback;
   }
 }

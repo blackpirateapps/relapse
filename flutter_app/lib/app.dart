@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'core/state/app_state.dart';
 import 'core/theme/app_theme.dart';
+import 'features/aviary/aviary_page.dart';
 import 'features/journey/journey_page.dart';
 import 'features/placeholder/placeholder_page.dart';
 import 'features/progression/progression_page.dart';
@@ -49,7 +50,7 @@ class _PhoenixNativeAppState extends State<PhoenixNativeApp> {
             ProgressionPage(appState: _appState),
             const PlaceholderPage(title: 'Forest', detail: 'Native forest module is planned.'),
             ShopPage(appState: _appState),
-            const PlaceholderPage(title: 'Aviary', detail: 'Native aviary module is planned.')
+            AviaryPage(appState: _appState),
           ];
 
           return Scaffold(
@@ -65,7 +66,7 @@ class _PhoenixNativeAppState extends State<PhoenixNativeApp> {
                 NavigationDestination(icon: Icon(Icons.trending_up_outlined), selectedIcon: Icon(Icons.trending_up), label: 'Progression'),
                 NavigationDestination(icon: Icon(Icons.park_outlined), selectedIcon: Icon(Icons.park), label: 'Forest'),
                 NavigationDestination(icon: Icon(Icons.storefront_outlined), selectedIcon: Icon(Icons.storefront), label: 'Shop'),
-                NavigationDestination(icon: Icon(Icons.history_toggle_off_outlined), selectedIcon: Icon(Icons.history_toggle_off), label: 'Aviary')
+                NavigationDestination(icon: Icon(Icons.history_toggle_off_outlined), selectedIcon: Icon(Icons.history_toggle_off), label: 'Aviary'),
               ],
             ),
           );
@@ -76,18 +77,12 @@ class _PhoenixNativeAppState extends State<PhoenixNativeApp> {
 
   String _titleForIndex(int index) {
     switch (index) {
-      case 0:
-        return 'Journey';
-      case 1:
-        return 'Progression';
-      case 2:
-        return 'Forest';
-      case 3:
-        return 'Shop';
-      case 4:
-        return 'Aviary';
-      default:
-        return 'Phoenix Journey';
+      case 0: return 'Journey';
+      case 1: return 'Progression';
+      case 2: return 'Forest';
+      case 3: return 'Shop';
+      case 4: return 'Aviary';
+      default: return 'Phoenix Journey';
     }
   }
 }

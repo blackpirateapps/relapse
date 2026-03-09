@@ -1,13 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
+import '../models/phoenix_history.dart';
 import '../models/rank.dart';
 import '../models/shop_item.dart';
 import '../models/user_state.dart';
 import '../services/api_client.dart';
 import '../services/local_cache.dart';
+import '../services/notification_service.dart';
 import '../services/session_store.dart';
 import '../utils/rank_utils.dart';
 
@@ -16,23 +19,29 @@ class AppState extends ChangeNotifier {
     ApiClient? apiClient,
     SessionStore? sessionStore,
     LocalCache? localCache,
+    NotificationService? notificationService,
   })  : _apiClient = apiClient ?? const ApiClient(),
         _sessionStore = sessionStore ?? SessionStore(),
-        _localCache = localCache ?? LocalCache();
+        _localCache = localCache ?? LocalCache(),
+        _notificationService = notificationService ?? NotificationService();
 
   final ApiClient _apiClient;
   final SessionStore _sessionStore;
   final LocalCache _localCache;
+  final NotificationService _notificationService;
 
   UserState? state;
   String? password;
   String? error;
   bool isLoading = false;
   List<ShopItem> shopItems = [];
+  List<PhoenixHistory> history = [];
   Timer? _syncTimer;
   String? actionMessage;
 
   bool get isAuthenticated => state != null && (password?.isNotEmpty ?? false);
+
+  bool get notificationEnabled => _notificationService.enabled;
 
   Duration get streakDuration {
     final s = state;
@@ -53,6 +62,7 @@ class AppState extends ChangeNotifier {
 
   // ── Bootstrap: offline-first ──────────────────────────────────
   Future<void> bootstrap() async {
+    await _notificationService.init();
     password = await _sessionStore.readPassword();
     if (password == null || password!.isEmpty) {
       notifyListeners();
@@ -62,6 +72,9 @@ class AppState extends ChangeNotifier {
     // Load from cache first → instant UI
     await _loadFromCache();
     notifyListeners();
+
+    // Start notification if enabled
+    _updateNotification();
 
     // Then sync in background
     _syncInBackground();
@@ -79,6 +92,10 @@ class AppState extends ChangeNotifier {
         final items = cachedShop['shopItems'] as List<dynamic>? ?? [];
         shopItems = items.map((e) => ShopItem.fromJson(e as Map<String, dynamic>)).toList();
       }
+      final cachedHistory = await _localCache.loadHistory();
+      if (cachedHistory != null) {
+        history = cachedHistory.map((e) => PhoenixHistory.fromJson(e as Map<String, dynamic>)).toList();
+      }
     } catch (_) {
       // Cache corrupted — will be overwritten on next sync
     }
@@ -87,10 +104,9 @@ class AppState extends ChangeNotifier {
   void _syncInBackground() {
     final pwd = password;
     if (pwd == null || pwd.isEmpty) return;
-
-    // Fire and forget — don't block UI
     _syncState(pwd);
     _syncShop(pwd);
+    _syncHistory(pwd);
   }
 
   Future<void> _syncState(String pwd) async {
@@ -98,10 +114,9 @@ class AppState extends ChangeNotifier {
       final rawJson = await _apiClient.fetchStateRaw(pwd);
       state = UserState.fromJson(rawJson);
       await _localCache.saveState(rawJson);
+      _updateNotification();
       notifyListeners();
-    } catch (_) {
-      // Offline — keep cached state
-    }
+    } catch (_) {}
   }
 
   Future<void> _syncShop(String pwd) async {
@@ -111,14 +126,36 @@ class AppState extends ChangeNotifier {
       shopItems = items.map((e) => ShopItem.fromJson(e as Map<String, dynamic>)).toList();
       await _localCache.saveShop(rawJson);
       notifyListeners();
-    } catch (_) {
-      // Offline — keep cached shop
-    }
+    } catch (_) {}
+  }
+
+  Future<void> _syncHistory(String pwd) async {
+    try {
+      final raw = await _apiClient.fetchHistoryRaw(pwd);
+      history = raw.map((e) => PhoenixHistory.fromJson(e as Map<String, dynamic>)).toList();
+      await _localCache.saveHistory(raw);
+      notifyListeners();
+    } catch (_) {}
   }
 
   void _startSyncTimer() {
     _syncTimer?.cancel();
     _syncTimer = Timer.periodic(const Duration(minutes: 5), (_) => _syncInBackground());
+  }
+
+  // ── Notification ──────────────────────────────────────────────
+  Future<void> toggleNotification(bool enabled) async {
+    await _notificationService.setEnabled(enabled);
+    if (enabled) {
+      _updateNotification();
+    }
+    notifyListeners();
+  }
+
+  void _updateNotification() {
+    final s = state;
+    if (s == null) return;
+    _notificationService.startIfEnabled(s.lastRelapse, s.coinsAtLastRelapse);
   }
 
   // ── Login ─────────────────────────────────────────────────────
@@ -135,7 +172,9 @@ class AppState extends ChangeNotifier {
       state = UserState.fromJson(rawJson);
       await _sessionStore.savePassword(pwd);
       await _localCache.saveState(rawJson);
+      _updateNotification();
       _syncShop(pwd);
+      _syncHistory(pwd);
       _startSyncTimer();
     } catch (err) {
       state = null;
@@ -165,11 +204,11 @@ class AppState extends ChangeNotifier {
       final rawJson = await _apiClient.fetchStateRaw(pwd);
       state = UserState.fromJson(rawJson);
       await _localCache.saveState(rawJson);
+      _updateNotification();
       if (saveOnSuccess) {
         await _sessionStore.savePassword(pwd);
       }
     } catch (err) {
-      // Keep existing cached state, just show error
       error = err.toString();
     } finally {
       isLoading = false;
@@ -189,6 +228,7 @@ class AppState extends ChangeNotifier {
     try {
       await _apiClient.relapse(pwd);
       await refresh();
+      _syncHistory(pwd);
     } catch (err) {
       error = err.toString();
       isLoading = false;
@@ -201,6 +241,12 @@ class AppState extends ChangeNotifier {
     final pwd = password;
     if (pwd == null || pwd.isEmpty) return;
     await _syncShop(pwd);
+  }
+
+  Future<void> refreshHistory() async {
+    final pwd = password;
+    if (pwd == null || pwd.isEmpty) return;
+    await _syncHistory(pwd);
   }
 
   Future<bool> buyItem(String itemId) async {
@@ -216,7 +262,6 @@ class AppState extends ChangeNotifier {
       state = newState;
       await _localCache.saveState(newState.toJson());
       actionMessage = 'Purchase successful!';
-      // Refresh shop to update ownership
       _syncShop(pwd);
     } catch (err) {
       actionMessage = err.toString();
@@ -260,7 +305,9 @@ class AppState extends ChangeNotifier {
     state = null;
     password = null;
     shopItems = [];
+    history = [];
     _syncTimer?.cancel();
+    _notificationService.stop();
     await _sessionStore.clearPassword();
     await _localCache.clearAll();
     notifyListeners();
@@ -269,6 +316,7 @@ class AppState extends ChangeNotifier {
   @override
   void dispose() {
     _syncTimer?.cancel();
+    _notificationService.dispose();
     super.dispose();
   }
 }

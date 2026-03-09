@@ -79,21 +79,22 @@ If push is blocked (no remote/permissions), the agent must document the exact bl
 ### Flutter Android App (Native)
 - Location: `flutter_app/`
 - Key modules:
-  - `lib/core/`: config, models (UserState, ShopItem, Rank), services (ApiClient, LocalCache, SessionStore), app state
-  - `lib/features/journey/`: native Journey screen + relapse action + equipped item visuals
-  - `lib/features/progression/`: native Progression timeline
-  - `lib/features/shop/`: native Shop page with buy/equip flows
-  - `lib/features/placeholder/`: placeholder pages for non-migrated modules
+  - `lib/core/`: config, models (UserState, ShopItem, PhoenixHistory, Rank), services (ApiClient, LocalCache, SessionStore, NotificationService), app state
+  - `lib/features/journey/`: Journey screen — big phoenix graphic, big streak timer, urge (placeholder) + relapse, notification toggle, equipped visuals
+  - `lib/features/progression/`: Progression timeline with rank graphics from URL
+  - `lib/features/shop/`: Shop page with category filters, buy/equip flows
+  - `lib/features/aviary/`: Aviary page showing archived phoenix history with images
+  - `lib/features/placeholder/`: placeholder pages for non-migrated modules (Forest)
   - `lib/widgets/`: StreakTicker (self-contained 1s timer), LoginGate
-- API base URL is hardcoded in Flutter at `https://phoenix.blackpiratex.com`.
-- Graphics are bundled as app assets under `flutter_app/assets/images/phoenix/`.
-- **Offline-first**: `LocalCache` service caches state + shop JSON in SharedPreferences. On launch, app shows cached data instantly and syncs in background. 5-minute periodic background sync.
-- **Persistent login**: Password saved in SharedPreferences via `SessionStore`. If cached state exists, app skips login screen even when offline.
-- **Performance**: The global 1-second `Timer.periodic` was replaced with a dedicated `StreakTicker` widget that only rebuilds itself, not the entire widget tree.
-- **Equipped item visuals**:
-  - **Skins**: If a `phoenix_skin` is equipped, skin progression images load from web server via `Image.network` per rank stage.
-  - **Auras**: If a `phoenix_aura` is equipped, aura image overlays behind the phoenix using a `Stack`.
-  - **Backgrounds**: If a `background_theme` is equipped, a matching gradient is applied to the Journey page scaffold.
+  - `lib/core/utils/image_urls.dart`: URL builders for phoenix graphics from web server
+- API base URL: `https://phoenix.blackpiratex.com`
+- **All graphics loaded from web URL** via `CachedNetworkImage` (disk-cached). Phoenix rank images at `/img/{rankId}.svg`.
+- **Offline-first**: `LocalCache` caches state + shop + history JSON. Cache-first bootstrap, 5-min background sync.
+- **Persistent login**: Password + cached state means no login screen when offline.
+- **Persistent notification**: `NotificationService` uses platform channel (`com.relapse.phoenix/notification`) → native `MainActivity.kt` creates Android notification (IMPORTANCE_LOW) with live streak timer and coin balance. Toggleable from Journey page.
+  - Native handler: `flutter_app/android_src/MainActivity.kt` (copied into generated project by CI script)
+- **Performance**: No global ticker. `StreakTicker` widget has its own 1s timer.
+- **Equipped item visuals**: Skins (network images per rank stage), aura overlays, background gradients.
 - Dependencies: `http`, `flutter_svg`, `shared_preferences`, `cached_network_image`.
 
 ### Progression + Level Showcase

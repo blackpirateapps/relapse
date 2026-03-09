@@ -24,6 +24,15 @@ if ! grep -q 'android.permission.INTERNET' "$MANIFEST_PATH"; then
     <uses-permission android:name="android.permission.INTERNET" />' "$MANIFEST_PATH"
 fi
 
+# Copy custom MainActivity.kt (notification handler) into the generated project
+MAIN_ACTIVITY_SRC="$APP_DIR/android_src/MainActivity.kt"
+MAIN_ACTIVITY_DST="$APP_DIR/android/app/src/main/kotlin/com/relapse/phoenix/MainActivity.kt"
+if [ -f "$MAIN_ACTIVITY_SRC" ]; then
+  mkdir -p "$(dirname "$MAIN_ACTIVITY_DST")"
+  cp "$MAIN_ACTIVITY_SRC" "$MAIN_ACTIVITY_DST"
+  echo "Copied custom MainActivity.kt"
+fi
+
 cd "$APP_DIR/android"
 ./gradlew --no-daemon assembleRelease \
   -Pandroid.injected.signing.store.file="$KEYSTORE_PATH" \

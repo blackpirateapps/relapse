@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../constants/app_config.dart';
+import '../models/phoenix_history.dart';
 import '../models/shop_item.dart';
 import '../models/user_state.dart';
 
@@ -103,6 +104,21 @@ class ApiClient {
     if (response.statusCode != 200) {
       throw ApiException('Failed to post relapse (${response.statusCode})');
     }
+  }
+
+  Future<List<dynamic>> fetchHistoryRaw(String password) async {
+    final uri = Uri.parse('${AppConfig.apiBaseUrl}/api/history');
+    final response = await http.get(uri, headers: _headers(password)).timeout(_timeout);
+
+    if (response.statusCode != 200) {
+      throw ApiException('Failed to load history (${response.statusCode})');
+    }
+    return jsonDecode(response.body) as List<dynamic>;
+  }
+
+  Future<List<PhoenixHistory>> fetchHistory(String password) async {
+    final raw = await fetchHistoryRaw(password);
+    return raw.map((e) => PhoenixHistory.fromJson(e as Map<String, dynamic>)).toList();
   }
 }
 
