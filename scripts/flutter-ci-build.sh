@@ -4,12 +4,6 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_DIR="$ROOT_DIR/flutter_app"
 
-cd "$APP_DIR"
-
-flutter create . --platforms=android --org com.blackpirateapps --project-name phoenix_native
-flutter pub get
-flutter analyze
-
 KEYSTORE_DIR="$APP_DIR/android/keystore"
 KEYSTORE_PATH="$KEYSTORE_DIR/upload-keystore.jks"
 mkdir -p "$KEYSTORE_DIR"

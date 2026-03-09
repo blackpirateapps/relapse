@@ -11,11 +11,11 @@ ThemeData buildAppTheme() {
       backgroundColor: Color(0xFF111A2F),
       foregroundColor: Colors.white,
       elevation: 0,
-      centerTitle: false
+      centerTitle: false,
     ),
-    cardTheme: const CardTheme(
+    cardTheme: const CardThemeData(
       color: Color(0xFF151F36),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(18)))
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(18))),
     ),
   );
 }

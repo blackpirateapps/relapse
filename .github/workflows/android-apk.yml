@@ -25,6 +25,17 @@ jobs:
         with:
           channel: stable
 
+      - name: Prepare Flutter Android Project
+        run: |
+          cd flutter_app
+          flutter create . --platforms=android --org com.blackpirateapps --project-name phoenix_native
+          flutter pub get
+
+      - name: Analyze Flutter App
+        run: |
+          cd flutter_app
+          flutter analyze
+
       - name: Build Signed Release APK
         run: bash scripts/flutter-ci-build.sh
 

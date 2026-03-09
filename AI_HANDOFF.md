@@ -285,13 +285,12 @@ Defined/initialized in `api/db.js`:
   - Push to `main`
 - Build flow:
   1. Set up Java + Flutter
-  2. Run `bash scripts/flutter-ci-build.sh`
-     - `flutter create . --platforms=android`
-     - `flutter pub get`
-     - `flutter analyze`
+  2. Prepare Flutter Android project (`flutter create . --platforms=android`, `flutter pub get`)
+  3. Run `flutter analyze`
+  4. Run `bash scripts/flutter-ci-build.sh`
      - generate keystore
      - Gradle `assembleRelease` with injected signing properties
-  3. Upload release APK artifact(s)
+  5. Upload release APK artifact(s)
 
 ## Known Gaps / Risks
 - `api/history.js` does not check auth currently.
