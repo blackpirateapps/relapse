@@ -1,6 +1,6 @@
-import db, { initDb } from './db.js';
-import { checkAuth } from './auth.js';
-import { ranks, getRank } from './ranks.js';
+import db, { initDb } from './_lib/db.js';
+import { checkAuth } from './_lib/auth.js';
+import { ranks, getRank } from './_lib/ranks.js';
 
 // Helper to parse JSON from the request body
 async function parseJsonBody(req) {
@@ -15,36 +15,36 @@ async function parseJsonBody(req) {
 // Loads all active shop items and their images from the database
 // THIS FUNCTION IS NOW CORRECTED to build the detailed treeTypes object
 async function loadShopDataFromDb() {
-    const itemsResult = await db.execute("SELECT * FROM shop_items WHERE is_active = true ORDER BY sort_order, id;");
-    const imagesResult = await db.execute("SELECT * FROM shop_item_images ORDER BY item_id, sort_order;");
-    
-    const imagesByItem = imagesResult.rows.reduce((acc, image) => {
-        if (!acc[image.item_id]) acc[image.item_id] = [];
-        acc[image.item_id].push(image);
-        return acc;
-    }, {});
-    
-    const shopItems = itemsResult.rows.map(item => ({ ...item, images: imagesByItem[item.id] || [] }));
-    
-    // Specifically format tree data, including the 'stages' array for the frontend
-    const treeTypes = shopItems
-        .filter(i => i.type === 'tree_sapling')
-        .reduce((acc, tree) => {
-            acc[tree.id] = { 
-                ...tree, 
-                witheredImage: tree.withered_image, // Pass the withered image URL
-                stages: tree.images
-                    .filter(img => img.image_type === 'growth_stage')
-                    .map(img => ({
-                        status: img.stage_name,
-                        hours: img.stage_hours,
-                        image: img.image_url
-                    }))
-            };
-            return acc;
-        }, {});
+  const itemsResult = await db.execute("SELECT * FROM shop_items WHERE is_active = true ORDER BY sort_order, id;");
+  const imagesResult = await db.execute("SELECT * FROM shop_item_images ORDER BY item_id, sort_order;");
 
-    return { shopItems, treeTypes };
+  const imagesByItem = imagesResult.rows.reduce((acc, image) => {
+    if (!acc[image.item_id]) acc[image.item_id] = [];
+    acc[image.item_id].push(image);
+    return acc;
+  }, {});
+
+  const shopItems = itemsResult.rows.map(item => ({ ...item, images: imagesByItem[item.id] || [] }));
+
+  // Specifically format tree data, including the 'stages' array for the frontend
+  const treeTypes = shopItems
+    .filter(i => i.type === 'tree_sapling')
+    .reduce((acc, tree) => {
+      acc[tree.id] = {
+        ...tree,
+        witheredImage: tree.withered_image, // Pass the withered image URL
+        stages: tree.images
+          .filter(img => img.image_type === 'growth_stage')
+          .map(img => ({
+            status: img.stage_name,
+            hours: img.stage_hours,
+            image: img.image_url
+          }))
+      };
+      return acc;
+    }, {});
+
+  return { shopItems, treeTypes };
 }
 
 
@@ -122,7 +122,7 @@ async function handlePurchase(itemId, res, position = {}) {
       sql: "SELECT * FROM shop_items WHERE id = ? AND is_active = true;",
       args: [itemId]
     });
-    
+
     if (itemResult.rows.length === 0) return res.status(404).json({ message: 'Item not found.' });
     const item = itemResult.rows[0];
 
@@ -188,7 +188,7 @@ async function handlePurchase(itemId, res, position = {}) {
     }
 
     // Leave dynamic price as-is for relapse-rebuy skin
-    
+
     await db.execute({
       sql: "UPDATE user_state SET coinsAtLastRelapse = ?, lastClaimedLevel = ? WHERE id = 1;",
       args: [newCoinsAtLastRelapse, newLastClaimedLevel]
@@ -196,7 +196,7 @@ async function handlePurchase(itemId, res, position = {}) {
 
     const { rows: updatedStateRows } = await db.execute("SELECT * FROM user_state WHERE id = 1;");
     const { rows: forestRows } = await db.execute("SELECT * FROM forest ORDER BY purchaseDate DESC;");
-    
+
     return res.status(200).json({
       success: true,
       message: `${item.name} purchased successfully!`,
@@ -224,7 +224,7 @@ async function handleEquipment(itemId, equip, res) {
 
     const itemResult = await db.execute({ sql: "SELECT * FROM shop_items WHERE id = ?;", args: [itemId] });
     const item = itemResult.rows[0];
-    
+
     if (equip && item && item.type === 'phoenix_skin') {
       const skinResult = await db.execute("SELECT id FROM shop_items WHERE type = 'phoenix_skin';");
       for (const skin of skinResult.rows) {
@@ -252,7 +252,7 @@ async function handleEquipment(itemId, equip, res) {
         equippedUpgrades[aura.id] = false;
       }
     }
-    
+
     equippedUpgrades[itemId] = equip;
 
     await db.execute({
@@ -261,7 +261,7 @@ async function handleEquipment(itemId, equip, res) {
     });
 
     const { rows: updatedRows } = await db.execute("SELECT * FROM user_state WHERE id = 1;");
-    
+
     return res.status(200).json({
       success: true,
       message: `${item?.name || 'Item'} ${equip ? 'equipped' : 'unequipped'}!`,

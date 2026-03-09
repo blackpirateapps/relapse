@@ -27,6 +27,7 @@ If push is blocked (no remote/permissions), the agent must document the exact bl
 - Datastore: Turso/SQLite via `@libsql/client`.
 - Auth: cookie gate (`phoenix_auth=true`) for web and `X-App-Password`/`Authorization: Bearer` support for native mobile.
 - Routing: SPA via `react-router-dom`; Vercel rewrite sends non-API routes to `index.html`.
+- **Vercel Hobby plan limit: max 12 serverless functions.** Utility modules live in `api/_lib/` (ignored by Vercel) to stay within this limit.
 - App model: streak progression game with rank evolution, coin economy, shop/inventory, forest simulation, minigames, urge tasks, and relapse lifecycle.
 - Native mobile app: Flutter app in `flutter_app/` focused on Journey + Progression (other tabs are placeholders).
 
@@ -150,14 +151,17 @@ If push is blocked (no remote/permissions), the agent must document the exact bl
 
 ## Backend API Map
 
+### Shared Utilities (`api/_lib/`)
+These files are **not** serverless functions (Vercel ignores `_`-prefixed dirs). They are imported by endpoint files.
+- `api/_lib/auth.js`: `checkAuth(req)` — cookie, `X-App-Password`, or `Bearer` auth.
+- `api/_lib/db.js`: Turso client, `initDb()`, schema seeding.
+- `api/_lib/http.js`: `applyMobileCors()`, `handleOptions()`.
+- `api/_lib/ranks.js`: rank data array and `getRank(totalHours)`.
+
 ### Auth
 - `POST /api/login` (`api/login.js`)
   - Validates `APP_PASSWORD`.
   - Sets `phoenix_auth` cookie.
-- `checkAuth(req)` in `api/auth.js` accepts:
-  - authenticated cookie, or
-  - `X-App-Password: <APP_PASSWORD>`, or
-  - `Authorization: Bearer <APP_PASSWORD>`
 
 ### State
 - `GET /api/state` (`api/state.js`)
@@ -211,7 +215,7 @@ If push is blocked (no remote/permissions), the agent must document the exact bl
 - `GET/POST /api/admin` (`api/admin.js`): currently preview-oriented helper for asset path conventions.
 
 ## Data Model (Turso/SQLite)
-Defined/initialized in `api/db.js`:
+Defined/initialized in `api/_lib/db.js`:
 
 - `user_state`
   - Core streak/coin/rank progression

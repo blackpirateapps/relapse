@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="Cosmic Orbit">
+  <rect width="320" height="320" rx="48" fill="#050608"/>
+  <defs>
+    <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffd000" stop-opacity="1"/>
+      <stop offset="40%" stop-color="#f9b700" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#e06317" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Star background with twinkle -->
+  <circle cx="40" cy="50" r="1" fill="white">
+    <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="280" cy="40" r="1.5" fill="white">
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="60" cy="260" r="1" fill="white">
+    <animate attributeName="opacity" values="0.4;0.8;0.4" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="270" cy="280" r="1" fill="white">
+    <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="100" cy="100" r="0.8" fill="white">
+    <animate attributeName="opacity" values="0.2;0.7;0.2" dur="2.8s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="220" cy="120" r="1" fill="white">
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Orbital rings -->
+  <circle cx="160" cy="160" r="40" fill="none" stroke="#66a6e5" stroke-opacity="0.15" stroke-width="1"/>
+  <circle cx="160" cy="160" r="60" fill="none" stroke="#66a6e5" stroke-opacity="0.12" stroke-width="1"/>
+  <circle cx="160" cy="160" r="85" fill="none" stroke="#66a6e5" stroke-opacity="0.1" stroke-width="1"/>
+  <circle cx="160" cy="160" r="110" fill="none" stroke="#66a6e5" stroke-opacity="0.08" stroke-width="1"/>
+  <circle cx="160" cy="160" r="135" fill="none" stroke="#66a6e5" stroke-opacity="0.06" stroke-width="1"/>
+  <!-- Sun with pulse -->
+  <circle cx="160" cy="160" r="16" fill="url(#sunGlow)">
+    <animate attributeName="r" values="16;18;16" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  <!-- Mercury - orbiting -->
+  <g>
+    <animateTransform attributeName="transform" type="rotate" from="0 160 160" to="360 160 160" dur="4s" repeatCount="indefinite"/>
+    <circle cx="200" cy="160" r="4" fill="#9f5e26"/>
+  </g>
+  <!-- Venus - orbiting -->
+  <g>
+    <animateTransform attributeName="transform" type="rotate" from="60 160 160" to="420 160 160" dur="7s" repeatCount="indefinite"/>
+    <circle cx="220" cy="160" r="6" fill="#BEB768"/>
+  </g>
+  <!-- Earth with moon - orbiting -->
+  <g>
+    <animateTransform attributeName="transform" type="rotate" from="120 160 160" to="480 160 160" dur="12s" repeatCount="indefinite"/>
+    <circle cx="245" cy="160" r="7" fill="#11abe9"/>
+    <circle cx="245" cy="150" r="2" fill="#a0a0a0"/>
+  </g>
+  <!-- Mars - orbiting -->
+  <g>
+    <animateTransform attributeName="transform" type="rotate" from="200 160 160" to="560 160 160" dur="18s" repeatCount="indefinite"/>
+    <circle cx="270" cy="160" r="5" fill="#cf3921"/>
+  </g>
+  <!-- Saturn with ring - orbiting -->
+  <g>
+    <animateTransform attributeName="transform" type="rotate" from="280 160 160" to="640 160 160" dur="28s" repeatCount="indefinite"/>
+    <circle cx="295" cy="160" r="9" fill="#e7c194"/>
+    <ellipse cx="295" cy="160" rx="14" ry="3" fill="none" stroke="#987641" stroke-width="2"/>
+  </g>
+</svg>

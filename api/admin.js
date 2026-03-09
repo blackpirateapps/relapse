@@ -1,5 +1,5 @@
-import db from './db.js';
-import { checkAuth } from './auth.js';
+import db from './_lib/db.js';
+import { checkAuth } from './_lib/auth.js';
 
 // Helper to parse JSON from the request body
 async function parseJsonBody(req) {

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Cactus Young">
+  <defs>
+    <linearGradient id="cactusGreen" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#166534"/>
+      <stop offset="25%" stop-color="#22c55e"/>
+      <stop offset="75%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#166534"/>
+    </linearGradient>
+  </defs>
+  <!-- Ground shadow -->
+  <ellipse cx="64" cy="116" rx="28" ry="6" fill="#0a0a0a" opacity="0.35"/>
+  <!-- Sandy ground -->
+  <ellipse cx="64" cy="112" rx="32" ry="6" fill="#d4a574"/>
+  <ellipse cx="64" cy="110" rx="28" ry="4" fill="#e5c9a8"/>
+  <!-- Rocks -->
+  <ellipse cx="42" cy="112" rx="4" ry="2.5" fill="#a8a29e"/>
+  <ellipse cx="86" cy="111" rx="3" ry="2" fill="#a8a29e"/>
+  <!-- Main cactus body -->
+  <path d="M52 108 Q48 85 52 55 Q64 45 76 55 Q80 85 76 108 Z" fill="url(#cactusGreen)"/>
+  <!-- Ridges on main body -->
+  <path d="M54 105 Q50 80 54 58" fill="none" stroke="#15803d" stroke-width="2" opacity="0.6"/>
+  <path d="M64 108 L64 52" fill="none" stroke="#15803d" stroke-width="1.5" opacity="0.5"/>
+  <path d="M74 105 Q78 80 74 58" fill="none" stroke="#15803d" stroke-width="2" opacity="0.6"/>
+  <!-- Left arm bud -->
+  <ellipse cx="42" cy="78" rx="10" ry="8" fill="url(#cactusGreen)"/>
+  <path d="M52 78 Q46 78 38 78" fill="none" stroke="#166534" stroke-width="3"/>
+  <!-- Right arm bud -->
+  <ellipse cx="86" cy="72" rx="9" ry="7" fill="url(#cactusGreen)"/>
+  <path d="M76 72 Q82 72 90 72" fill="none" stroke="#166534" stroke-width="3"/>
+  <!-- Spines -->
+  <line x1="48" y1="65" x2="42" y2="62" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="48" y1="80" x2="42" y2="80" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="48" y1="95" x2="43" y2="96" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="80" y1="62" x2="86" y2="60" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="80" y1="75" x2="86" y2="75" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="80" y1="92" x2="85" y2="93" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="64" y1="50" x2="64" y2="42" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Arm spines -->
+  <line x1="34" y1="76" x2="30" y2="74" stroke="#fef3c7" stroke-width="1" stroke-linecap="round"/>
+  <line x1="92" y1="70" x2="96" y2="68" stroke="#fef3c7" stroke-width="1" stroke-linecap="round"/>
+  <!-- Highlight -->
+  <ellipse cx="58" cy="75" rx="4" ry="15" fill="#4ade80" opacity="0.3"/>
+</svg>

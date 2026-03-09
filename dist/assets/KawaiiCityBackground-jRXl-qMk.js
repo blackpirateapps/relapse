@@ -1,0 +1,290 @@
+import{j as a}from"./index-Dbow32nk.js";function e(){return a.jsxDEV("div",{className:"fixed inset-0 -z-10 overflow-hidden",children:[a.jsxDEV("div",{className:"absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(86,110,160,0.45),rgba(26,32,64,0.9),rgba(10,12,22,1))]"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:6,columnNumber:7},this),a.jsxDEV("div",{className:"absolute inset-x-0 bottom-0 h-2/5 bg-[linear-gradient(to_top,rgba(10,12,20,0.98),rgba(30,34,70,0.7),rgba(120,140,190,0))]"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:7,columnNumber:7},this),a.jsxDEV("div",{className:"absolute inset-0 opacity-70",children:[a.jsxDEV("div",{className:"kawaii-cloud cloud-one"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:10,columnNumber:9},this),a.jsxDEV("div",{className:"kawaii-cloud cloud-two"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:11,columnNumber:9},this),a.jsxDEV("div",{className:"kawaii-cloud cloud-three"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:12,columnNumber:9},this),a.jsxDEV("div",{className:"kawaii-cloud cloud-dark cloud-four"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:13,columnNumber:9},this),a.jsxDEV("div",{className:"kawaii-cloud cloud-dark cloud-five"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:14,columnNumber:9},this)]},void 0,!0,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:9,columnNumber:7},this),a.jsxDEV("div",{className:"absolute inset-x-0 bottom-0 h-1/2 flex items-end justify-center",children:a.jsxDEV("div",{className:"kawaii-city"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:18,columnNumber:9},this)},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:17,columnNumber:7},this),a.jsxDEV("div",{className:"absolute inset-x-0 bottom-24 h-32",children:a.jsxDEV("div",{className:"kawaii-tree-line"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:22,columnNumber:9},this)},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:21,columnNumber:7},this),a.jsxDEV("div",{className:"absolute bottom-10 left-10 kawaii-cat",children:[a.jsxDEV("span",{className:"cat-eye left"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:25,columnNumber:9},this),a.jsxDEV("span",{className:"cat-eye right"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:26,columnNumber:9},this),a.jsxDEV("span",{className:"cat-mouth"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:27,columnNumber:9},this),a.jsxDEV("span",{className:"cat-tail"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:28,columnNumber:9},this)]},void 0,!0,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:24,columnNumber:7},this),a.jsxDEV("div",{className:"absolute inset-0 pointer-events-none",children:[a.jsxDEV("span",{className:"kawaii-heart heart-a"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:32,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-heart heart-b"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:33,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-heart heart-c"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:34,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-sparkle sparkle-a"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:35,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-sparkle sparkle-b"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:36,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-sparkle sparkle-c"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:37,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-petal petal-a"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:38,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-petal petal-b"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:39,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-petal petal-c"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:40,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-petal petal-d"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:41,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-petal petal-e"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:42,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-a"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:43,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-b"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:44,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-c"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:45,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-d"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:46,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-e"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:47,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-f"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:48,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-g"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:49,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-h"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:50,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-i"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:51,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-j"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:52,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-k"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:53,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-l"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:54,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-m"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:55,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-n"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:56,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-o"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:57,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-p"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:58,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-q"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:59,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-r"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:60,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-s"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:61,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-t"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:62,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-u"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:63,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-v"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:64,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-w"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:65,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-x"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:66,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-y"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:67,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-rain rain-z"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:68,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-lightning lightning-a"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:69,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-lightning lightning-b"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:70,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-firecracker firecracker-a"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:71,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-firecracker firecracker-b"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:72,columnNumber:9},this),a.jsxDEV("span",{className:"kawaii-firecracker firecracker-c"},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:73,columnNumber:9},this)]},void 0,!0,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:31,columnNumber:7},this),a.jsxDEV("style",{jsx:!0,children:`
+        .kawaii-cloud {
+          position: absolute;
+          width: 220px;
+          height: 70px;
+          border-radius: 999px;
+          background: rgba(200, 210, 240, 0.35);
+          filter: blur(0.5px);
+          box-shadow:
+            30px 20px 0 -10px rgba(200, 210, 240, 0.4),
+            -40px 20px 0 -15px rgba(160, 170, 210, 0.35);
+          animation: drift 40s linear infinite;
+        }
+        .cloud-one { top: 10%; left: -10%; animation-delay: -6s; }
+        .cloud-two { top: 22%; left: -20%; width: 280px; animation-duration: 46s; }
+        .cloud-three { top: 34%; left: -15%; width: 200px; animation-duration: 36s; }
+        .cloud-dark {
+          background: rgba(80, 90, 130, 0.4);
+          box-shadow:
+            30px 20px 0 -10px rgba(60, 70, 110, 0.35),
+            -40px 20px 0 -15px rgba(50, 60, 90, 0.35);
+        }
+        .cloud-four { top: 16%; left: -30%; width: 300px; animation-duration: 50s; }
+        .cloud-five { top: 28%; left: -25%; width: 260px; animation-duration: 44s; animation-delay: -10s; }
+
+        .kawaii-city {
+          width: 120%;
+          height: 100%;
+          background:
+            linear-gradient(to top, rgba(16, 18, 36, 0.98), rgba(30, 34, 80, 0.85)),
+            repeating-linear-gradient(
+              90deg,
+              rgba(160, 180, 255, 0.25) 0px,
+              rgba(160, 180, 255, 0.25) 6px,
+              rgba(14, 16, 26, 0.55) 6px,
+              rgba(14, 16, 26, 0.55) 14px
+            );
+          clip-path: polygon(0 40%, 6% 30%, 12% 42%, 18% 26%, 24% 38%, 30% 22%, 36% 36%, 44% 18%, 52% 32%, 60% 14%, 68% 34%, 76% 20%, 84% 38%, 92% 24%, 100% 42%, 100% 100%, 0 100%);
+          animation: pulseCity 8s ease-in-out infinite;
+        }
+
+        .kawaii-tree-line {
+          width: 120%;
+          height: 100%;
+          background: linear-gradient(to top, rgba(5, 7, 12, 0.9), rgba(10, 14, 24, 0.5));
+          clip-path: polygon(
+            0 75%, 6% 68%, 10% 72%, 16% 62%, 22% 70%, 28% 60%, 34% 68%, 40% 58%, 46% 66%,
+            52% 58%, 58% 70%, 64% 62%, 70% 72%, 76% 60%, 82% 70%, 88% 62%, 94% 72%, 100% 66%,
+            100% 100%, 0 100%
+          );
+          filter: blur(0.3px);
+          opacity: 0.8;
+        }
+
+        .kawaii-cat {
+          width: 72px;
+          height: 72px;
+          background: #1c2033;
+          border-radius: 18px 18px 12px 12px;
+          position: relative;
+          box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+        .kawaii-cat::before,
+        .kawaii-cat::after {
+          content: '';
+          position: absolute;
+          top: -14px;
+          width: 20px;
+          height: 20px;
+          background: #1c2033;
+          border-radius: 4px;
+        }
+        .kawaii-cat::before { left: 6px; transform: rotate(-12deg); }
+        .kawaii-cat::after { right: 6px; transform: rotate(12deg); }
+        .kawaii-cat::after {
+          box-shadow: 0 0 0 0 rgba(0,0,0,0);
+        }
+
+        .kawaii-cat .cat-eye {
+          position: absolute;
+          top: 28px;
+          width: 6px;
+          height: 10px;
+          background: #f4f7ff;
+          border-radius: 4px;
+        }
+        .kawaii-cat .cat-eye.left { left: 20px; }
+        .kawaii-cat .cat-eye.right { right: 20px; }
+        .kawaii-cat .cat-mouth {
+          position: absolute;
+          top: 42px;
+          left: 50%;
+          width: 14px;
+          height: 6px;
+          border-bottom: 2px solid #f4f7ff;
+          border-radius: 0 0 8px 8px;
+          transform: translateX(-50%);
+        }
+        .kawaii-cat .cat-tail {
+          position: absolute;
+          right: -8px;
+          bottom: 10px;
+          width: 18px;
+          height: 10px;
+          border-radius: 10px;
+          background: #1c2033;
+          transform: rotate(20deg);
+        }
+
+        .kawaii-heart {
+          position: absolute;
+          width: 22px;
+          height: 22px;
+          background: #b06ad9;
+          transform: rotate(45deg);
+          animation: floatUp 14s ease-in-out infinite;
+          box-shadow: 0 0 10px rgba(176, 106, 217, 0.6);
+        }
+        .kawaii-heart::before,
+        .kawaii-heart::after {
+          content: '';
+          position: absolute;
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          background: #b06ad9;
+        }
+        .kawaii-heart::before { top: -11px; left: 0; }
+        .kawaii-heart::after { left: -11px; top: 0; }
+
+        .heart-a { left: 18%; bottom: 15%; animation-delay: -2s; }
+        .heart-b { left: 68%; bottom: 20%; animation-delay: -8s; background: #7fb1ff; }
+        .heart-b::before, .heart-b::after { background: #7fb1ff; }
+        .heart-c { left: 42%; bottom: 10%; animation-delay: -5s; background: #ff9ac8; }
+        .heart-c::before, .heart-c::after { background: #ff9ac8; }
+
+        .kawaii-sparkle {
+          position: absolute;
+          width: 10px;
+          height: 10px;
+          background: #d4e4ff;
+          border-radius: 2px;
+          transform: rotate(45deg);
+          animation: twinkle 4s ease-in-out infinite;
+          box-shadow: 0 0 8px rgba(180, 200, 255, 0.7);
+        }
+        .sparkle-a { top: 18%; left: 60%; animation-delay: -1s; }
+        .sparkle-b { top: 30%; left: 30%; animation-delay: -2s; }
+        .sparkle-c { top: 12%; left: 45%; animation-delay: -0.5s; }
+
+        .kawaii-petal {
+          position: absolute;
+          width: 14px;
+          height: 18px;
+          background: linear-gradient(160deg, #ffc5e6, #b18cff);
+          border-radius: 70% 70% 70% 70%;
+          opacity: 0.8;
+          animation: fallPetal 14s ease-in-out infinite;
+        }
+        .petal-a { top: -5%; left: 20%; animation-delay: -2s; }
+        .petal-b { top: -8%; left: 50%; animation-delay: -6s; transform: rotate(20deg); }
+        .petal-c { top: -10%; left: 70%; animation-delay: -9s; transform: rotate(-10deg); }
+        .petal-d { top: -6%; left: 35%; animation-delay: -4s; transform: rotate(10deg); }
+        .petal-e { top: -12%; left: 85%; animation-delay: -11s; transform: rotate(30deg); }
+
+        .kawaii-rain {
+          position: absolute;
+          width: 2px;
+          height: 120px;
+          background: linear-gradient(to bottom, rgba(120, 160, 255, 0), rgba(120, 160, 255, 0.6));
+          animation: rainFall 1.4s linear infinite;
+        }
+        .rain-a { left: 12%; top: -30%; animation-delay: -0.2s; }
+        .rain-b { left: 18%; top: -40%; animation-delay: -0.6s; }
+        .rain-c { left: 24%; top: -25%; animation-delay: -1.1s; }
+        .rain-d { left: 32%; top: -35%; animation-delay: -0.4s; }
+        .rain-e { left: 40%; top: -45%; animation-delay: -0.9s; }
+        .rain-f { left: 48%; top: -28%; animation-delay: -0.7s; }
+        .rain-g { left: 56%; top: -38%; animation-delay: -1.3s; }
+        .rain-h { left: 64%; top: -22%; animation-delay: -0.8s; }
+        .rain-i { left: 72%; top: -34%; animation-delay: -1.1s; }
+        .rain-j { left: 80%; top: -40%; animation-delay: -0.5s; }
+        .rain-k { left: 86%; top: -26%; animation-delay: -1.4s; }
+        .rain-l { left: 90%; top: -32%; animation-delay: -0.9s; }
+        .rain-m { left: 6%; top: -20%; animation-delay: -1.2s; }
+        .rain-n { left: 52%; top: -20%; animation-delay: -0.3s; }
+        .rain-o { left: 96%; top: -24%; animation-delay: -1.5s; }
+        .rain-p { left: 14%; top: -18%; animation-delay: -0.9s; }
+        .rain-q { left: 22%; top: -14%; animation-delay: -1.4s; }
+        .rain-r { left: 36%; top: -26%; animation-delay: -0.6s; }
+        .rain-s { left: 44%; top: -18%; animation-delay: -1.1s; }
+        .rain-t { left: 60%; top: -26%; animation-delay: -0.5s; }
+        .rain-u { left: 68%; top: -18%; animation-delay: -1.3s; }
+        .rain-v { left: 74%; top: -26%; animation-delay: -0.8s; }
+        .rain-w { left: 82%; top: -18%; animation-delay: -1.5s; }
+        .rain-x { left: 88%; top: -12%; animation-delay: -0.7s; }
+        .rain-y { left: 92%; top: -20%; animation-delay: -1.2s; }
+        .rain-z { left: 98%; top: -16%; animation-delay: -0.4s; }
+
+        .kawaii-lightning {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(circle at 60% 18%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0));
+          opacity: 0;
+          animation: lightningFlash 18s ease-in-out infinite;
+          mix-blend-mode: screen;
+        }
+        .lightning-a { animation-delay: -4s; }
+        .lightning-b { animation-delay: -11s; background: radial-gradient(circle at 30% 12%, rgba(180, 210, 255, 0.8), rgba(255, 255, 255, 0)); }
+
+        .kawaii-firecracker {
+          position: absolute;
+          width: 60px;
+          height: 60px;
+          border-radius: 999px;
+          border: 2px solid rgba(255, 170, 220, 0.8);
+          box-shadow:
+            0 0 12px rgba(255, 170, 220, 0.8),
+            0 0 28px rgba(140, 200, 255, 0.6);
+          opacity: 0;
+          animation: firecrackerPop 18s ease-in-out infinite;
+        }
+        .firecracker-a { top: 18%; left: 22%; animation-delay: -3s; }
+        .firecracker-b { top: 12%; left: 62%; animation-delay: -9s; border-color: rgba(140, 200, 255, 0.8); }
+        .firecracker-c { top: 24%; left: 42%; animation-delay: -14s; border-color: rgba(255, 200, 140, 0.8); }
+
+        @keyframes drift {
+          0% { transform: translateX(0); opacity: 0; }
+          10% { opacity: 1; }
+          50% { opacity: 0.9; }
+          100% { transform: translateX(120vw); opacity: 0; }
+        }
+        @keyframes pulseCity {
+          0%, 100% { filter: brightness(1); }
+          50% { filter: brightness(1.05); }
+        }
+        @keyframes floatUp {
+          0% { transform: translateY(0) rotate(45deg); opacity: 0; }
+          20% { opacity: 0.9; }
+          80% { opacity: 0.7; }
+          100% { transform: translateY(-120px) rotate(45deg); opacity: 0; }
+        }
+        @keyframes twinkle {
+          0%, 100% { transform: scale(0.6) rotate(45deg); opacity: 0.4; }
+          50% { transform: scale(1) rotate(45deg); opacity: 1; }
+        }
+        @keyframes fallPetal {
+          0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+          20% { opacity: 0.8; }
+          100% { transform: translateY(120vh) translateX(-60px) rotate(120deg); opacity: 0; }
+        }
+        @keyframes rainFall {
+          0% { transform: translateY(0); opacity: 0; }
+          10% { opacity: 0.6; }
+          100% { transform: translateY(120vh); opacity: 0; }
+        }
+        @keyframes lightningFlash {
+          0% { opacity: 0; }
+          2% { opacity: 0.9; }
+          4% { opacity: 0.1; }
+          6% { opacity: 0.7; }
+          8% { opacity: 0; }
+          100% { opacity: 0; }
+        }
+        @keyframes firecrackerPop {
+          0%, 88% { opacity: 0; transform: scale(0.2); }
+          90% { opacity: 1; transform: scale(1); }
+          94% { opacity: 0.2; transform: scale(1.4); }
+          100% { opacity: 0; transform: scale(0.2); }
+        }
+
+        @media (max-width: 640px) {
+          .kawaii-city { animation: none; }
+          .rain-n, .rain-o, .rain-p, .rain-q, .rain-r, .rain-s, .rain-t, .rain-u,
+          .rain-v, .rain-w, .rain-x, .rain-y, .rain-z { display: none; }
+          .petal-d, .petal-e { display: none; }
+          .sparkle-b, .sparkle-c { display: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .kawaii-cloud,
+          .kawaii-heart,
+          .kawaii-sparkle,
+          .kawaii-petal,
+          .kawaii-rain,
+          .kawaii-lightning,
+          .kawaii-firecracker,
+          .kawaii-city { animation: none !important; }
+        }
+      `},void 0,!1,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:76,columnNumber:7},this)]},void 0,!0,{fileName:"/home/dog/git/relapse/src/components/KawaiiCityBackground.jsx",lineNumber:5,columnNumber:5},this)}export{e as default};

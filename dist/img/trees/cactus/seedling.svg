@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Cactus Seedling">
+  <defs>
+    <linearGradient id="cactusBody" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#166534"/>
+      <stop offset="30%" stop-color="#22c55e"/>
+      <stop offset="70%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#166534"/>
+    </linearGradient>
+  </defs>
+  <!-- Ground shadow -->
+  <ellipse cx="64" cy="110" rx="22" ry="6" fill="#0a0a0a" opacity="0.4"/>
+  <!-- Sandy soil -->
+  <ellipse cx="64" cy="106" rx="26" ry="6" fill="#d4a574"/>
+  <ellipse cx="64" cy="104" rx="22" ry="4" fill="#e5c9a8"/>
+  <!-- Small rocks -->
+  <ellipse cx="50" cy="106" rx="3" ry="2" fill="#a8a29e"/>
+  <ellipse cx="78" cy="105" rx="2.5" ry="1.5" fill="#a8a29e"/>
+  <!-- Baby cactus body -->
+  <ellipse cx="64" cy="82" rx="14" ry="22" fill="url(#cactusBody)"/>
+  <!-- Vertical ridges -->
+  <path d="M56 100 Q54 82 56 64" fill="none" stroke="#15803d" stroke-width="1.5" opacity="0.6"/>
+  <path d="M64 102 L64 62" fill="none" stroke="#15803d" stroke-width="1" opacity="0.5"/>
+  <path d="M72 100 Q74 82 72 64" fill="none" stroke="#15803d" stroke-width="1.5" opacity="0.6"/>
+  <!-- Small spines -->
+  <line x1="50" y1="80" x2="46" y2="78" stroke="#fef3c7" stroke-width="1" stroke-linecap="round"/>
+  <line x1="50" y1="88" x2="45" y2="88" stroke="#fef3c7" stroke-width="1" stroke-linecap="round"/>
+  <line x1="78" y1="78" x2="82" y2="76" stroke="#fef3c7" stroke-width="1" stroke-linecap="round"/>
+  <line x1="78" y1="86" x2="83" y2="86" stroke="#fef3c7" stroke-width="1" stroke-linecap="round"/>
+  <line x1="64" y1="62" x2="64" y2="56" stroke="#fef3c7" stroke-width="1" stroke-linecap="round"/>
+  <!-- Highlight -->
+  <ellipse cx="60" cy="78" rx="3" ry="8" fill="#4ade80" opacity="0.4"/>
+</svg>

@@ -1,7 +1,7 @@
-import db, { initDb } from './db.js';
-import { checkAuth } from './auth.js';
-import { ranks, getRank } from './ranks.js';
-import { applyMobileCors, handleOptions } from './http.js';
+import db, { initDb } from './_lib/db.js';
+import { checkAuth } from './_lib/auth.js';
+import { ranks, getRank } from './_lib/ranks.js';
+import { applyMobileCors, handleOptions } from './_lib/http.js';
 
 export default async function handler(req, res) {
     applyMobileCors(req, res);
@@ -20,7 +20,7 @@ export default async function handler(req, res) {
         await initDb();
         const { rows } = await db.execute("SELECT * FROM user_state WHERE id = 1;");
         if (rows.length === 0) return res.status(404).json({ message: 'State not found.' });
-        
+
         const state = rows[0];
         const endDate = new Date();
         const currentStreakMs = endDate.getTime() - new Date(state.lastRelapse).getTime();
@@ -63,7 +63,7 @@ export default async function handler(req, res) {
             const { rows: updatedState } = await db.execute("SELECT * FROM user_state WHERE id = 1;");
             return res.status(200).json(updatedState[0]);
         }
-        
+
         // Archive the completed streak's history (no change here)
         if (currentStreakMs > 0) {
             const totalHours = currentStreakMs / (1000 * 60 * 60);
@@ -84,7 +84,7 @@ export default async function handler(req, res) {
                 ]
             });
         }
-        
+
         // --- START: NEW COIN BANKING LOGIC ---
 
         // 1. Calculate all coin components at the moment of relapse.
@@ -102,7 +102,7 @@ export default async function handler(req, res) {
         }
 
         const streakCoins = Math.floor(10 * Math.pow(totalHours, 1.2));
-        
+
         // 2. The new base coin balance is the sum of the old base, plus all streak and unclaimed rewards.
         const newBaseCoins = state.coinsAtLastRelapse + streakCoins + unclaimedLevelReward;
         const newLastClaimedLevel = currentRank.level;
@@ -134,7 +134,7 @@ export default async function handler(req, res) {
 
         // Update the user's state for the new streak
         const newLongestStreak = Math.max(state.longestStreak || 0, currentStreakMs);
-        
+
         await db.execute({
             sql: `UPDATE user_state 
                   SET 
@@ -149,7 +149,7 @@ export default async function handler(req, res) {
                     potion_relapse_used_at = NULL
                   WHERE id = 1;`,
             args: [
-                endDate.toISOString(), 
+                endDate.toISOString(),
                 newLongestStreak,
                 newBaseCoins, // Set the new base coin value
                 0             // Reset claimed level for the new journey

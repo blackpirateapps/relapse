@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-label="Inferno Blaze">
+  <rect width="320" height="320" rx="48" fill="#0b1120"/>
+  <defs>
+    <radialGradient id="infernoGlow" cx="50%" cy="70%" r="60%">
+      <stop offset="0%" stop-color="#fde047" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#f97316" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#dc2626" stop-opacity="0.2"/>
+    </radialGradient>
+    <linearGradient id="flame1" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#ef4444" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#fbbf24" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#fde047" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="flame2" x1="50%" y1="100%" x2="50%" y2="0%">
+      <stop offset="0%" stop-color="#f97316" stop-opacity="0.85"/>
+      <stop offset="60%" stop-color="#fcd34d" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#fef3c7" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <!-- Base glow with pulse -->
+  <ellipse cx="160" cy="220" rx="90" ry="50" fill="url(#infernoGlow)">
+    <animate attributeName="rx" values="90;95;90" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+  </ellipse>
+  <!-- Flames with rise animation -->
+  <ellipse cx="100" cy="160" rx="25" ry="70" fill="url(#flame1)" transform="rotate(-15 100 200)">
+    <animate attributeName="ry" values="70;80;70" dur="1.2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="1.2s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="140" cy="140" rx="30" ry="90" fill="url(#flame2)">
+    <animate attributeName="ry" values="90;100;90" dur="0.9s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.8;1;0.8" dur="0.9s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="160" cy="130" rx="28" ry="100" fill="url(#flame1)">
+    <animate attributeName="ry" values="100;115;100" dur="1.4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="1.4s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="180" cy="140" rx="30" ry="90" fill="url(#flame2)">
+    <animate attributeName="ry" values="90;105;90" dur="1.1s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.75;1;0.75" dur="1.1s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="220" cy="160" rx="25" ry="70" fill="url(#flame1)" transform="rotate(15 220 200)">
+    <animate attributeName="ry" values="70;82;70" dur="1.3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.7;1;0.7" dur="1.3s" repeatCount="indefinite"/>
+  </ellipse>
+  <!-- Sparks with float animation -->
+  <circle cx="90" cy="100" r="4" fill="#fde047" opacity="0.8">
+    <animate attributeName="cy" values="100;85;100" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="230" cy="110" r="3" fill="#fbbf24" opacity="0.7">
+    <animate attributeName="cy" values="110;90;110" dur="2.5s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="130" cy="70" r="3" fill="#fde047" opacity="0.6">
+    <animate attributeName="cy" values="70;50;70" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="190" cy="80" r="4" fill="#fcd34d" opacity="0.8">
+    <animate attributeName="cy" values="80;60;80" dur="2.2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="2.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="160" cy="50" r="3" fill="#fbbf24" opacity="0.7">
+    <animate attributeName="cy" values="50;30;50" dur="2.8s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.8s" repeatCount="indefinite"/>
+  </circle>
+</svg>

@@ -1,0 +1,13 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <style>
+        .phoenix-fire { animation: fire 2s infinite alternate; }
+        @keyframes fire {
+            0% { filter: drop-shadow(0 0 10px #9333ea) drop-shadow(0 0 20px #f59e0b); }
+            100% { filter: drop-shadow(0 0 20px #9333ea) drop-shadow(0 0 40px #f59e0b) brightness(1.2); }
+        }
+    </style>
+    <g class="phoenix-fire">
+        <path fill="#9333EA" d="M100 5C50 5 10 50 10 100c0 50 40 95 90 95s90-45 90-95C190 50 150 5 100 5zm0 170c-41.4 0-75-33.6-75-75S58.6 25 100 25s75 33.6 75 75-33.6 75-75 75z"/>
+        <path fill="#F59E0B" d="M100 60c-22.1 0-40 17.9-40 40s17.9 40 40 40 40-17.9 40-40-17.9-40-40-40z"/>
+    </g>
+</svg>

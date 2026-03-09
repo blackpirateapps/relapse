@@ -1,6 +1,6 @@
-import db from './db.js';
-import { checkAuth } from './auth.js';
-import { ranks } from './ranks.js';
+import db from './_lib/db.js';
+import { checkAuth } from './_lib/auth.js';
+import { ranks } from './_lib/ranks.js';
 
 // --- Helper Functions ---
 

@@ -1,5 +1,5 @@
-import db, { initDb } from './db.js';
-import { checkAuth } from './auth.js';
+import db, { initDb } from './_lib/db.js';
+import { checkAuth } from './_lib/auth.js';
 
 export default async function handler(req, res) {
   if (!checkAuth(req)) {

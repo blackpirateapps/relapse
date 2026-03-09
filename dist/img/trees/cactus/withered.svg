@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Cactus Withered">
+  <defs>
+    <linearGradient id="deadCactus" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#78716c"/>
+      <stop offset="50%" stop-color="#a8a29e"/>
+      <stop offset="100%" stop-color="#78716c"/>
+    </linearGradient>
+  </defs>
+  <!-- Ground shadow -->
+  <ellipse cx="64" cy="118" rx="32" ry="5" fill="#0a0a0a" opacity="0.3"/>
+  <!-- Dry sandy ground -->
+  <ellipse cx="64" cy="114" rx="38" ry="6" fill="#c2a67e"/>
+  <ellipse cx="64" cy="112" rx="34" ry="4" fill="#d4b896"/>
+  <!-- Cracked soil lines -->
+  <path d="M40 112 L45 108 L42 104" fill="none" stroke="#a68b5e" stroke-width="1"/>
+  <path d="M85 111 L82 107" fill="none" stroke="#a68b5e" stroke-width="1"/>
+  <!-- Collapsed/leaning main body -->
+  <path d="M52 112 Q42 90 48 55 Q56 40 68 48 Q78 60 75 90 Q74 105 72 112 Z" fill="url(#deadCactus)"/>
+  <!-- Dried ridges -->
+  <path d="M50 108 Q44 85 50 58" fill="none" stroke="#57534e" stroke-width="2" opacity="0.5"/>
+  <path d="M62 110 Q58 82 62 52" fill="none" stroke="#57534e" stroke-width="1.5" opacity="0.4"/>
+  <path d="M72 108 Q74 85 70 55" fill="none" stroke="#57534e" stroke-width="2" opacity="0.5"/>
+  <!-- Broken left arm (fallen) -->
+  <ellipse cx="32" cy="108" rx="12" ry="5" fill="#78716c" transform="rotate(-10, 32, 108)"/>
+  <path d="M40 105 L44 90" fill="none" stroke="#a8a29e" stroke-width="2" stroke-linecap="round" stroke-dasharray="3,2"/>
+  <!-- Drooping right arm -->
+  <path d="M72 75 Q88 82 92 95" fill="url(#deadCactus)"/>
+  <ellipse cx="92" cy="98" rx="6" ry="8" fill="url(#deadCactus)"/>
+  <!-- Dead spines (fewer, some broken) -->
+  <line x1="46" y1="70" x2="40" y2="68" stroke="#d6d3d1" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="46" y1="85" x2="38" y2="86" stroke="#d6d3d1" stroke-width="1" stroke-linecap="round"/>
+  <line x1="76" y1="62" x2="82" y2="60" stroke="#d6d3d1" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="56" y1="46" x2="54" y2="40" stroke="#d6d3d1" stroke-width="1" stroke-linecap="round"/>
+  <!-- Arm spines -->
+  <line x1="26" y1="106" x2="22" y2="104" stroke="#d6d3d1" stroke-width="1" stroke-linecap="round"/>
+  <line x1="96" y1="92" x2="100" y2="90" stroke="#d6d3d1" stroke-width="1" stroke-linecap="round"/>
+  <!-- Holes/decay marks -->
+  <ellipse cx="58" cy="78" rx="3" ry="4" fill="#57534e" opacity="0.4"/>
+  <circle cx="68" cy="65" r="2" fill="#57534e" opacity="0.3"/>
+</svg>

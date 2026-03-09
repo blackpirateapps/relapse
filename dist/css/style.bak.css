@@ -1,0 +1,147 @@
+/* --- BASE & FONTS --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
+
+html {
+    height: 100%;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    color: #fff;
+    background-color: #111827; /* Default CSS Background */
+}
+
+.font-serif-display {
+    font-family: 'Playfair Display', serif;
+}
+
+/* --- SVG BACKGROUND CONTAINER --- */
+#background-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    transition: opacity 0.5s ease-in-out;
+}
+
+#background-container svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+/* --- LAYOUT & CONTAINERS --- */
+.app-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 72rem;
+    margin: auto;
+    padding: 1rem;
+    flex-grow: 1;
+    height: 100vh; 
+    height: -webkit-fill-available; /* iOS fix */
+}
+
+@media (min-width: 768px) { /* md breakpoint */
+    .app-wrapper {
+        padding: 1.5rem;
+    }
+}
+
+main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    min-height: 0; /* Necessary for flex-grow in some browsers */
+}
+
+/* Hide scrollbar for aesthetics but keep it functional */
+main::-webkit-scrollbar { display: none; }
+main { -ms-overflow-style: none; scrollbar-width: none; }
+
+
+/* --- HEADER (Desktop) & FOOTER (Mobile Nav) --- */
+header {
+    background-color: rgba(17, 24, 39, 0.5);
+    backdrop-filter: blur(8px);
+    border-radius: 1rem;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 4px_6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+footer.mobile-nav {
+    background-color: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-button {
+    padding: 0.5rem;
+    font-size: 0.75rem; /* Smaller font for mobile */
+    font-weight: 600;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease-in-out;
+    border: 2px solid transparent;
+    text-align: center;
+    flex: 1;
+}
+@media (min-width: 768px) {
+    .nav-button {
+        padding: 0.5rem 1.25rem;
+        font-size: 1rem; /* Restore font size for desktop */
+        flex: initial;
+    }
+}
+
+.nav-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-button.active {
+    background-color: #4f46e5;
+    color: white;
+}
+
+/* CELESTIAL NAVIGATION THEME */
+header.celestial-nav {
+    background: linear-gradient(to right, #1e3a8a, #4c1d95);
+    border: 1px solid #4f46e5;
+}
+header.celestial-nav .nav-button.active {
+    background-color: #a5b4fc;
+    color: #1e3a8a;
+}
+
+
+/* --- PROGRESSION PAGE SCROLLER FIX --- */
+#progression-scroller {
+    display: flex;
+    flex-grow: 1;
+    min-height: 0; /* Crucial for allowing flex item to shrink */
+}
+#progression-container {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 1rem; /* Space for scrollbar */
+    width: 100%;
+}
+#progression-container > div {
+    scroll-snap-align: center;
+    flex-shrink: 0;
+    width: 90%; /* On mobile, cards are 90% of the screen width */
+    max-width: 380px; /* Max card width */
+    margin: 0 auto;
+}
+
+/* --- Other page styles remain the same --- */
+

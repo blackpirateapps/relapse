@@ -1,7 +1,7 @@
-import db, { initDb } from './db.js';
-import { checkAuth } from './auth.js';
-import { ranks } from './ranks.js';
-import { applyMobileCors, handleOptions } from './http.js';
+import db, { initDb } from './_lib/db.js';
+import { checkAuth } from './_lib/auth.js';
+import { ranks } from './_lib/ranks.js';
+import { applyMobileCors, handleOptions } from './_lib/http.js';
 
 function getRank(totalHours) {
   for (let i = ranks.length - 1; i >= 0; i--) {
@@ -22,14 +22,14 @@ export default async function handler(req, res) {
 
   try {
     await initDb();
-    
+
     await db.execute({
       sql: "UPDATE forest SET status = 'matured' WHERE status = 'growing' AND matureDate <= ?;",
       args: [new Date().toISOString()]
     });
 
     const { rows } = await db.execute("SELECT * FROM user_state WHERE id = 1;");
-    
+
     if (rows.length > 0) {
       let state = rows[0];
 
