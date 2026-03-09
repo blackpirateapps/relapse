@@ -259,8 +259,8 @@ Defined/initialized in `api/db.js`:
 - Deploy model: Vercel rewrites in `vercel.json`
 - Capacitor/Android:
   - Config: `capacitor.config.json`
-  - If `CAP_SERVER_URL` env is provided, it is injected into Capacitor config via `scripts/set-cap-server-url.mjs`.
-  - API calls now include `credentials: 'include'` and can use `VITE_MOBILE_API_BASE_URL`/`VITE_API_BASE_URL` override if needed.
+  - Mobile server URL is hardcoded to `https://phoenix.blackpiratex.com` (can still be overridden by `CAP_SERVER_URL` in CI).
+  - API calls include `credentials: 'include'`; native Android defaults to `https://phoenix.blackpiratex.com`.
   - Prepare Android project: `npm run android:prepare`
   - Build release APK: `npm run android:ci:apk`
 

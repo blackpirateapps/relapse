@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       server_url:
-        description: "Web app URL for Android shell (e.g. https://your-app.vercel.app)"
+        description: "Optional override for Android shell server URL"
         required: false
         type: string
   push:
@@ -40,8 +40,7 @@ jobs:
           elif [ -n "$VAR_URL" ]; then
             echo "CAP_SERVER_URL=$VAR_URL" >> "$GITHUB_ENV"
           else
-            echo "CAP_SERVER_URL is required. Provide workflow input 'server_url' or repository variable 'CAP_SERVER_URL'." >&2
-            exit 1
+            echo "Using hardcoded mobile server URL from scripts/set-cap-server-url.mjs"
           fi
 
       - name: Install dependencies
