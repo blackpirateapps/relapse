@@ -50,7 +50,7 @@ If push is blocked (no remote/permissions), the agent must document the exact bl
 - `src/App.jsx`: route table, lazy loading, preview mode banner.
 - `src/components/Sidebar.jsx`: nav + mobile drawer; special skinning when `kawaii_city_bg` equipped/previewed.
 - `src/components/Header.jsx`: page title + live coin panel.
-- Android mode (`Capacitor` native Android, legacy path still present):
+- Legacy Android mode (`Capacitor`, deprecated / not used by current Android build workflow):
   - Limits accessible routes to `"/"` (Journey) and `"/progression"`.
   - Sidebar only shows Journey + Progression.
   - Journey page hides the urge-task CTA, keeps relapse CTA active.
@@ -63,7 +63,7 @@ If push is blocked (no remote/permissions), the agent must document the exact bl
 - Relapse triggers `POST /api/relapse` and refetches state.
 - In Android mode, only `I Relapsed` is shown to preserve the focused app surface.
 
-### Android Streak Notification
+### Android Streak Notification (Legacy Capacitor)
 - JS bridge:
   - `src/mobile/useStreakNotification.js`
   - `src/mobile/streakNotification.js`
@@ -91,10 +91,12 @@ If push is blocked (no remote/permissions), the agent must document the exact bl
 - **All graphics loaded from web URL** via `CachedNetworkImage` (disk-cached). Phoenix rank images at `/img/{rankId}.svg`.
 - **Offline-first**: `LocalCache` caches state + shop + history JSON. Cache-first bootstrap, 5-min background sync.
 - **Persistent login**: Password + cached state means no login screen when offline.
-- **Persistent notification**: `NotificationService` uses platform channel (`com.relapse.phoenix/notification`) → native `MainActivity.kt` creates Android notification (IMPORTANCE_LOW) with live streak timer and coin balance. Toggleable from Journey page.
+- **Persistent notification**: `NotificationService` uses platform channel (`com.relapse.phoenix/notification`) → native `MainActivity.kt` creates an ongoing Android notification (IMPORTANCE_LOW). Toggleable from Journey page.
   - Native handler: `flutter_app/android_src/MainActivity.kt` (copied into generated project by CI script)
+  - Android 13+ requires runtime notification permission; CI script injects `POST_NOTIFICATIONS` and the native handler requests permission when enabling.
 - **Performance**: No global ticker. `StreakTicker` widget has its own 1s timer.
 - **Equipped item visuals**: Skins (network images per rank stage), aura overlays, background gradients.
+- **Image URL safety**: `lib/core/utils/image_urls.dart` normalizes paths from API/shop (`/img/...` vs `img/...`) when building absolute URLs.
 - Dependencies: `http`, `flutter_svg`, `shared_preferences`, `cached_network_image`.
 
 ### Progression + Level Showcase

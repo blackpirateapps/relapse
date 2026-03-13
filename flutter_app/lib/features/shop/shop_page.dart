@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants/app_config.dart';
 import '../../core/models/shop_item.dart';
 import '../../core/state/app_state.dart';
+import '../../core/utils/image_urls.dart';
 
 /// Map of item types to the categories shown as filter chips.
 const _categoryOrder = [
@@ -162,8 +162,8 @@ class _ShopItemCard extends StatelessWidget {
   String? get _imageUrl {
     final preview = item.previewImage;
     if (preview == null || preview.isEmpty) return null;
-    if (preview.startsWith('http')) return preview;
-    return '${AppConfig.apiBaseUrl}$preview';
+    final url = webAssetUrl(preview);
+    return url.isEmpty ? null : url;
   }
 
   @override

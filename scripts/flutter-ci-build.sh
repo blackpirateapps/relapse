@@ -24,6 +24,11 @@ if ! grep -q 'android.permission.INTERNET' "$MANIFEST_PATH"; then
     <uses-permission android:name="android.permission.INTERNET" />' "$MANIFEST_PATH"
 fi
 
+if ! grep -q 'android.permission.POST_NOTIFICATIONS' "$MANIFEST_PATH"; then
+  sed -i '/<manifest[^>]*>/a\
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />' "$MANIFEST_PATH"
+fi
+
 # Copy custom MainActivity.kt (notification handler) into the generated project
 MAIN_ACTIVITY_SRC="$APP_DIR/android_src/MainActivity.kt"
 MAIN_ACTIVITY_DST="$APP_DIR/android/app/src/main/kotlin/com/relapse/phoenix/MainActivity.kt"

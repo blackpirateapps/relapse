@@ -144,10 +144,13 @@ class AppState extends ChangeNotifier {
 
   // ── Notification ──────────────────────────────────────────────
   Future<void> toggleNotification(bool enabled) async {
-    await _notificationService.setEnabled(enabled);
-    if (enabled) {
-      _updateNotification();
+    final ok = await _notificationService.setEnabled(enabled);
+    if (!ok) {
+      // Permission denied (Android 13+) or native handler unavailable.
+      notifyListeners();
+      return;
     }
+    if (enabled) _updateNotification();
     notifyListeners();
   }
 

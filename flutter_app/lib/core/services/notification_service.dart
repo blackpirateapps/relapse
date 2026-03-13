@@ -23,13 +23,29 @@ class NotificationService {
     _enabled = prefs.getBool(_prefKey) ?? false;
   }
 
-  Future<void> setEnabled(bool value) async {
+  Future<bool> _ensurePermissionIfNeeded() async {
+    try {
+      final ok = await _channel.invokeMethod<bool>('requestPermission');
+      return ok ?? true;
+    } catch (_) {
+      // Platform channel not available (e.g. tests or missing native side)
+      return true;
+    }
+  }
+
+  Future<bool> setEnabled(bool value) async {
+    if (value) {
+      final ok = await _ensurePermissionIfNeeded();
+      if (!ok) return false;
+    }
+
     _enabled = value;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_prefKey, value);
     if (!value) {
       stop();
     }
+    return true;
   }
 
   void startIfEnabled(DateTime lastRelapse, int coinsAtLastRelapse) {
