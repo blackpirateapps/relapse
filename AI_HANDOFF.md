@@ -83,7 +83,7 @@ If push is blocked (no remote/permissions), the agent must document the exact bl
   - `lib/features/journey/`: Journey screen — big phoenix graphic, big streak timer, urge (placeholder) + relapse, notification toggle, equipped visuals
   - `lib/features/progression/`: Progression timeline with rank graphics from URL
   - `lib/features/shop/`: Shop page with category filters, buy/equip flows
-  - `lib/features/aviary/`: Aviary page showing archived phoenix history with images
+  - `lib/features/aviary/`: Aviary page showing archived phoenix history with images (parses `upgrades_json` to accurately show the skin and aura equipped at the time of relapse)
   - `lib/features/placeholder/`: placeholder pages for non-migrated modules (Forest)
   - `lib/widgets/`: StreakTicker (self-contained 1s timer), LoginGate
   - `lib/core/utils/image_urls.dart`: URL builders for phoenix graphics from web server
@@ -149,8 +149,9 @@ If push is blocked (no remote/permissions), the agent must document the exact bl
   - `end_game`
 
 ### Phoenix Rendering
-- `src/components/PhoenixImage.jsx`
+- `src/components/PhoenixImage.jsx` (Web) / `_PhoenixDisplay` (Flutter)
 - Chooses base rank image or equipped skin stage image.
+- If a skin is equipped but lacks an image for the current stage, a placeholder (`?` icon) is shown instead of falling back to the base image.
 - Applies equipped or previewed aura visual effects.
 
 ## Background/Theme System

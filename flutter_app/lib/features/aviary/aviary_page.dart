@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../../core/models/shop_item.dart';
 import '../../core/state/app_state.dart';
 import '../../core/utils/image_urls.dart';
 
@@ -51,6 +53,60 @@ class AviaryPage extends StatelessWidget {
         itemBuilder: (context, index) {
           final entry = history[index];
 
+          ShopItem? equippedSkin;
+          ShopItem? equippedAura;
+          if (entry.upgradesJson != null && entry.upgradesJson!.isNotEmpty) {
+            try {
+              final map = jsonDecode(entry.upgradesJson!);
+              final skinId = map['phoenix_skin'];
+              final auraId = map['phoenix_aura'];
+              if (skinId != null) {
+                equippedSkin = appState.shopItems.where((i) => i.id == skinId).firstOrNull;
+              }
+              if (auraId != null) {
+                equippedAura = appState.shopItems.where((i) => i.id == auraId).firstOrNull;
+              }
+            } catch (_) {}
+          }
+
+          Widget phoenixWidget;
+          if (equippedSkin != null) {
+            final matchingImage = equippedSkin.images.where((img) => img.stageName == entry.rankId).firstOrNull;
+            if (matchingImage != null && matchingImage.imageUrl.isNotEmpty) {
+              phoenixWidget = CachedNetworkImage(
+                imageUrl: skinStageImageUrl(matchingImage.imageUrl),
+                width: 64,
+                height: 64,
+                fit: BoxFit.contain,
+                placeholder: (_, __) => const Center(
+                  child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                ),
+                errorWidget: (_, __, ___) => const Icon(Icons.local_fire_department, color: Colors.white24, size: 28),
+              );
+            } else {
+              phoenixWidget = const SizedBox(
+                width: 64,
+                height: 64,
+                child: Center(child: Icon(Icons.help_outline, color: Colors.white24, size: 28)),
+              );
+            }
+          } else {
+            phoenixWidget = CachedNetworkImage(
+              imageUrl: phoenixImageUrl(entry.rankId),
+              width: 64,
+              height: 64,
+              fit: BoxFit.contain,
+              placeholder: (_, __) => const Center(
+                child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+              ),
+              errorWidget: (_, __, ___) => const Icon(
+                Icons.local_fire_department,
+                color: Colors.white24,
+                size: 28,
+              ),
+            );
+          }
+
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
             child: Padding(
@@ -64,19 +120,22 @@ class AviaryPage extends StatelessWidget {
                       width: 64,
                       height: 64,
                       color: const Color(0xFF1A2744),
-                      child: CachedNetworkImage(
-                        imageUrl: phoenixImageUrl(entry.rankId),
-                        width: 64,
-                        height: 64,
-                        fit: BoxFit.contain,
-                        placeholder: (_, __) => const Center(
-                          child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
-                        ),
-                        errorWidget: (_, __, ___) => const Icon(
-                          Icons.local_fire_department,
-                          color: Colors.white24,
-                          size: 28,
-                        ),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          if (equippedAura != null)
+                            Opacity(
+                              opacity: 0.6,
+                              child: CachedNetworkImage(
+                                imageUrl: auraImageUrl(equippedAura.previewImage ?? ''),
+                                width: 64,
+                                height: 64,
+                                fit: BoxFit.contain,
+                                errorWidget: (_, __, ___) => const SizedBox.shrink(),
+                              ),
+                            ),
+                          phoenixWidget,
+                        ],
                       ),
                     ),
                   ),

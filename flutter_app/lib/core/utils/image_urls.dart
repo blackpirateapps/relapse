@@ -19,7 +19,7 @@ String webAssetUrl(String relativeOrAbsolute) {
 /// Builds the full URL for a phoenix rank image from the web server.
 /// The web server hosts SVGs at /img/{rankId}.svg
 String phoenixImageUrl(String rankId) {
-  return webAssetUrl('/img/$rankId.svg');
+  return webAssetUrl('/img/$rankId.webp');
 }
 
 /// Builds the full URL for a skin's progression image.

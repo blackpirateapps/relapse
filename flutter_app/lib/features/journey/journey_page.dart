@@ -271,19 +271,14 @@ class _PhoenixDisplay extends StatelessWidget {
         height: 240,
         fit: BoxFit.contain,
         placeholder: (_, __) => const SizedBox(height: 240, child: Center(child: CircularProgressIndicator(strokeWidth: 2))),
-        errorWidget: (_, __, ___) => CachedNetworkImage(
-          imageUrl: phoenixImageUrl(rankId),
-          height: 240,
-          fit: BoxFit.contain,
-        ),
+        errorWidget: (_, __, ___) => const Icon(Icons.local_fire_department, size: 120, color: Colors.white24),
       );
     }
-    return CachedNetworkImage(
-      imageUrl: phoenixImageUrl(rankId),
+    return const SizedBox(
       height: 240,
-      fit: BoxFit.contain,
-      placeholder: (_, __) => const SizedBox(height: 240, child: Center(child: CircularProgressIndicator(strokeWidth: 2))),
-      errorWidget: (_, __, ___) => const Icon(Icons.local_fire_department, size: 120, color: Colors.white24),
+      child: Center(
+        child: Icon(Icons.help_outline, size: 120, color: Colors.white24),
+      ),
     );
   }
 }
